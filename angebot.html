@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Angebot-Generator — Hasi Tools</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f12; --surface: #151820; --border: #1e2330; --border2: #2a3040;
+      --hasi: #33afe2; --text: #e8ecf0; --muted: #6b7585; --green: #34d399;
+    }
+
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px; opacity: 0.4; pointer-events: none; z-index: 0;
+    }
+
+    body::after {
+      content: ''; position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(51,175,226,0.12) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrap { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 24px 20px 60px; }
+
+    /* Back link */
+    .back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none;
+      font-size: 13px; font-family: 'DM Mono', monospace; margin-bottom: 24px; transition: color .2s; }
+    .back:hover { color: var(--hasi); }
+
+    /* Header */
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 { font-size: 32px; font-weight: 600; letter-spacing: -1px; }
+    .page-header h1 span { color: var(--hasi); }
+    .page-header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+    /* Two-col layout */
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media(max-width:720px) { .layout { grid-template-columns: 1fr; } }
+
+    /* Card */
+    .card { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; padding: 24px; }
+    .card-title { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--muted);
+      letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 16px; }
+
+    /* Form */
+    label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+    input, textarea, select {
+      width: 100%; background: #0d0f12; border: 1px solid var(--border2); border-radius: 8px;
+      color: var(--text); padding: 10px 14px; font-size: 14px; font-family: 'DM Sans', sans-serif;
+      transition: border-color .2s; outline: none; margin-bottom: 14px;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--hasi); }
+    textarea { resize: vertical; min-height: 70px; }
+
+    /* Services */
+    .services-section { grid-column: 1 / -1; }
+    .services-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .services-header .card-title { margin-bottom: 0; }
+    .btn-add { display: flex; align-items: center; gap: 6px; background: rgba(51,175,226,0.1);
+      border: 1px solid rgba(51,175,226,0.3); color: var(--hasi); padding: 6px 14px;
+      border-radius: 8px; font-size: 13px; cursor: pointer; transition: background .2s; }
+    .btn-add:hover { background: rgba(51,175,226,0.2); }
+
+    .service-row {
+      display: grid; grid-template-columns: 1fr 90px 90px 36px;
+      gap: 8px; align-items: center; margin-bottom: 10px;
+    }
+    .service-row input { margin-bottom: 0; }
+    .service-row select { margin-bottom: 0; padding: 10px 8px; }
+
+    .btn-del { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3);
+      color: #f87171; width: 36px; height: 40px; border-radius: 8px; cursor: pointer;
+      font-size: 16px; transition: background .2s; display: flex; align-items: center; justify-content: center; }
+    .btn-del:hover { background: rgba(248,113,113,0.2); }
+
+    /* Preset chips */
+    .presets { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+    .chip {
+      font-size: 12px; font-family: 'DM Mono', monospace; padding: 5px 12px;
+      border-radius: 100px; cursor: pointer; border: 1px solid var(--border2);
+      color: var(--muted); background: transparent; transition: all .15s; white-space: nowrap;
+    }
+    .chip:hover { border-color: var(--hasi); color: var(--hasi); background: rgba(51,175,226,0.08); }
+
+    /* Totals */
+    .totals { background: #0d0f12; border: 1px solid var(--border2); border-radius: 10px;
+      padding: 16px; margin-top: 4px; }
+    .total-row { display: flex; justify-content: space-between; font-size: 14px;
+      color: var(--muted); padding: 4px 0; }
+    .total-row.big { font-size: 18px; font-weight: 600; color: var(--text);
+      border-top: 1px solid var(--border2); margin-top: 8px; padding-top: 12px; }
+    .total-row.big span:last-child { color: var(--hasi); }
+
+    /* Actions */
+    .actions { grid-column: 1 / -1; display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-preview {
+      flex: 1; min-width: 160px; padding: 14px 24px; border-radius: 12px; font-size: 15px;
+      font-weight: 600; cursor: pointer; transition: all .2s; border: none;
+      background: var(--hasi); color: #fff;
+    }
+    .btn-preview:hover { background: #1d8fbe; transform: translateY(-1px); }
+    .btn-reset {
+      padding: 14px 20px; border-radius: 12px; font-size: 14px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border2); color: var(--muted); transition: all .2s;
+    }
+    .btn-reset:hover { border-color: #f87171; color: #f87171; }
+
+    /* ── PREVIEW MODAL ── */
+    #preview-modal {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7);
+      z-index: 100; overflow-y: auto; padding: 20px;
+    }
+    #preview-modal.open { display: flex; align-items: flex-start; justify-content: center; }
+
+    .modal-inner {
+      background: #fff; color: #111; border-radius: 16px; width: 100%; max-width: 720px;
+      margin: auto; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.5);
+    }
+
+    .modal-toolbar {
+      background: #f5f5f5; border-bottom: 1px solid #ddd; padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .modal-toolbar span { font-size: 13px; color: #666; font-family: 'DM Mono', monospace; }
+    .modal-toolbar-btns { display: flex; gap: 8px; }
+    .btn-print {
+      background: #33afe2; color: #fff; border: none; padding: 8px 18px;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s;
+    }
+    .btn-print:hover { background: #1d8fbe; }
+    .btn-close-modal {
+      background: transparent; border: 1px solid #ccc; color: #555; padding: 8px 14px;
+      border-radius: 8px; font-size: 13px; cursor: pointer; transition: all .2s;
+    }
+    .btn-close-modal:hover { border-color: #f87171; color: #f87171; }
+
+    /* ── ANGEBOT DOCUMENT ── */
+    #angebot-doc {
+      padding: 48px 52px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1a1a1a;
+    }
+
+    .doc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
+
+    .doc-logo { display: flex; align-items: center; gap: 10px; }
+    .doc-logo-box {
+      width: 42px; height: 42px; background: #33afe2; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600; color: #fff;
+    }
+    .doc-logo-text strong { display: block; font-size: 16px; font-weight: 700; color: #111; }
+    .doc-logo-text span { font-size: 11px; color: #888; }
+
+    .doc-meta { text-align: right; font-size: 12px; color: #666; line-height: 1.8; }
+    .doc-meta strong { color: #111; font-size: 14px; }
+
+    .doc-divider { border: none; border-top: 2px solid #33afe2; margin: 0 0 32px; }
+
+    .doc-addresses { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 36px; }
+    .doc-addr-label { font-size: 10px; font-weight: 600; color: #33afe2; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 6px; }
+    .doc-addr p { font-size: 13px; line-height: 1.6; color: #333; }
+
+    .doc-subject { margin-bottom: 28px; }
+    .doc-subject h2 { font-size: 20px; font-weight: 700; color: #111; margin-bottom: 6px; }
+    .doc-subject p { font-size: 13px; color: #555; }
+
+    .doc-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+    .doc-table th {
+      background: #f8f9fa; padding: 10px 14px; text-align: left;
+      font-size: 11px; font-weight: 600; color: #555; text-transform: uppercase;
+      letter-spacing: 0.8px; border-bottom: 2px solid #e0e0e0;
+    }
+    .doc-table th:last-child, .doc-table td:last-child { text-align: right; }
+    .doc-table th:nth-child(2), .doc-table td:nth-child(2) { text-align: center; }
+    .doc-table th:nth-child(3), .doc-table td:nth-child(3) { text-align: right; }
+    .doc-table td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #222; }
+    .doc-table tr:last-child td { border-bottom: none; }
+    .doc-table tr:hover td { background: #fafafa; }
+
+    .doc-totals { margin-left: auto; width: 280px; }
+    .doc-total-row { display: flex; justify-content: space-between; padding: 5px 0;
+      font-size: 13px; color: #555; border-bottom: 1px solid #f0f0f0; }
+    .doc-total-row:last-child { border-bottom: none; }
+    .doc-total-final {
+      display: flex; justify-content: space-between; padding: 12px 0 6px;
+      font-size: 16px; font-weight: 700; color: #111;
+      border-top: 2px solid #33afe2; margin-top: 4px;
+    }
+    .doc-total-final span:last-child { color: #33afe2; }
+
+    .doc-notes { margin-top: 32px; padding: 16px; background: #f8f9fb;
+      border-left: 3px solid #33afe2; border-radius: 4px; font-size: 12px; color: #555; line-height: 1.7; }
+
+    .doc-footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #e0e0e0;
+      display: flex; justify-content: space-between; font-size: 11px; color: #aaa; }
+
+    /* Print */
+    @media print {
+      body { background: #fff !important; }
+      body::before, body::after { display: none; }
+      #preview-modal { position: static; background: none; padding: 0; display: block !important; }
+      .modal-toolbar { display: none !important; }
+      .modal-inner { box-shadow: none; border-radius: 0; max-width: 100%; }
+      #angebot-doc { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <a href="./index.html" class="back">← Hasi Tools</a>
+
+  <div class="page-header">
+    <h1>Angebot<span>-Generator</span></h1>
+    <p>Angebot erstellen → Vorschau → PDF drucken</p>
+  </div>
+
+  <div class="layout">
+
+    <!-- Absender -->
+    <div class="card">
+      <div class="card-title">Absender (Hasi Elektronic)</div>
+      <label>Name / Firma</label>
+      <input id="abs-name" value="Hasi Elektronic" type="text">
+      <label>Adresse</label>
+      <input id="abs-addr" value="Grabenstraße 18, 71665 Vaihingen/Enz" type="text">
+      <label>Telefon</label>
+      <input id="abs-tel" value="07042 16391" type="text">
+      <label>E-Mail</label>
+      <input id="abs-email" value="info@hasi-elektronic.de" type="text">
+      <label>Website</label>
+      <input id="abs-web" value="www.hasi-elektronic.de" type="text">
+    </div>
+
+    <!-- Empfänger -->
+    <div class="card">
+      <div class="card-title">Empfänger (Kunde)</div>
+      <label>Name / Firma</label>
+      <input id="emp-name" type="text" placeholder="Max Mustermann">
+      <label>Adresse</label>
+      <input id="emp-addr" type="text" placeholder="Musterstraße 1, 71665 Vaihingen">
+      <label>Angebot-Nr.</label>
+      <input id="ang-nr" type="text" id="ang-nr">
+      <label>Datum</label>
+      <input id="ang-datum" type="date">
+      <label>Gültig bis</label>
+      <input id="ang-valid" type="date">
+    </div>
+
+    <!-- Leistungen -->
+    <div class="card services-section">
+      <div class="services-header">
+        <div class="card-title">Leistungen</div>
+        <button class="btn-add" id="btn-add-row">＋ Position hinzufügen</button>
+      </div>
+
+      <div class="presets">
+        <button class="chip" data-desc="PC-Reparatur / Diagnose"    data-qty="1"  data-unit="Pauschal" data-price="96">PC-Reparatur</button>
+        <button class="chip" data-desc="Netzwerk / WLAN Einrichtung" data-qty="1"  data-unit="Pauschal" data-price="96">Netzwerk</button>
+        <button class="chip" data-desc="Viren & Malware Entfernung"  data-qty="1"  data-unit="Pauschal" data-price="96">Viren & Malware</button>
+        <button class="chip" data-desc="Datenrettung"               data-qty="1"  data-unit="Pauschal" data-price="150">Datenrettung</button>
+        <button class="chip" data-desc="Website-Erstellung"         data-qty="1"  data-unit="Pauschal" data-price="490">Website</button>
+        <button class="chip" data-desc="Arbeitsstunden (96 €/Std.)" data-qty="1"  data-unit="Std."    data-price="96">Stundensatz</button>
+        <button class="chip" data-desc="HasiSafe Stick (AES-256)"   data-qty="1"  data-unit="Stück"   data-price="49">HasiSafe Stick</button>
+      </div>
+
+      <div id="rows-container">
+        <!-- rows injected here -->
+      </div>
+
+      <div class="totals">
+        <div class="total-row"><span>Netto</span><span id="t-netto">0,00 €</span></div>
+        <div class="total-row"><span>MwSt. 19%</span><span id="t-mwst">0,00 €</span></div>
+        <div class="total-row big"><span>Gesamt</span><span id="t-brutto">0,00 €</span></div>
+      </div>
+    </div>
+
+    <!-- Notizen -->
+    <div class="card">
+      <div class="card-title">Anmerkungen</div>
+      <label>Begleittext (optional)</label>
+      <textarea id="ang-text" placeholder="Vielen Dank für Ihr Interesse. Wir freuen uns, Ihnen folgendes Angebot unterbreiten zu dürfen."></textarea>
+      <label>Zahlungsbedingungen</label>
+      <input id="ang-zahlung" value="Zahlbar innerhalb von 14 Tagen ohne Abzug" type="text">
+      <label>Gewährleistung</label>
+      <input id="ang-gew" value="2 Jahre auf alle erbrachten Leistungen" type="text">
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn-preview" id="btn-preview">Vorschau & PDF →</button>
+      <button class="btn-reset" id="btn-reset">Zurücksetzen</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="preview-modal">
+  <div class="modal-inner">
+    <div class="modal-toolbar">
+      <span>Angebot — Vorschau</span>
+      <div class="modal-toolbar-btns">
+        <button class="btn-print" id="btn-print">🖨 Drucken / PDF</button>
+        <button class="btn-close-modal" id="btn-close">Schließen</button>
+      </div>
+    </div>
+    <div id="angebot-doc"></div>
+  </div>
+</div>
+
+<script>
+  const MWST = 0.19;
+  let rowId = 0;
+
+  function fmt(v) { return v.toFixed(2).replace('.', ',') + ' €'; }
+  function parse(v) { return parseFloat((v||'').replace(',','.').replace(/[^\d.]/g,'')) || 0; }
+
+  function genNr() {
+    const d = new Date();
+    return 'ANG-' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + '-' + String(Math.floor(Math.random()*900)+100);
+  }
+
+  function todayStr() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  function validStr() {
+    const d = new Date(); d.setDate(d.getDate()+30);
+    return d.toISOString().split('T')[0];
+  }
+
+  function fmtDate(s) {
+    if (!s) return '—';
+    const [y,m,d] = s.split('-');
+    return d+'.'+m+'.'+y;
+  }
+
+  // Init defaults
+  document.getElementById('ang-nr').value    = genNr();
+  document.getElementById('ang-datum').value  = todayStr();
+  document.getElementById('ang-valid').value  = validStr();
+
+  // Add row
+  function addRow(desc='', qty=1, unit='Pauschal', price=0) {
+    rowId++;
+    const id = rowId;
+    const div = document.createElement('div');
+    div.className = 'service-row';
+    div.id = 'row-' + id;
+    div.innerHTML = `
+      <input type="text" class="row-desc" placeholder="Leistungsbeschreibung" value="${desc}">
+      <input type="text" class="row-qty"  placeholder="Menge" value="${qty}" inputmode="decimal" style="text-align:center">
+      <input type="text" class="row-price" placeholder="Preis" value="${price > 0 ? String(price).replace('.',',') : ''}" inputmode="decimal" style="text-align:right">
+      <button class="btn-del" data-id="${id}">✕</button>
+    `;
+    document.getElementById('rows-container').appendChild(div);
+    div.querySelectorAll('input').forEach(i => i.addEventListener('input', calcTotals));
+    div.querySelector('.btn-del').addEventListener('click', () => {
+      document.getElementById('row-' + id).remove();
+      calcTotals();
+    });
+    calcTotals();
+  }
+
+  function calcTotals() {
+    let netto = 0;
+    document.querySelectorAll('.service-row').forEach(row => {
+      const qty   = parse(row.querySelector('.row-qty').value);
+      const price = parse(row.querySelector('.row-price').value);
+      netto += qty * price;
+    });
+    const mwst   = netto * MWST;
+    const brutto = netto + mwst;
+    document.getElementById('t-netto').textContent  = fmt(netto);
+    document.getElementById('t-mwst').textContent   = fmt(mwst);
+    document.getElementById('t-brutto').textContent = fmt(brutto);
+  }
+
+  document.getElementById('btn-add-row').addEventListener('click', () => addRow());
+
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      addRow(chip.dataset.desc, chip.dataset.qty, chip.dataset.unit, chip.dataset.price);
+    });
+  });
+
+  // Initial empty row
+  addRow();
+
+  // Preview
+  document.getElementById('btn-preview').addEventListener('click', () => {
+    const rows = [];
+    let netto = 0;
+    document.querySelectorAll('.service-row').forEach(row => {
+      const desc  = row.querySelector('.row-desc').value  || '—';
+      const qty   = parse(row.querySelector('.row-qty').value);
+      const price = parse(row.querySelector('.row-price').value);
+      const sum   = qty * price;
+      netto += sum;
+      rows.push({ desc, qty, price, sum });
+    });
+    const mwst   = netto * MWST;
+    const brutto = netto + mwst;
+
+    const v = id => document.getElementById(id).value;
+
+    const tableRows = rows.map((r,i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>${r.desc}</td>
+        <td style="text-align:center">${String(r.qty).replace('.',',')}</td>
+        <td style="text-align:right">${fmt(r.price)}</td>
+        <td style="text-align:right"><strong>${fmt(r.sum)}</strong></td>
+      </tr>
+    `).join('');
+
+    const begleit = v('ang-text') || 'Vielen Dank für Ihr Interesse. Wir freuen uns, Ihnen folgendes Angebot unterbreiten zu dürfen.';
+
+    document.getElementById('angebot-doc').innerHTML = `
+      <div class="doc-header">
+        <div class="doc-logo">
+          <div class="doc-logo-box">HE</div>
+          <div class="doc-logo-text">
+            <strong>${v('abs-name')}</strong>
+            <span>${v('abs-web')}</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <strong>ANGEBOT</strong><br>
+          Nr. ${v('ang-nr')}<br>
+          Datum: ${fmtDate(v('ang-datum'))}<br>
+          Gültig bis: ${fmtDate(v('ang-valid'))}
+        </div>
+      </div>
+      <hr class="doc-divider">
+      <div class="doc-addresses">
+        <div class="doc-addr">
+          <div class="doc-addr-label">Von</div>
+          <p><strong>${v('abs-name')}</strong><br>${v('abs-addr')}<br>Tel: ${v('abs-tel')}<br>${v('abs-email')}</p>
+        </div>
+        <div class="doc-addr">
+          <div class="doc-addr-label">An</div>
+          <p><strong>${v('emp-name') || 'Kunde'}</strong><br>${v('emp-addr') || ''}</p>
+        </div>
+      </div>
+      <div class="doc-subject">
+        <h2>Angebot ${v('ang-nr')}</h2>
+        <p>${begleit}</p>
+      </div>
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th style="width:36px">Pos.</th>
+            <th>Leistung</th>
+            <th style="width:70px">Menge</th>
+            <th style="width:100px">Einzelpreis</th>
+            <th style="width:110px">Gesamt</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+      <div class="doc-totals">
+        <div class="doc-total-row"><span>Nettobetrag</span><span>${fmt(netto)}</span></div>
+        <div class="doc-total-row"><span>MwSt. 19%</span><span>${fmt(mwst)}</span></div>
+        <div class="doc-total-final"><span>Gesamtbetrag</span><span>${fmt(brutto)}</span></div>
+      </div>
+      <div class="doc-notes">
+        <strong>Zahlungsbedingungen:</strong> ${v('ang-zahlung')}<br>
+        <strong>Gewährleistung:</strong> ${v('ang-gew')}
+      </div>
+      <div class="doc-footer">
+        <span>${v('abs-name')} · ${v('abs-addr')}</span>
+        <span>${v('abs-email')} · ${v('abs-tel')}</span>
+      </div>
+    `;
+
+    document.getElementById('preview-modal').classList.add('open');
+  });
+
+  document.getElementById('btn-close').addEventListener('click', () => {
+    document.getElementById('preview-modal').classList.remove('open');
+  });
+
+  document.getElementById('btn-print').addEventListener('click', () => window.print());
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    if (!confirm('Alles zurücksetzen?')) return;
+    document.getElementById('rows-container').innerHTML = '';
+    rowId = 0;
+    document.getElementById('ang-nr').value   = genNr();
+    document.getElementById('ang-datum').value = todayStr();
+    document.getElementById('ang-valid').value = validStr();
+    ['emp-name','emp-addr','ang-text'].forEach(id => document.getElementById(id).value = '');
+    addRow();
+  });
+</script>
+</body>
+</html>
