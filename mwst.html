@@ -4,270 +4,425 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MwSt & Kalkulations-Rechner — Hasi Tools</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f12; --surface: #151820; --border: #1e2330; --border2: #2a3040;
+      --hasi: #33afe2; --text: #e8ecf0; --muted: #6b7585;
+      --green: #34d399; --orange: #fb923c; --purple: #a78bfa;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; overflow-x: hidden;
+    }
+
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px; opacity: 0.4; pointer-events: none; z-index: 0;
+    }
+
+    body::after {
+      content: ''; position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(51,175,226,0.12) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 24px 20px 60px; }
+
+    .back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted);
+      text-decoration: none; font-size: 13px; font-family: 'DM Mono', monospace;
+      margin-bottom: 24px; transition: color .2s; }
+    .back:hover { color: var(--hasi); }
+
+    /* Header */
+    .page-header {
+      background: var(--surface); border: 1px solid var(--border2); border-radius: 16px;
+      padding: 24px 28px; margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-icon {
+      width: 48px; height: 48px; background: rgba(51,175,226,0.15); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .header-title { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+    .header-sub { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+    .btn-calc {
+      display: flex; align-items: center; gap: 7px;
+      background: rgba(51,175,226,0.1); border: 1px solid rgba(51,175,226,0.3);
+      color: var(--hasi); padding: 8px 16px; border-radius: 10px;
+      font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background .2s;
+    }
+    .btn-calc:hover { background: rgba(51,175,226,0.2); }
+
+    /* Cards */
+    .card {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 16px; padding: 24px; margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted);
+      letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 18px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+
+    input {
+      width: 100%; background: #0d0f12; border: 1px solid var(--border2);
+      border-radius: 8px; color: var(--text); padding: 10px 14px;
+      font-size: 15px; font-family: 'DM Sans', sans-serif;
+      transition: border-color .2s; outline: none;
+    }
+    input:focus { border-color: var(--hasi); }
+
+    .input-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .input-row input { flex: 1; min-width: 160px; }
+
+    .btn-calc-primary {
+      background: var(--hasi); color: #fff; border: none;
+      padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background .2s; white-space: nowrap;
+    }
+    .btn-calc-primary:hover { background: #1d8fbe; }
+
+    .btn-purple {
+      background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3);
+      color: var(--purple);
+    }
+    .btn-purple:hover { background: rgba(167,139,250,0.25); }
+
+    /* Result grid */
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    @media(max-width:500px) { .result-grid { grid-template-columns: 1fr; } }
+
+    .result-box {
+      border-radius: 12px; padding: 16px 18px; cursor: pointer;
+      transition: transform .15s, filter .15s; border: 1px solid transparent;
+    }
+    .result-box:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .result-box .res-label { font-size: 11px; font-family: 'DM Mono', monospace; margin-bottom: 6px; }
+    .result-box .res-value { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
+
+    .box-blue   { background: rgba(51,175,226,0.1);  border-color: rgba(51,175,226,0.2);  }
+    .box-blue   .res-label { color: var(--hasi); }
+    .box-blue   .res-value { color: var(--hasi); }
+
+    .box-green  { background: rgba(52,211,153,0.1);  border-color: rgba(52,211,153,0.2);  }
+    .box-green  .res-label { color: var(--green); }
+    .box-green  .res-value { color: var(--green); }
+
+    .box-orange { background: rgba(251,146,60,0.1);  border-color: rgba(251,146,60,0.2);  }
+    .box-orange .res-label { color: var(--orange); }
+    .box-orange .res-value { color: var(--orange); }
+
+    .box-purple { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.2); }
+    .box-purple .res-label { color: var(--purple); }
+    .box-purple .res-value { color: var(--purple); }
+
+    /* Kalkulation results — clickable to transfer */
+    .vk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    @media(max-width:500px) { .vk-grid { grid-template-columns: 1fr; } }
+
+    .vk-box {
+      border-radius: 12px; padding: 16px 18px; cursor: pointer;
+      transition: transform .15s, filter .15s; border: 1px solid transparent;
+    }
+    .vk-box:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .vk-box .vk-hint { font-size: 10px; font-family: 'DM Mono', monospace; opacity: .6; margin-top: 4px; }
+
+    /* Status bar */
+    .status-bar {
+      background: var(--surface); border: 1px solid var(--border2); border-radius: 10px;
+      padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; margin-top: 4px;
+    }
+    .status-bar .mono { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+
+    /* Calculator modal */
+    #calc-modal {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+      z-index: 50; align-items: center; justify-content: center; padding: 20px;
+    }
+    #calc-modal.open { display: flex; }
+
+    .calc-inner {
+      background: #1a1d24; border: 1px solid var(--border2); border-radius: 20px;
+      padding: 24px; width: 100%; max-width: 320px;
+    }
+    .calc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .calc-header span { font-size: 14px; font-weight: 600; }
+    .calc-close { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; }
+    .calc-close:hover { color: var(--text); }
+
+    #calc-display {
+      width: 100%; background: #0d0f12; border: 1px solid var(--border2); border-radius: 10px;
+      color: var(--text); text-align: right; font-size: 24px; font-family: 'DM Mono', monospace;
+      padding: 12px 16px; margin-bottom: 14px; outline: none;
+    }
+
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .calc-btn {
+      padding: 16px; border-radius: 10px; border: none; font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: filter .15s;
+    }
+    .calc-btn:hover { filter: brightness(1.2); }
+    .cb-num  { background: #1e2330; color: var(--text); }
+    .cb-op   { background: rgba(51,175,226,0.2); color: var(--hasi); }
+    .cb-red  { background: rgba(248,113,113,0.2); color: #f87171; }
+    .cb-eq   { background: var(--hasi); color: #fff; }
   </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen">
+<body>
+<div class="wrap">
 
-  <div class="max-w-4xl mx-auto p-4 pb-8">
+  <a href="./index.html" class="back">← Hasi Tools</a>
 
-    <div class="mb-4">
-      <a href="./index.html" style="color:#33afe2;font-size:13px;text-decoration:none;">← Hasi Tools</a>
-    </div>
-
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-t-2xl shadow-lg p-6 text-white">
-      <div class="flex items-center justify-between flex-wrap gap-4">
-        <div class="flex items-center gap-3">
-          <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <div>
-            <h1 class="text-2xl font-bold">MwSt & Kalkulations-Rechner</h1>
-            <p class="text-sm text-blue-100">Hasi Elektronic</p>
-          </div>
-        </div>
-        <button id="btn-calc" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-          </svg>
-          <span class="hidden sm:inline">Rechner</span>
-        </button>
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">💶</div>
+      <div>
+        <div class="header-title">MwSt & Kalkulation</div>
+        <div class="header-sub">19% · Netto ↔ Brutto · Verkaufspreis</div>
       </div>
     </div>
-
-    <div class="bg-white rounded-b-2xl shadow-lg p-6 space-y-6">
-
-      <!-- Kalkulation -->
-      <div class="border border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white">
-        <h2 class="text-lg font-bold text-gray-800 mb-4">Kalkulation Verkaufspreis</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label class="text-sm text-gray-600 mb-1 block">Einkaufspreis Netto (€)</label>
-            <input id="einkauf" type="text" inputmode="decimal"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0,00">
-          </div>
-          <div>
-            <label class="text-sm text-gray-600 mb-1 block">Aufschlag (%)</label>
-            <input id="aufschlag" type="text" inputmode="decimal"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
-          </div>
-        </div>
-        <button id="btn-vk" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition mb-4">
-          Berechnen
-        </button>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div id="res-vk-netto" class="bg-green-50 border border-green-200 rounded-lg p-4 cursor-pointer hover:bg-green-100 transition">
-            <div class="text-sm text-green-700">VK Netto</div>
-            <div class="text-2xl font-bold text-green-800">0,00 €</div>
-          </div>
-          <div id="res-vk-brutto" class="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition">
-            <div class="text-sm text-blue-700">VK Brutto</div>
-            <div class="text-2xl font-bold text-blue-800">0,00 €</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Netto → Brutto -->
-      <div class="border border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white">
-        <h2 class="text-lg font-bold text-gray-800 mb-4">Netto → Brutto (19% MwSt)</h2>
-        <div class="flex gap-4 mb-4 flex-wrap">
-          <input id="netto-in" type="text" inputmode="decimal"
-            class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Netto-Preis">
-          <button id="btn-nb" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition">→ Berechnen</button>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div id="res-brutto" class="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition">
-            <div class="text-sm text-blue-700">Brutto-Preis</div>
-            <div class="text-xl font-bold text-blue-800">0,00 €</div>
-          </div>
-          <div id="res-mwst-n" class="bg-orange-50 border border-orange-200 rounded-lg p-4 cursor-pointer hover:bg-orange-100 transition">
-            <div class="text-sm text-orange-700">MwSt. (19%)</div>
-            <div class="text-xl font-bold text-orange-800">0,00 €</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Brutto → Netto -->
-      <div class="border border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white">
-        <h2 class="text-lg font-bold text-gray-800 mb-4">Brutto → Netto (19% MwSt)</h2>
-        <div class="flex gap-4 mb-4 flex-wrap">
-          <input id="brutto-in" type="text" inputmode="decimal"
-            class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Brutto-Preis">
-          <button id="btn-bn" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg transition">→ Berechnen</button>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div id="res-netto" class="bg-purple-50 border border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100 transition">
-            <div class="text-sm text-purple-700">Netto-Preis</div>
-            <div class="text-xl font-bold text-purple-800">0,00 €</div>
-          </div>
-          <div id="res-mwst-b" class="bg-orange-50 border border-orange-200 rounded-lg p-4 cursor-pointer hover:bg-orange-100 transition">
-            <div class="text-sm text-orange-700">MwSt.-Anteil (19%)</div>
-            <div class="text-xl font-bold text-orange-800">0,00 €</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Status -->
-      <div class="bg-gray-800 text-gray-100 px-4 py-2 rounded-lg flex justify-between items-center flex-wrap gap-2">
-        <span id="status-msg" class="text-blue-400">Bereit</span>
-        <span class="text-gray-400 text-sm">MwSt: 19%</span>
-      </div>
-
-    </div>
+    <button class="btn-calc" id="btn-open-calc">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+      </svg>
+      Rechner
+    </button>
   </div>
 
-  <!-- Calculator Modal -->
-  <div id="calc-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 hidden">
-    <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-white font-bold text-lg">Taschenrechner</h3>
-        <button id="calc-close" class="text-white hover:text-gray-300 text-xl">✕</button>
+  <!-- Kalkulation -->
+  <div class="card">
+    <div class="card-title">Kalkulation Verkaufspreis</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div>
+        <label>Einkaufspreis Netto (€)</label>
+        <input id="einkauf" type="text" inputmode="decimal" placeholder="0,00">
       </div>
-      <input id="calc-display" type="text" readonly
-        class="w-full bg-gray-700 text-white text-right text-2xl px-4 py-3 rounded-lg mb-4 font-mono">
-      <div class="grid grid-cols-4 gap-2">
-        <button class="calc-btn bg-red-600    hover:bg-red-700    text-white font-bold py-4 rounded-lg" data-val="C">C</button>
-        <button class="calc-btn bg-red-600    hover:bg-red-700    text-white font-bold py-4 rounded-lg" data-val="←">←</button>
-        <button class="calc-btn bg-blue-600   hover:bg-blue-700   text-white font-bold py-4 rounded-lg" data-val="%">%</button>
-        <button class="calc-btn bg-blue-600   hover:bg-blue-700   text-white font-bold py-4 rounded-lg" data-val="/">/</button>
-        <button class="calc-btn bg-gray-600   hover:bg-gray-500   text-white font-bold py-4 rounded-lg" data-val="7">7</button>
-        <button class="calc-btn bg-gray-600   hover:bg-gray-500   text-white font-bold py-4 rounded-lg" data-val="8">8</button>
-        <button class="calc-btn bg-gray-600   hover:bg-gray-500   text-white font-bold py-4 rounded-lg" data-val="9">9</button>
-        <button class="calc-btn bg-blue-600   hover:bg-blue-700   text-white font-bold py-4 rounded-lg" data-val="*">×</button>
-        <button class="calc-btn bg-gray-600   hover:bg-gray-500   text-white font-bold py-4 rounded-lg" data-val="4">4</button>
-        <button class="calc-btn bg-gray-600   hover:bg-gray-500   text-white font-bold py-4 rounded-lg" data-val="5">5</button>
-        <button class="calc-btn bg-gray-600   hover:bg-gray-500   text-white font-bold py-4 rounded-lg" data-val="6">6</button>
-        <button class="calc-btn bg-blue-600   hover:bg-blue-700   text-white font-bold py-4 rounded-lg" data-val="-">−</button>
-        <button class="calc-btn bg-gray-600   hover:bg-gray-500   text-white font-bold py-4 rounded-lg" data-val="1">1</button>
-        <button class="calc-btn bg-gray-600   hover:bg-gray-500   text-white font-bold py-4 rounded-lg" data-val="2">2</button>
-        <button class="calc-btn bg-gray-600   hover:bg-gray-500   text-white font-bold py-4 rounded-lg" data-val="3">3</button>
-        <button class="calc-btn bg-blue-600   hover:bg-blue-700   text-white font-bold py-4 rounded-lg" data-val="+">+</button>
-        <button class="calc-btn bg-gray-600   hover:bg-gray-500   text-white font-bold py-4 rounded-lg col-span-2" data-val="0">0</button>
-        <button class="calc-btn bg-gray-600   hover:bg-gray-500   text-white font-bold py-4 rounded-lg" data-val=".">.</button>
-        <button class="calc-btn bg-green-600  hover:bg-green-700  text-white font-bold py-4 rounded-lg" data-val="=">=</button>
+      <div>
+        <label>Aufschlag (%)</label>
+        <input id="aufschlag" type="text" inputmode="decimal" placeholder="0">
+      </div>
+    </div>
+    <button class="btn-calc-primary" id="btn-vk">Berechnen</button>
+    <div class="vk-grid">
+      <div class="vk-box box-green" id="res-vk-netto">
+        <div class="res-label" style="color:var(--green);font-size:11px;font-family:'DM Mono',monospace;margin-bottom:6px;">VK Netto</div>
+        <div class="res-value" style="font-size:22px;font-weight:600;color:var(--green);">0,00 €</div>
+        <div class="vk-hint">↓ Klick → Netto-Feld</div>
+      </div>
+      <div class="vk-box box-blue" id="res-vk-brutto">
+        <div class="res-label" style="color:var(--hasi);font-size:11px;font-family:'DM Mono',monospace;margin-bottom:6px;">VK Brutto</div>
+        <div class="res-value" style="font-size:22px;font-weight:600;color:var(--hasi);">0,00 €</div>
+        <div class="vk-hint">↓ Klick → Brutto-Feld</div>
       </div>
     </div>
   </div>
 
-  <script>
-    const MWST = 0.19;
+  <!-- Netto → Brutto -->
+  <div class="card">
+    <div class="card-title">Netto → Brutto (19% MwSt)</div>
+    <div class="input-row">
+      <input id="netto-in" type="text" inputmode="decimal" placeholder="Netto-Preis eingeben">
+      <button class="btn-calc-primary" id="btn-nb">Berechnen →</button>
+    </div>
+    <div class="result-grid">
+      <div class="result-box box-blue" id="res-brutto">
+        <div class="res-label">Brutto-Preis</div>
+        <div class="res-value">0,00 €</div>
+      </div>
+      <div class="result-box box-orange" id="res-mwst-n">
+        <div class="res-label">MwSt. 19%</div>
+        <div class="res-value">0,00 €</div>
+      </div>
+    </div>
+  </div>
 
-    function fmt(v) {
-      return v.toFixed(2).replace('.', ',') + ' €';
-    }
+  <!-- Brutto → Netto -->
+  <div class="card">
+    <div class="card-title">Brutto → Netto (19% MwSt)</div>
+    <div class="input-row">
+      <input id="brutto-in" type="text" inputmode="decimal" placeholder="Brutto-Preis eingeben">
+      <button class="btn-calc-primary btn-purple" id="btn-bn">Berechnen →</button>
+    </div>
+    <div class="result-grid">
+      <div class="result-box box-purple" id="res-netto">
+        <div class="res-label">Netto-Preis</div>
+        <div class="res-value">0,00 €</div>
+      </div>
+      <div class="result-box box-orange" id="res-mwst-b">
+        <div class="res-label">MwSt.-Anteil 19%</div>
+        <div class="res-value">0,00 €</div>
+      </div>
+    </div>
+  </div>
 
-    function parse(v) {
-      return parseFloat((v || '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
-    }
+  <!-- Status -->
+  <div class="status-bar">
+    <span id="status-msg" style="color:var(--hasi)">Bereit</span>
+    <span class="mono">MwSt: 19% · Klick auf Ergebnis = Kopieren</span>
+  </div>
 
-    function setResult(id, value) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.querySelector('div:last-child').textContent = value;
-    }
+</div>
 
-    function setStatus(msg, color) {
-      const el = document.getElementById('status-msg');
-      el.textContent = msg;
-      el.className = color || 'text-blue-400';
-      clearTimeout(el._t);
-      el._t = setTimeout(() => { el.textContent = 'Bereit'; el.className = 'text-blue-400'; }, 3000);
-    }
+<!-- Calculator Modal -->
+<div id="calc-modal">
+  <div class="calc-inner">
+    <div class="calc-header">
+      <span>Taschenrechner</span>
+      <button class="calc-close" id="calc-close">✕</button>
+    </div>
+    <input id="calc-display" type="text" readonly>
+    <div class="calc-grid">
+      <button class="calc-btn cb-red"  data-val="C">C</button>
+      <button class="calc-btn cb-red"  data-val="←">←</button>
+      <button class="calc-btn cb-op"   data-val="%">%</button>
+      <button class="calc-btn cb-op"   data-val="/">/</button>
+      <button class="calc-btn cb-num"  data-val="7">7</button>
+      <button class="calc-btn cb-num"  data-val="8">8</button>
+      <button class="calc-btn cb-num"  data-val="9">9</button>
+      <button class="calc-btn cb-op"   data-val="*">×</button>
+      <button class="calc-btn cb-num"  data-val="4">4</button>
+      <button class="calc-btn cb-num"  data-val="5">5</button>
+      <button class="calc-btn cb-num"  data-val="6">6</button>
+      <button class="calc-btn cb-op"   data-val="-">−</button>
+      <button class="calc-btn cb-num"  data-val="1">1</button>
+      <button class="calc-btn cb-num"  data-val="2">2</button>
+      <button class="calc-btn cb-num"  data-val="3">3</button>
+      <button class="calc-btn cb-op"   data-val="+">+</button>
+      <button class="calc-btn cb-num"  data-val="0" style="grid-column:span 2">0</button>
+      <button class="calc-btn cb-num"  data-val=".">.</button>
+      <button class="calc-btn cb-eq"   data-val="=">=</button>
+    </div>
+  </div>
+</div>
 
-    function copyVal(id) {
-      const el = document.getElementById(id);
-      const txt = el.querySelector('div:last-child').textContent;
-      const clean = txt.replace(' €', '').replace(/\./g, '').replace(',', '.');
-      navigator.clipboard.writeText(clean).catch(() => {});
-      setStatus('✓ Kopiert: ' + txt, 'text-green-400');
-    }
+<script>
+  const MWST = 0.19;
 
-    // Kalkulation
-    document.getElementById('btn-vk').addEventListener('click', () => {
-      const ek = parse(document.getElementById('einkauf').value);
-      const auf = parse(document.getElementById('aufschlag').value);
-      if (ek <= 0) { setStatus('⚠️ Einkaufspreis > 0', 'text-orange-400'); return; }
-      const vkN = ek * (1 + auf / 100);
-      const vkB = vkN * (1 + MWST);
-      setResult('res-vk-netto',  fmt(vkN));
-      setResult('res-vk-brutto', fmt(vkB));
-      setStatus('✓ Berechnet: ' + auf.toFixed(1) + '% Aufschlag', 'text-green-400');
+  function fmt(v) { return v.toFixed(2).replace('.', ',') + ' €'; }
+  function parse(v) { return parseFloat((v||'').replace(',','.').replace(/[^\d.]/g,'')) || 0; }
+
+  function setVal(id, val) {
+    document.querySelector('#' + id + ' .res-value').textContent = val;
+  }
+
+  function setVkVal(id, val) {
+    document.querySelector('#' + id + ' .res-value').textContent = val;
+  }
+
+  function setStatus(msg, color) {
+    const el = document.getElementById('status-msg');
+    el.textContent = msg;
+    el.style.color = color || 'var(--hasi)';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.textContent = 'Bereit'; el.style.color = 'var(--hasi)'; }, 3000);
+  }
+
+  function copyVal(id) {
+    const txt = document.querySelector('#' + id + ' .res-value').textContent;
+    const clean = txt.replace(' €','').replace(/\./g,'').replace(',','.');
+    navigator.clipboard.writeText(clean).catch(()=>{});
+    setStatus('✓ Kopiert: ' + txt, 'var(--green)');
+  }
+
+  // Kalkulation
+  document.getElementById('btn-vk').addEventListener('click', () => {
+    const ek  = parse(document.getElementById('einkauf').value);
+    const auf = parse(document.getElementById('aufschlag').value);
+    if (ek <= 0) { setStatus('⚠️ Einkaufspreis > 0', 'var(--orange)'); return; }
+    const vkN = ek * (1 + auf / 100);
+    const vkB = vkN * (1 + MWST);
+    setVkVal('res-vk-netto',  fmt(vkN));
+    setVkVal('res-vk-brutto', fmt(vkB));
+    setStatus('✓ ' + auf.toFixed(1) + '% Aufschlag berechnet', 'var(--green)');
+  });
+
+  document.getElementById('aufschlag').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-vk').click();
+  });
+
+  // VK übernehmen
+  document.getElementById('res-vk-netto').addEventListener('click', () => {
+    const val = document.querySelector('#res-vk-netto .res-value').textContent.replace(' €','');
+    document.getElementById('netto-in').value = val;
+    document.getElementById('btn-nb').click();
+    setStatus('✓ VK Netto übernommen', 'var(--green)');
+  });
+  document.getElementById('res-vk-brutto').addEventListener('click', () => {
+    const val = document.querySelector('#res-vk-brutto .res-value').textContent.replace(' €','');
+    document.getElementById('brutto-in').value = val;
+    document.getElementById('btn-bn').click();
+    setStatus('✓ VK Brutto übernommen', 'var(--green)');
+  });
+
+  // Netto → Brutto
+  document.getElementById('btn-nb').addEventListener('click', () => {
+    const n = parse(document.getElementById('netto-in').value);
+    if (n <= 0) { setStatus('⚠️ Netto > 0', 'var(--orange)'); return; }
+    const b = n * (1 + MWST);
+    setVal('res-brutto',  fmt(b));
+    setVal('res-mwst-n',  fmt(b - n));
+    setStatus('✓ Brutto berechnet', 'var(--green)');
+  });
+  document.getElementById('netto-in').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-nb').click();
+  });
+  document.getElementById('res-brutto').addEventListener('click',  () => copyVal('res-brutto'));
+  document.getElementById('res-mwst-n').addEventListener('click',  () => copyVal('res-mwst-n'));
+
+  // Brutto → Netto
+  document.getElementById('btn-bn').addEventListener('click', () => {
+    const b = parse(document.getElementById('brutto-in').value);
+    if (b <= 0) { setStatus('⚠️ Brutto > 0', 'var(--orange)'); return; }
+    const n = b / (1 + MWST);
+    setVal('res-netto',  fmt(n));
+    setVal('res-mwst-b', fmt(b - n));
+    setStatus('✓ Netto berechnet', 'var(--green)');
+  });
+  document.getElementById('brutto-in').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-bn').click();
+  });
+  document.getElementById('res-netto').addEventListener('click',  () => copyVal('res-netto'));
+  document.getElementById('res-mwst-b').addEventListener('click', () => copyVal('res-mwst-b'));
+
+  // Calculator
+  const modal   = document.getElementById('calc-modal');
+  const display = document.getElementById('calc-display');
+
+  document.getElementById('btn-open-calc').addEventListener('click', () => modal.classList.add('open'));
+  document.getElementById('calc-close').addEventListener('click',    () => modal.classList.remove('open'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+
+  document.querySelectorAll('.calc-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.dataset.val;
+      if (v === 'C')  { display.value = ''; return; }
+      if (v === '←')  { display.value = display.value.slice(0,-1); return; }
+      if (v === '=')  {
+        try { display.value = eval(display.value.replace(',','.')); }
+        catch { display.value = 'Fehler'; }
+        return;
+      }
+      display.value += v;
     });
-
-    document.getElementById('aufschlag').addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('btn-vk').click();
-    });
-
-    // VK → übernehmen
-    document.getElementById('res-vk-netto').addEventListener('click', () => {
-      const val = document.getElementById('res-vk-netto').querySelector('div:last-child').textContent.replace(' €','');
-      document.getElementById('netto-in').value = val;
-      document.getElementById('btn-nb').click();
-    });
-    document.getElementById('res-vk-brutto').addEventListener('click', () => {
-      const val = document.getElementById('res-vk-brutto').querySelector('div:last-child').textContent.replace(' €','');
-      document.getElementById('brutto-in').value = val;
-      document.getElementById('btn-bn').click();
-    });
-
-    // Netto → Brutto
-    document.getElementById('btn-nb').addEventListener('click', () => {
-      const n = parse(document.getElementById('netto-in').value);
-      if (n <= 0) { setStatus('⚠️ Netto > 0', 'text-orange-400'); return; }
-      const b = n * (1 + MWST);
-      setResult('res-brutto', fmt(b));
-      setResult('res-mwst-n', fmt(b - n));
-      setStatus('✓ Brutto berechnet', 'text-green-400');
-    });
-    document.getElementById('netto-in').addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('btn-nb').click();
-    });
-    document.getElementById('res-brutto').addEventListener('click', () => copyVal('res-brutto'));
-    document.getElementById('res-mwst-n').addEventListener('click', () => copyVal('res-mwst-n'));
-
-    // Brutto → Netto
-    document.getElementById('btn-bn').addEventListener('click', () => {
-      const b = parse(document.getElementById('brutto-in').value);
-      if (b <= 0) { setStatus('⚠️ Brutto > 0', 'text-orange-400'); return; }
-      const n = b / (1 + MWST);
-      setResult('res-netto',  fmt(n));
-      setResult('res-mwst-b', fmt(b - n));
-      setStatus('✓ Netto berechnet', 'text-green-400');
-    });
-    document.getElementById('brutto-in').addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('btn-bn').click();
-    });
-    document.getElementById('res-netto').addEventListener('click',  () => copyVal('res-netto'));
-    document.getElementById('res-mwst-b').addEventListener('click', () => copyVal('res-mwst-b'));
-
-    // Calculator modal
-    const modal   = document.getElementById('calc-modal');
-    const display = document.getElementById('calc-display');
-
-    document.getElementById('btn-calc').addEventListener('click', () => modal.classList.remove('hidden'));
-    document.getElementById('calc-close').addEventListener('click', () => modal.classList.add('hidden'));
-    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.add('hidden'); });
-
-    document.querySelectorAll('.calc-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const v = btn.dataset.val;
-        if (v === 'C')  { display.value = ''; return; }
-        if (v === '←')  { display.value = display.value.slice(0, -1); return; }
-        if (v === '=')  {
-          try { display.value = eval(display.value.replace(',','.')); }
-          catch { display.value = 'Fehler'; }
-          return;
-        }
-        display.value += v;
-      });
-    });
-  </script>
-
+  });
+</script>
 </body>
 </html>
