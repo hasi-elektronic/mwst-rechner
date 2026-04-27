@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MwSt & Kalkulations-Rechner — Hasi Tools</title>
+  <meta name="description" content="MwSt Rechner für schnelle Berechnungen - Hasi Elektronic">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100">
+  <div class="max-w-4xl mx-auto p-4">
+    <div class="mb-4">
+      <a href="./index.html" style="color:#33afe2; font-size:13px; text-decoration:none;">← Hasi Tools</a>
+    </div>
+  </div>
+  <div id="app" class="max-w-4xl mx-auto px-4 pb-8"></div>
+  <script>
+    const MWST = 0.19;
+    const state = {
+      einkauf:'',aufschlag:'',vkNetto:'0,00',vkBrutto:'0,00',
+      netto:'',bruttoResult:'0,00',mwstNetto:'0,00',
+      brutto:'',nettoResult:'0,00',mwstBrutto:'0,00',
+      status:{message:'Bereit',type:'info'},showCalc:false,calcDisplay:'',showInfo:false
+    };
+    function fmt(v){return v.toFixed(2).replace('.',',')+' €';}
+    function parse(v){return parseFloat(v.replace(',','.').replace(/[^\d.]/g,''))||0;}
+    function copyToClipboard(t){const c=t.replace('€','').replace('.','').replace(',','.').trim();navigator.clipboard.writeText(c);showStatus('✓ Kopiert: '+t,'success');}
+    function showStatus(m,t='info'){state.status={message:m,type:t};render();setTimeout(()=>{state.status={message:'Bereit',type:'info'};render();},3000);}
+    function berechneVerkaufspreis(){const ek=parse(state.einkauf),auf=parse(state.aufschlag);if(ek<=0){showStatus('⚠️ EK > 0','warning');return;}const vn=ek*(1+auf/100);state.vkNetto=fmt(vn);state.vkBrutto=fmt(vn*(1+MWST));showStatus('✓ Berechnet: '+auf.toFixed(1)+'%','success');}
+    function nettoZuBrutto(){const n=parse(state.netto);if(n<=0){showStatus('⚠️ Netto > 0','warning');return;}const b=n*(1+MWST);state.bruttoResult=fmt(b);state.mwstNetto=fmt(b-n);showStatus('✓ Brutto berechnet','success');}
+    function bruttoZuNetto(){const b=parse(state.brutto);if(b<=0){showStatus('⚠️ Brutto > 0','warning');return;}const n=b/(1+MWST);state.nettoResult=fmt(n);state.mwstBrutto=fmt(b-n);showStatus('✓ Netto berechnet','success');}
+    function ubernehmenZuNetto(){const v=state.vkNetto.replace(' €','');state.netto=v;const n=parse(v),b=n*(1+MWST);state.bruttoResult=fmt(b);state.mwstNetto=fmt(b-n);showStatus('✓ VK Netto übernommen','success');}
+    function ubernehmenZuBrutto(){const v=state.vkBrutto.replace(' €','');state.brutto=v;const b=parse(v),n=b/(1+MWST);state.nettoResult=fmt(n);state.mwstBrutto=fmt(b-n);showStatus('✓ VK Brutto übernommen','success');}
+    function calcAppend(v){state.calcDisplay+=v;render();}
+    function calcClear(){state.calcDisplay='';render();}
+    function calcBackspace(){state.calcDisplay=state.calcDisplay.slice(0,-1);render();}
+    function calcEquals(){try{state.calcDisplay=eval(state.calcDisplay.replace(',','.')).toString();}catch{state.calcDisplay='Fehler';}render();}
+    function render(){
+      const sc={success:'text-green-600',error:'text-red-600',warning:'text-orange-600',info:'text-blue-600'};
+      document.getElementById('app').innerHTML=`
+        <div>
+          <div class="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-t-2xl shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+              <div class="flex items-center gap-3">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><h1 class="text-2xl font-bold">MwSt & Kalkulations-Rechner</h1><p class="text-sm text-blue-100">Hasi Elektronic</p></div>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="state.showCalc=!state.showCalc;render();" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition flex items-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                  <span class="hidden sm:inline">Rechner</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-b-2xl shadow-lg p-6 space-y-6">
+            <div class="border border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white">
+              <h2 class="text-lg font-bold text-gray-800 mb-4">Kalkulation Verkaufspreis</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div><label class="text-sm text-gray-600 mb-1 block">Einkaufspreis Netto (€)</label><input type="text" value="${state.einkauf}" oninput="state.einkauf=this.value;render();" onkeypress="if(event.key==='Enter')document.getElementById('auf').focus()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0,00"></div>
+                <div><label class="text-sm text-gray-600 mb-1 block">Aufschlag (%)</label><input id="auf" type="text" value="${state.aufschlag}" oninput="state.aufschlag=this.value;render();" onkeypress="if(event.key==='Enter')berechneVerkaufspreis()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0"></div>
+              </div>
+              <button onclick="berechneVerkaufspreis()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition mb-4">Berechnen</button>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div onclick="ubernehmenZuNetto()" class="bg-green-50 border border-green-200 rounded-lg p-4 cursor-pointer hover:bg-green-100 transition"><div class="text-sm text-green-700">VK Netto</div><div class="text-2xl font-bold text-green-800">${state.vkNetto}</div></div>
+                <div onclick="ubernehmenZuBrutto()" class="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition"><div class="text-sm text-blue-700">VK Brutto</div><div class="text-2xl font-bold text-blue-800">${state.vkBrutto}</div></div>
+              </div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white">
+              <h2 class="text-lg font-bold text-gray-800 mb-4">Netto → Brutto (19% MwSt)</h2>
+              <div class="flex gap-4 mb-4 flex-wrap">
+                <input type="text" value="${state.netto}" oninput="state.netto=this.value;render();" onkeypress="if(event.key==='Enter')nettoZuBrutto()" class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Netto-Preis">
+                <button onclick="nettoZuBrutto()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition">→ Berechnen</button>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div onclick="copyToClipboard('${state.bruttoResult}')" class="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition"><div class="text-sm text-blue-700">Brutto-Preis</div><div class="text-xl font-bold text-blue-800">${state.bruttoResult}</div></div>
+                <div onclick="copyToClipboard('${state.mwstNetto}')" class="bg-orange-50 border border-orange-200 rounded-lg p-4 cursor-pointer hover:bg-orange-100 transition"><div class="text-sm text-orange-700">MwSt. (19%)</div><div class="text-xl font-bold text-orange-800">${state.mwstNetto}</div></div>
+              </div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white">
+              <h2 class="text-lg font-bold text-gray-800 mb-4">Brutto → Netto (19% MwSt)</h2>
+              <div class="flex gap-4 mb-4 flex-wrap">
+                <input type="text" value="${state.brutto}" oninput="state.brutto=this.value;render();" onkeypress="if(event.key==='Enter')bruttoZuNetto()" class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Brutto-Preis">
+                <button onclick="bruttoZuNetto()" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg transition">→ Berechnen</button>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div onclick="copyToClipboard('${state.nettoResult}')" class="bg-purple-50 border border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100 transition"><div class="text-sm text-purple-700">Netto-Preis</div><div class="text-xl font-bold text-purple-800">${state.nettoResult}</div></div>
+                <div onclick="copyToClipboard('${state.mwstBrutto}')" class="bg-orange-50 border border-orange-200 rounded-lg p-4 cursor-pointer hover:bg-orange-100 transition"><div class="text-sm text-orange-700">MwSt.-Anteil (19%)</div><div class="text-xl font-bold text-orange-800">${state.mwstBrutto}</div></div>
+              </div>
+            </div>
+            <div class="bg-gray-800 text-gray-100 px-4 py-2 rounded-lg flex justify-between items-center flex-wrap gap-2">
+              <span class="${sc[state.status.type]}">${state.status.message}</span>
+              <span class="text-gray-400 text-sm">MwSt: 19%</span>
+            </div>
+          </div>
+        </div>
+        ${state.showCalc?`<div class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onclick="if(event.target===this){state.showCalc=false;render();}"><div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm"><div class="flex justify-between items-center mb-4"><h3 class="text-white font-bold text-lg">Taschenrechner</h3><button onclick="state.showCalc=false;render();" class="text-white hover:text-gray-300">✕</button></div><input type="text" value="${state.calcDisplay}" readonly class="w-full bg-gray-700 text-white text-right text-2xl px-4 py-3 rounded-lg mb-4 font-mono"><div class="grid grid-cols-4 gap-2">${[['C','←','%','/'],['7','8','9','*'],['4','5','6','-'],['1','2','3','+'],[['0','col-span-2'],'.','=']].map(row=>row.map(btn=>{const b=Array.isArray(btn)?btn[0]:btn;const cs=Array.isArray(btn)?'col-span-2':'';if(b==='')return'';const bg=b==='='?'bg-green-600 hover:bg-green-700':['C','←'].includes(b)?'bg-red-600 hover:bg-red-700':['/','+','-','*','%'].includes(b)?'bg-blue-600 hover:bg-blue-700':'bg-gray-600 hover:bg-gray-500';const act=b==='C'?'calcClear()':b==='←'?'calcBackspace()':b==='='?'calcEquals()':`calcAppend('${b}')`;return`<button onclick="${act}" class="${bg} ${cs} text-white font-bold py-4 rounded-lg transition">${b}</button>`}).join('')).join('')}</div></div></div>`:''}
+      `;
+    }
+    render();
+  </script>
+</body>
+</html>

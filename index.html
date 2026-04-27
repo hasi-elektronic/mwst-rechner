@@ -3,358 +3,448 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hasi MwSt & Kalkulations-Rechner</title>
-  <meta name="description" content="MwSt Rechner für schnelle Berechnungen - Hasi Elektronic">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Hasi Tools — Professionelle Hilfsmittel</title>
+  <meta name="description" content="Professionelle Berechnungs- und Hilfswerkzeuge von Hasi Elektronic">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0f12;
+      --surface:  #151820;
+      --border:   #1e2330;
+      --border2:  #2a3040;
+      --hasi:     #33afe2;
+      --text:     #e8ecf0;
+      --muted:    #6b7585;
+      --green:    #34d399;
+      --amber:    #fbbf24;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(51,175,226,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    header { padding: 32px 0 0; }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--hasi);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .logo-text strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+
+    .logo-text span {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .header-link {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .header-link:hover { color: var(--hasi); }
+
+    .hero {
+      padding: 72px 0 56px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(51,175,226,0.1);
+      border: 1px solid rgba(51,175,226,0.25);
+      border-radius: 100px;
+      padding: 4px 14px;
+      font-size: 12px;
+      font-family: 'DM Mono', monospace;
+      color: var(--hasi);
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--hasi);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 58px);
+      font-weight: 600;
+      letter-spacing: -1.5px;
+      line-height: 1.05;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span { color: var(--hasi); }
+
+    .hero p {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border2);
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 56px;
+    }
+
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 28px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(51,175,226,0.05) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .tool-card:not(.disabled):hover {
+      border-color: var(--hasi);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(51,175,226,0.12);
+    }
+
+    .tool-card:not(.disabled):hover::before { opacity: 1; }
+
+    .tool-card.disabled {
+      opacity: 0.45;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .tool-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tool-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .tool-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+    }
+
+    .tag-live  { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); color: var(--green); }
+    .tag-soon  { background: rgba(251,191,36,0.1);  border: 1px solid rgba(251,191,36,0.3);  color: var(--amber); }
+    .tag-plan  { background: rgba(107,117,133,0.12); border: 1px solid var(--border2); color: var(--muted); }
+
+    .tool-title {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+
+    .tool-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .tool-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .tool-arrow {
+      color: var(--hasi);
+      font-size: 16px;
+      transition: transform 0.2s;
+    }
+
+    .tool-card:not(.disabled):hover .tool-arrow {
+      transform: translateX(4px);
+    }
+
+    .add-card {
+      border-style: dashed !important;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-height: 180px;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer-inner a { color: var(--hasi); text-decoration: none; }
+    .footer-inner a:hover { opacity: 0.7; }
+
+    @media (max-width: 600px) {
+      .hero { padding: 48px 0 40px; }
+      .tools-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-blue-100">
-  <div id="app" class="min-h-screen p-4"></div>
+<body>
 
-  <script>
-    const MWST = 0.19;
-    
-    const state = {
-      einkauf: '',
-      aufschlag: '',
-      vkNetto: '0,00',
-      vkBrutto: '0,00',
-      netto: '',
-      bruttoResult: '0,00',
-      mwstNetto: '0,00',
-      brutto: '',
-      nettoResult: '0,00',
-      mwstBrutto: '0,00',
-      status: { message: 'Bereit', type: 'info' },
-      showCalc: false,
-      calcDisplay: '',
-      showInfo: false
-    };
+<div class="container">
 
-    function formatCurrency(value) {
-      return value.toFixed(2).replace('.', ',') + ' €';
-    }
-
-    function parseInput(value) {
-      const cleaned = value.replace(',', '.').replace(/[^\d.]/g, '');
-      return parseFloat(cleaned) || 0;
-    }
-
-    function copyToClipboard(text) {
-      const clean = text.replace('€', '').replace('.', '').replace(',', '.').trim();
-      navigator.clipboard.writeText(clean);
-      showStatus(`✓ Kopiert: ${text}`, 'success');
-    }
-
-    function showStatus(message, type = 'info') {
-      state.status = { message, type };
-      render();
-      setTimeout(() => {
-        state.status = { message: 'Bereit', type: 'info' };
-        render();
-      }, 3000);
-    }
-
-    function berechneVerkaufspreis() {
-      const ek = parseInput(state.einkauf);
-      const auf = parseInput(state.aufschlag);
-      
-      if (ek <= 0) {
-        showStatus('⚠️ Einkaufspreis muss größer als 0 sein', 'warning');
-        return;
-      }
-      
-      const vkNet = ek * (1 + auf / 100);
-      const vkBrut = vkNet * (1 + MWST);
-      
-      state.vkNetto = formatCurrency(vkNet);
-      state.vkBrutto = formatCurrency(vkBrut);
-      showStatus(`✓ Verkaufspreis berechnet: ${auf.toFixed(1)}% Aufschlag`, 'success');
-    }
-
-    function nettoZuBrutto() {
-      const net = parseInput(state.netto);
-      if (net <= 0) {
-        showStatus('⚠️ Netto-Preis muss größer als 0 sein', 'warning');
-        return;
-      }
-      
-      const brut = net * (1 + MWST);
-      const steuer = brut - net;
-      
-      state.bruttoResult = formatCurrency(brut);
-      state.mwstNetto = formatCurrency(steuer);
-      showStatus('✓ Brutto-Preis berechnet', 'success');
-    }
-
-    function bruttoZuNetto() {
-      const brut = parseInput(state.brutto);
-      if (brut <= 0) {
-        showStatus('⚠️ Brutto-Preis muss größer als 0 sein', 'warning');
-        return;
-      }
-      
-      const net = brut / (1 + MWST);
-      const steuer = brut - net;
-      
-      state.nettoResult = formatCurrency(net);
-      state.mwstBrutto = formatCurrency(steuer);
-      showStatus('✓ Netto-Preis berechnet', 'success');
-    }
-
-    function ubernehmenZuNetto() {
-      const value = state.vkNetto.replace(' €', '');
-      state.netto = value;
-      const net = parseInput(value);
-      const brut = net * (1 + MWST);
-      const steuer = brut - net;
-      state.bruttoResult = formatCurrency(brut);
-      state.mwstNetto = formatCurrency(steuer);
-      showStatus('✓ VK Netto übernommen', 'success');
-    }
-
-    function ubernehmenZuBrutto() {
-      const value = state.vkBrutto.replace(' €', '');
-      state.brutto = value;
-      const brut = parseInput(value);
-      const net = brut / (1 + MWST);
-      const steuer = brut - net;
-      state.nettoResult = formatCurrency(net);
-      state.mwstBrutto = formatCurrency(steuer);
-      showStatus('✓ VK Brutto übernommen', 'success');
-    }
-
-    function calcAppend(val) {
-      state.calcDisplay += val;
-      render();
-    }
-
-    function calcClear() {
-      state.calcDisplay = '';
-      render();
-    }
-
-    function calcBackspace() {
-      state.calcDisplay = state.calcDisplay.slice(0, -1);
-      render();
-    }
-
-    function calcEquals() {
-      try {
-        const result = eval(state.calcDisplay.replace(',', '.'));
-        state.calcDisplay = result.toString();
-      } catch {
-        state.calcDisplay = 'Fehler';
-      }
-      render();
-    }
-
-    function render() {
-      const statusColors = {
-        success: 'text-green-600',
-        error: 'text-red-600',
-        warning: 'text-orange-600',
-        info: 'text-blue-600'
-      };
-
-      document.getElementById('app').innerHTML = `
-        <div class="max-w-4xl mx-auto">
-          <!-- Header -->
-          <div class="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-t-2xl shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between flex-wrap gap-4">
-              <div class="flex items-center gap-3">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <div>
-                  <h1 class="text-2xl font-bold">MwSt & Kalkulations-Rechner</h1>
-                  <p class="text-sm text-blue-100">Hasi Elektronic</p>
-                </div>
-              </div>
-              <div class="flex gap-2">
-                <button onclick="state.showCalc = !state.showCalc; render();" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition flex items-center gap-2">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                  </svg>
-                  <span class="hidden sm:inline">Rechner</span>
-                </button>
-                <button onclick="state.showInfo = !state.showInfo; render();" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-b-2xl shadow-lg p-6 space-y-6">
-            <!-- Kalkulation -->
-            <div class="border border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white">
-              <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                </svg>
-                Kalkulation Verkaufspreis
-              </h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label class="text-sm text-gray-600 mb-1 block">Einkaufspreis Netto (€)</label>
-                  <input type="text" value="${state.einkauf}" oninput="state.einkauf = this.value; render();" 
-                    onkeypress="if(event.key==='Enter') document.getElementById('aufschlag').focus()"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0,00">
-                </div>
-                <div>
-                  <label class="text-sm text-gray-600 mb-1 block">Aufschlag (%)</label>
-                  <input id="aufschlag" type="text" value="${state.aufschlag}" oninput="state.aufschlag = this.value; render();"
-                    onkeypress="if(event.key==='Enter') berechneVerkaufspreis()"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
-                </div>
-              </div>
-              <button onclick="berechneVerkaufspreis()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition mb-4">
-                Berechnen
-              </button>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div onclick="ubernehmenZuNetto()" class="bg-green-50 border border-green-200 rounded-lg p-4 cursor-pointer hover:bg-green-100 transition">
-                  <div class="text-sm text-green-700">VK Netto</div>
-                  <div class="text-2xl font-bold text-green-800">${state.vkNetto}</div>
-                </div>
-                <div onclick="ubernehmenZuBrutto()" class="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition">
-                  <div class="text-sm text-blue-700">VK Brutto</div>
-                  <div class="text-2xl font-bold text-blue-800">${state.vkBrutto}</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Netto → Brutto -->
-            <div class="border border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white">
-              <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                </svg>
-                Netto → Brutto (19% MwSt)
-              </h2>
-              <div class="flex gap-4 mb-4 flex-wrap">
-                <input type="text" value="${state.netto}" oninput="state.netto = this.value; render();"
-                  onkeypress="if(event.key==='Enter') nettoZuBrutto()"
-                  class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Netto-Preis">
-                <button onclick="nettoZuBrutto()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition">
-                  → Berechnen
-                </button>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div onclick="copyToClipboard('${state.bruttoResult}')" class="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition">
-                  <div class="text-sm text-blue-700">Brutto-Preis</div>
-                  <div class="text-xl font-bold text-blue-800">${state.bruttoResult}</div>
-                </div>
-                <div onclick="copyToClipboard('${state.mwstNetto}')" class="bg-orange-50 border border-orange-200 rounded-lg p-4 cursor-pointer hover:bg-orange-100 transition">
-                  <div class="text-sm text-orange-700">MwSt. (19%)</div>
-                  <div class="text-xl font-bold text-orange-800">${state.mwstNetto}</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Brutto → Netto -->
-            <div class="border border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white">
-              <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
-                </svg>
-                Brutto → Netto (19% MwSt)
-              </h2>
-              <div class="flex gap-4 mb-4 flex-wrap">
-                <input type="text" value="${state.brutto}" oninput="state.brutto = this.value; render();"
-                  onkeypress="if(event.key==='Enter') bruttoZuNetto()"
-                  class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Brutto-Preis">
-                <button onclick="bruttoZuNetto()" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg transition">
-                  → Berechnen
-                </button>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div onclick="copyToClipboard('${state.nettoResult}')" class="bg-purple-50 border border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100 transition">
-                  <div class="text-sm text-purple-700">Netto-Preis</div>
-                  <div class="text-xl font-bold text-purple-800">${state.nettoResult}</div>
-                </div>
-                <div onclick="copyToClipboard('${state.mwstBrutto}')" class="bg-orange-50 border border-orange-200 rounded-lg p-4 cursor-pointer hover:bg-orange-100 transition">
-                  <div class="text-sm text-orange-700">MwSt.-Anteil (19%)</div>
-                  <div class="text-xl font-bold text-orange-800">${state.mwstBrutto}</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Status Bar -->
-            <div class="bg-gray-800 text-gray-100 px-4 py-2 rounded-lg flex justify-between items-center flex-wrap gap-2">
-              <span class="${statusColors[state.status.type]}">${state.status.message}</span>
-              <span class="text-gray-400 text-sm">MwSt: 19%</span>
-            </div>
-          </div>
+  <header>
+    <div class="header-inner">
+      <a href="https://hasi-elektronic.de" class="logo" target="_blank" rel="noopener">
+        <div class="logo-icon">HE</div>
+        <div class="logo-text">
+          <strong>Hasi Elektronic</strong>
+          <span>tools.hasi-elektronic.de</span>
         </div>
+      </a>
+      <a href="https://hasi-elektronic.de" class="header-link" target="_blank" rel="noopener">← Zur Website</a>
+    </div>
+  </header>
 
-        <!-- Calculator Modal -->
-        ${state.showCalc ? `
-          <div class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onclick="if(event.target === this) { state.showCalc = false; render(); }">
-            <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm">
-              <div class="flex justify-between items-center mb-4">
-                <h3 class="text-white font-bold text-lg">Taschenrechner</h3>
-                <button onclick="state.showCalc = false; render();" class="text-white hover:text-gray-300">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                  </svg>
-                </button>
-              </div>
-              <input type="text" value="${state.calcDisplay}" readonly class="w-full bg-gray-700 text-white text-right text-2xl px-4 py-3 rounded-lg mb-4 font-mono">
-              <div class="grid grid-cols-4 gap-2">
-                ${[
-                  ['C', '←', '%', '/'],
-                  ['7', '8', '9', '*'],
-                  ['4', '5', '6', '-'],
-                  ['1', '2', '3', '+'],
-                  ['0', '.', '=', '=']
-                ].map((row, i) => row.map((btn, j) => {
-                  if (i === 4 && j === 2) return '';
-                  const colspan = (i === 4 && j === 3) ? 'col-span-2' : '';
-                  const bg = btn === '=' ? 'bg-green-600 hover:bg-green-700' :
-                             ['C', '←'].includes(btn) ? 'bg-red-600 hover:bg-red-700' :
-                             ['/', '*', '-', '+', '%'].includes(btn) ? 'bg-blue-600 hover:bg-blue-700' :
-                             'bg-gray-600 hover:bg-gray-500';
-                  const action = btn === 'C' ? 'calcClear()' :
-                                btn === '←' ? 'calcBackspace()' :
-                                btn === '=' ? 'calcEquals()' :
-                                `calcAppend('${btn}')`;
-                  return `<button onclick="${action}" class="${bg} ${colspan} text-white font-bold py-4 rounded-lg transition">${btn}</button>`;
-                }).join('')).join('')}
-              </div>
-            </div>
-          </div>
-        ` : ''}
+  <section class="hero">
+    <div class="hero-badge">HASI TOOLS</div>
+    <h1>Professionelle<br><span>Hilfswerkzeuge</span></h1>
+    <p>Schnelle, präzise Berechnungen für den täglichen Einsatz — kostenlos, ohne Login.</p>
+  </section>
 
-        <!-- Info Modal -->
-        ${state.showInfo ? `
-          <div class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onclick="if(event.target === this) { state.showInfo = false; render(); }">
-            <div class="bg-white rounded-2xl p-6 w-full max-w-md">
-              <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Info</h3>
-                <button onclick="state.showInfo = false; render();" class="text-gray-600 hover:text-gray-800">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                  </svg>
-                </button>
-              </div>
-              <div class="space-y-2 text-gray-700">
-                <p class="font-bold text-lg">Hasi MwSt & Kalkulations-Rechner</p>
-                <p class="text-sm">Version: 1.0 Web</p>
-                <p class="text-sm">© 2026 Hasi Elektronic</p>
-                <p class="text-sm mt-4">Entwickelt für schnelle MwSt-Berechnungen und Verkaufspreis-Kalkulationen.</p>
-              </div>
-            </div>
-          </div>
-        ` : ''}
-      `;
-    }
+  <div class="section-label">Verfügbare Tools</div>
 
-    render();
-  </script>
+  <div class="tools-grid">
+
+    <!-- 1. MwSt — LIVE -->
+    <a href="./mwst.html" class="tool-card">
+      <div class="tool-card-header">
+        <div class="tool-icon" style="background:rgba(51,175,226,0.12);">💶</div>
+        <span class="tool-tag tag-live">● Live</span>
+      </div>
+      <div>
+        <div class="tool-title">MwSt & Kalkulation</div>
+        <div class="tool-desc">Netto ↔ Brutto, Verkaufspreis mit Aufschlag, eingebauter Taschenrechner.</div>
+      </div>
+      <div class="tool-footer">
+        <span>mwst-rechner</span>
+        <span class="tool-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- 2. Stunden — SOON -->
+    <div class="tool-card disabled">
+      <div class="tool-card-header">
+        <div class="tool-icon" style="background:rgba(251,191,36,0.1);">⏱</div>
+        <span class="tool-tag tag-soon">Bald</span>
+      </div>
+      <div>
+        <div class="tool-title">Stunden-Rechner</div>
+        <div class="tool-desc">Stunden × Stundensatz, ideal für Angebote und Rechnungen.</div>
+      </div>
+      <div class="tool-footer">
+        <span>stunden-rechner</span>
+        <span class="tool-arrow">→</span>
+      </div>
+    </div>
+
+    <!-- 3. Subnetz — SOON -->
+    <div class="tool-card disabled">
+      <div class="tool-card-header">
+        <div class="tool-icon" style="background:rgba(167,139,250,0.1);">🌐</div>
+        <span class="tool-tag tag-soon">Bald</span>
+      </div>
+      <div>
+        <div class="tool-title">Subnetz-Rechner</div>
+        <div class="tool-desc">IP-Range, Maske, Gateway und Broadcast schnell ermitteln.</div>
+      </div>
+      <div class="tool-footer">
+        <span>subnetz-rechner</span>
+        <span class="tool-arrow">→</span>
+      </div>
+    </div>
+
+    <!-- 4. Passwort — GEPLANT -->
+    <div class="tool-card disabled">
+      <div class="tool-card-header">
+        <div class="tool-icon" style="background:rgba(52,211,153,0.08);">🔐</div>
+        <span class="tool-tag tag-plan">Geplant</span>
+      </div>
+      <div>
+        <div class="tool-title">Passwort-Generator</div>
+        <div class="tool-desc">Sichere Passwörter lokal generieren — keine Cloud-Übertragung.</div>
+      </div>
+      <div class="tool-footer">
+        <span>passwort-generator</span>
+        <span class="tool-arrow">→</span>
+      </div>
+    </div>
+
+    <!-- 5. Kabel — GEPLANT -->
+    <div class="tool-card disabled">
+      <div class="tool-card-header">
+        <div class="tool-icon" style="background:rgba(248,113,113,0.1);">⚡</div>
+        <span class="tool-tag tag-plan">Geplant</span>
+      </div>
+      <div>
+        <div class="tool-title">Kabel-Querschnitt</div>
+        <div class="tool-desc">Stromlast, Länge, Spannungsabfall — richtigen Querschnitt ermitteln.</div>
+      </div>
+      <div class="tool-footer">
+        <span>kabel-rechner</span>
+        <span class="tool-arrow">→</span>
+      </div>
+    </div>
+
+    <!-- 6. Platzhalter -->
+    <div class="tool-card disabled add-card">
+      <div style="font-size:28px; margin-bottom:10px; color:var(--muted)">＋</div>
+      <div class="tool-desc">Weitere Tools in Planung</div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <span>⚡ <a href="https://hasi-elektronic.de" target="_blank" rel="noopener">Hasi Elektronic</a> — Vaihingen/Enz</span>
+      <span style="font-family:'DM Mono',monospace; font-size:11px; color:var(--muted)">tools.hasi-elektronic.de</span>
+    </div>
+  </footer>
+
+</div>
 </body>
 </html>
