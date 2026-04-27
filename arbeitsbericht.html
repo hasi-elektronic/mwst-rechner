@@ -242,12 +242,44 @@
     }
 
     @media print {
-      body { background: #fff !important; }
-      body::before, body::after { display: none; }
-      #preview-modal { position: static; background: none; padding: 0; display: block !important; }
+      @page { size: A4; margin: 10mm 12mm; }
+
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+      html, body { height: auto !important; background: #fff !important; }
+      body::before, body::after { display: none !important; }
+
+      .wrap { display: none !important; }
+
+      #preview-modal {
+        display: block !important;
+        position: static !important;
+        background: none !important;
+        padding: 0 !important;
+        overflow: visible !important;
+      }
       .modal-toolbar { display: none !important; }
-      .modal-inner { box-shadow: none; border-radius: 0; max-width: 100%; }
-      #ab-doc { padding: 20px; }
+      .modal-inner {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      #ab-doc {
+        padding: 0 !important;
+        font-size: 11px !important;
+      }
+
+      .doc-table th, .doc-table td { padding: 6px 8px !important; }
+      .doc-info-grid { padding: 10px !important; gap: 10px !important; }
+      .doc-totals { width: 260px !important; }
+      .doc-bank, .doc-notes { padding: 10px 12px !important; margin-top: 14px !important; }
+      .doc-header { margin-bottom: 20px !important; }
+      .doc-addresses { margin-bottom: 16px !important; }
+      .doc-footer { margin-top: 20px !important; }
+
+      table { page-break-inside: avoid !important; }
+      .doc-totals, .doc-bank, .doc-footer { page-break-inside: avoid !important; }
     }
   </style>
 </head>
