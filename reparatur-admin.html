@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reparatur Admin — Hasi Tools</title>
+  <!-- Passwort-Schutz -->
+  <script>
+    if (sessionStorage.getItem('hasi-auth') !== '1') window.location.href = './index.html';
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --bg:#0d0f12; --surface:#151820; --border:#1e2330; --border2:#2a3040;
+      --hasi:#33afe2; --text:#e8ecf0; --muted:#6b7585;
+      --green:#34d399; --amber:#fbbf24; --red:#f87171; --purple:#a78bfa;
+    }
+    body { font-family:"DM Sans",sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    body::before {
+      content:""; position:fixed; inset:0;
+      background-image:linear-gradient(var(--border) 1px,transparent 1px),
+                       linear-gradient(90deg,var(--border) 1px,transparent 1px);
+      background-size:48px 48px; opacity:.4; pointer-events:none; z-index:0;
+    }
+    body::after {
+      content:""; position:fixed; top:-200px; left:50%; transform:translateX(-50%);
+      width:800px; height:400px;
+      background:radial-gradient(ellipse,rgba(51,175,226,0.12) 0%,transparent 70%);
+      pointer-events:none; z-index:0;
+    }
+    .wrap { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:24px 20px 60px; }
+
+    .back { display:inline-flex; align-items:center; gap:6px; color:var(--muted);
+      text-decoration:none; font-size:13px; font-family:"DM Mono",monospace;
+      margin-bottom:24px; transition:color .2s; }
+    .back:hover { color:var(--hasi); }
+
+    .page-header { display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:12px; margin-bottom:24px; }
+    .page-header h1 { font-size:28px; font-weight:600; letter-spacing:-0.8px; }
+    .page-header h1 span { color:var(--hasi); }
+
+    /* Filter bar */
+    .filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+    .filter-btn {
+      font-size:12px; font-family:"DM Mono",monospace; padding:6px 14px;
+      border-radius:100px; cursor:pointer; border:1px solid var(--border2);
+      color:var(--muted); background:transparent; transition:all .15s;
+    }
+    .filter-btn:hover, .filter-btn.active { border-color:var(--hasi); color:var(--hasi); background:rgba(51,175,226,0.08); }
+
+    /* Stats */
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:24px; }
+    .stat-box {
+      background:var(--surface); border:1px solid var(--border2); border-radius:12px;
+      padding:16px; text-align:center;
+    }
+    .stat-box .val { font-size:28px; font-weight:700; }
+    .stat-box .lbl { font-size:11px; font-family:"DM Mono",monospace; color:var(--muted); margin-top:4px; }
+
+    /* Table */
+    .table-wrap { background:var(--surface); border:1px solid var(--border2); border-radius:16px; overflow:hidden; }
+    table { width:100%; border-collapse:collapse; }
+    th { background:#0d0f12; padding:11px 14px; text-align:left;
+      font-size:11px; font-family:"DM Mono",monospace; color:var(--muted);
+      text-transform:uppercase; letter-spacing:0.8px; border-bottom:1px solid var(--border2); }
+    td { padding:12px 14px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(255,255,255,0.02); }
+
+    .badge {
+      display:inline-flex; align-items:center; gap:5px;
+      font-size:11px; font-family:"DM Mono",monospace;
+      padding:3px 10px; border-radius:100px; font-weight:500;
+    }
+    .badge-neu    { background:rgba(51,175,226,0.15); color:var(--hasi); }
+    .badge-laufend{ background:rgba(251,191,36,0.15);  color:var(--amber); }
+    .badge-fertig { background:rgba(52,211,153,0.15);  color:var(--green); }
+    .badge-abgeholt{ background:rgba(107,117,133,0.2); color:var(--muted); }
+    .badge-abgelehnt{ background:rgba(248,113,113,0.15);color:var(--red); }
+
+    .btn-detail {
+      background:rgba(51,175,226,0.1); border:1px solid rgba(51,175,226,0.25);
+      color:var(--hasi); padding:5px 12px; border-radius:7px;
+      font-size:12px; cursor:pointer; transition:background .2s;
+    }
+    .btn-detail:hover { background:rgba(51,175,226,0.2); }
+
+    /* Detail Modal */
+    #detail-modal {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,.7);
+      z-index:100; align-items:center; justify-content:center; padding:20px; overflow-y:auto;
+    }
+    #detail-modal.open { display:flex; }
+    .modal-box {
+      background:#151820; border:1px solid var(--border2); border-radius:20px;
+      width:100%; max-width:580px; margin:auto; padding:28px;
+    }
+    .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+    .modal-header h3 { font-size:18px; font-weight:600; }
+    .modal-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; }
+    .modal-close:hover { color:var(--text); }
+
+    .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+    .detail-item .dl { font-size:10px; font-family:"DM Mono",monospace; color:var(--muted);
+      text-transform:uppercase; letter-spacing:0.8px; margin-bottom:3px; }
+    .detail-item .dv { font-size:13px; color:var(--text); }
+
+    .modal-actions { display:flex; flex-direction:column; gap:10px; }
+    .modal-actions label { font-size:12px; color:var(--muted); margin-bottom:3px; display:block; }
+    .modal-actions select, .modal-actions textarea {
+      width:100%; background:#0d0f12; border:1px solid var(--border2);
+      border-radius:8px; color:var(--text); padding:10px 12px;
+      font-size:14px; font-family:"DM Sans",sans-serif; outline:none;
+    }
+    .modal-actions select:focus, .modal-actions textarea:focus { border-color:var(--hasi); }
+    .modal-actions textarea { resize:vertical; min-height:60px; }
+
+    .btn-save {
+      background:var(--hasi); color:#fff; border:none; padding:11px 24px;
+      border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:background .2s;
+    }
+    .btn-save:hover { background:#1d8fbe; }
+
+    #loading { text-align:center; padding:60px; color:var(--muted); font-family:"DM Mono",monospace; }
+    #empty { text-align:center; padding:60px; color:var(--muted); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <a href="./index.html" class="back">← Hasi Tools</a>
+
+  <div class="page-header">
+    <h1>Reparatur<span>aufträge</span></h1>
+    <button class="btn-detail" id="btn-refresh" style="font-size:13px;padding:8px 16px;">⟳ Aktualisieren</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-box"><div class="val" id="s-total" style="color:var(--hasi)">—</div><div class="lbl">Gesamt</div></div>
+    <div class="stat-box"><div class="val" id="s-neu"    style="color:var(--hasi)">—</div><div class="lbl">Neu</div></div>
+    <div class="stat-box"><div class="val" id="s-lauf"   style="color:var(--amber)">—</div><div class="lbl">In Arbeit</div></div>
+    <div class="stat-box"><div class="val" id="s-fertig" style="color:var(--green)">—</div><div class="lbl">Fertig</div></div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">Alle</button>
+    <button class="filter-btn" data-filter="Neu">Neu</button>
+    <button class="filter-btn" data-filter="In Arbeit">In Arbeit</button>
+    <button class="filter-btn" data-filter="Fertig">Fertig</button>
+    <button class="filter-btn" data-filter="Abgeholt">Abgeholt</button>
+    <button class="filter-btn" data-filter="Abgelehnt">Abgelehnt</button>
+  </div>
+
+  <div class="table-wrap">
+    <div id="loading">Lade Aufträge...</div>
+    <div id="empty" style="display:none">Keine Aufträge gefunden.</div>
+    <table id="main-table" style="display:none">
+      <thead>
+        <tr>
+          <th>Nr.</th>
+          <th>Datum</th>
+          <th>Kunde</th>
+          <th>Gerät</th>
+          <th>Fehler</th>
+          <th>Limit</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div id="detail-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-title">Auftrag</h3>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="detail-grid" id="modal-details"></div>
+    <div class="modal-actions">
+      <div>
+        <label>Status</label>
+        <select id="modal-status">
+          <option>Neu</option>
+          <option>In Arbeit</option>
+          <option>Fertig</option>
+          <option>Abgeholt</option>
+          <option>Abgelehnt</option>
+        </select>
+      </div>
+      <div>
+        <label>Interne Notizen</label>
+        <textarea id="modal-notizen" placeholder="z.B. Display bestellt, kommt Do..."></textarea>
+      </div>
+      <button class="btn-save" id="modal-save">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const WORKER = 'https://hasi-reparatur.hguencavdi.workers.dev';
+  const AUTH   = 'Bearer 71665';
+
+  let allData = [];
+  let currentFilter = 'all';
+  let currentId = null;
+
+  const statusBadge = s => {{
+    const map = {{
+      'Neu':'badge-neu','In Arbeit':'badge-laufend',
+      'Fertig':'badge-fertig','Abgeholt':'badge-abgeholt','Abgelehnt':'badge-abgelehnt'
+    }};
+    return `<span class="badge ${{map[s]||'badge-neu'}}">${{s}}</span>`;
+  }};
+
+  const stars = n => '★'.repeat(n||0) + '☆'.repeat(5-(n||0));
+
+  async function load() {{
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('main-table').style.display = 'none';
+    document.getElementById('empty').style.display = 'none';
+    try {{
+      const res = await fetch(WORKER + '/api/reparatur', {{ headers:{{ Authorization:AUTH }} }});
+      allData = await res.json();
+      updateStats();
+      renderTable();
+    }} catch(e) {{
+      document.getElementById('loading').textContent = 'Fehler beim Laden.';
+    }}
+  }}
+
+  function updateStats() {{
+    document.getElementById('s-total').textContent = allData.length;
+    document.getElementById('s-neu').textContent   = allData.filter(r=>r.status==='Neu').length;
+    document.getElementById('s-lauf').textContent  = allData.filter(r=>r.status==='In Arbeit').length;
+    document.getElementById('s-fertig').textContent= allData.filter(r=>r.status==='Fertig').length;
+  }}
+
+  function renderTable() {{
+    const data = currentFilter === 'all' ? allData : allData.filter(r => r.status === currentFilter);
+    document.getElementById('loading').style.display = 'none';
+    if (!data.length) {{
+      document.getElementById('empty').style.display = 'block';
+      document.getElementById('main-table').style.display = 'none';
+      return;
+    }}
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('main-table').style.display = 'table';
+
+    document.getElementById('table-body').innerHTML = data.map(r => `
+      <tr>
+        <td><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--hasi)">${{r.nr}}</span></td>
+        <td style="color:var(--muted);font-size:12px">${{r.datum}}</td>
+        <td><strong>${{r.k_name||'—'}}</strong><br><span style="font-size:11px;color:var(--muted)">${{r.k_telefon||''}}</span></td>
+        <td style="font-size:12px">${{r.geraet_typ||'—'}}<br><span style="color:var(--muted)">${{r.modell||''}}</span></td>
+        <td style="font-size:12px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${{r.fehler||'—'}}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px">${{r.kostenlimit ? r.kostenlimit+'€' : '—'}}</td>
+        <td>${{statusBadge(r.status)}}</td>
+        <td><button class="btn-detail" onclick="openDetail(${{r.id}})">Details</button></td>
+      </tr>
+    `).join('');
+  }}
+
+  function openDetail(id) {{
+    const r = allData.find(x => x.id === id);
+    if (!r) return;
+    currentId = id;
+    document.getElementById('modal-title').textContent = r.nr;
+    document.getElementById('modal-status').value   = r.status || 'Neu';
+    document.getElementById('modal-notizen').value  = r.notizen || '';
+
+    document.getElementById('modal-details').innerHTML = [
+      ['Kunde',    r.k_name],
+      ['Adresse',  [r.k_adresse, r.k_plz_ort].filter(Boolean).join(', ')],
+      ['Telefon',  r.k_telefon],
+      ['E-Mail',   r.k_email],
+      ['Gerät',    r.geraet_typ],
+      ['Modell',   r.modell],
+      ['Zustand',  stars(r.zustand)],
+      ['Limit',    r.kostenlimit ? r.kostenlimit+' €' : '—'],
+      ['Zubehör',  r.zubehoer],
+      ['Fehler',   r.fehler],
+      ['Schäden',  r.schaeden],
+      ['Beschr.',  r.beschreibung],
+      ['Win-PW',   r.win_passwort ? '••••••' : '—'],
+      ['Eingang',  r.created_at?.slice(0,16).replace('T',' ')],
+    ].map(([l,v]) => v ? `
+      <div class="detail-item">
+        <div class="dl">${{l}}</div>
+        <div class="dv">${{v||'—'}}</div>
+      </div>` : '').join('');
+
+    document.getElementById('detail-modal').classList.add('open');
+  }}
+
+  document.getElementById('modal-close').addEventListener('click', () =>
+    document.getElementById('detail-modal').classList.remove('open'));
+  document.getElementById('detail-modal').addEventListener('click', e => {{
+    if (e.target === document.getElementById('detail-modal'))
+      document.getElementById('detail-modal').classList.remove('open');
+  }});
+
+  document.getElementById('modal-save').addEventListener('click', async () => {{
+    const btn = document.getElementById('modal-save');
+    btn.disabled = true; btn.textContent = 'Speichern...';
+    try {{
+      await fetch(`${{WORKER}}/api/reparatur/${{currentId}}`, {{
+        method: 'PATCH',
+        headers: {{ Authorization:AUTH, 'Content-Type':'application/json' }},
+        body: JSON.stringify({{
+          status:  document.getElementById('modal-status').value,
+          notizen: document.getElementById('modal-notizen').value,
+        }}),
+      }});
+      await load();
+      document.getElementById('detail-modal').classList.remove('open');
+    }} catch(e) {{ alert('Fehler'); }}
+    btn.disabled = false; btn.textContent = 'Speichern';
+  }});
+
+  document.getElementById('btn-refresh').addEventListener('click', load);
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {{
+    btn.addEventListener('click', () => {{
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderTable();
+    }});
+  }});
+
+  load();
+</script>
+</body>
+</html>
