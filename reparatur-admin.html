@@ -51,7 +51,10 @@
     .badge-laufend  { background:rgba(251,191,36,0.15);  color:var(--amber); }
     .badge-fertig   { background:rgba(52,211,153,0.15);  color:var(--green); }
     .badge-abgeholt { background:rgba(107,117,133,0.2);  color:var(--muted); }
-    .badge-abgelehnt{ background:rgba(248,113,113,0.15); color:var(--red); }
+    .badge-abgelehnt   { background:rgba(248,113,113,0.15); color:var(--red); }
+    .badge-bearbeitung { background:rgba(96,165,250,0.15);  color:#60a5fa; }
+    .badge-teile       { background:rgba(251,146,60,0.15);  color:#fb923c; }
+    .badge-warten      { background:rgba(167,139,250,0.15); color:#a78bfa; }
     .btn-sm { background:rgba(51,175,226,0.1); border:1px solid rgba(51,175,226,0.25); color:var(--hasi); padding:5px 10px; border-radius:7px; font-size:12px; cursor:pointer; transition:background .2s; margin-right:4px; }
     .btn-sm:hover { background:rgba(51,175,226,0.2); }
     #loading { text-align:center; padding:60px; color:var(--muted); font-family:"DM Mono",monospace; }
@@ -116,13 +119,15 @@
   <div class="stats-grid">
     <div class="stat-box"><div class="val" id="s-total" style="color:var(--hasi)">—</div><div class="lbl">Gesamt</div></div>
     <div class="stat-box"><div class="val" id="s-neu"    style="color:var(--hasi)">—</div><div class="lbl">Neu</div></div>
-    <div class="stat-box"><div class="val" id="s-lauf"   style="color:var(--amber)">—</div><div class="lbl">In Arbeit</div></div>
+    <div class="stat-box"><div class="val" id="s-lauf"   style="color:var(--amber)">—</div><div class="lbl">In Bearbeitung</div></div>
     <div class="stat-box"><div class="val" id="s-fertig" style="color:var(--green)">—</div><div class="lbl">Fertig</div></div>
   </div>
   <div class="filter-bar">
     <button class="filter-btn active" data-filter="all">Alle</button>
     <button class="filter-btn" data-filter="Neu">Neu</button>
-    <button class="filter-btn" data-filter="In Arbeit">In Arbeit</button>
+    <button class="filter-btn" data-filter="In Bearbeitung">In Bearbeitung</button>
+    <button class="filter-btn" data-filter="Teile bestellt">Teile bestellt</button>
+    <button class="filter-btn" data-filter="Warten auf Kunde">Warten</button>
     <button class="filter-btn" data-filter="Fertig">Fertig</button>
     <button class="filter-btn" data-filter="Abgeholt">Abgeholt</button>
     <button class="filter-btn" data-filter="Abgelehnt">Abgelehnt</button>
@@ -155,7 +160,9 @@
         <label>Status ändern</label>
         <select id="modal-status">
           <option>Neu</option>
-          <option>In Arbeit</option>
+          <option>In Bearbeitung</option>
+          <option>Teile bestellt</option>
+          <option>Warten auf Kunde</option>
           <option>Fertig</option>
           <option>Abgeholt</option>
           <option>Abgelehnt</option>
@@ -169,6 +176,11 @@
         <button class="btn-save" id="modal-save">💾 Speichern</button>
         <button class="btn-print-modal" id="modal-print">🖨 PDF</button>
       </div>
+      <button class="btn-ab" id="modal-ab" style="
+        width:100%;margin-top:8px;padding:11px;border-radius:10px;
+        background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);
+        color:var(--green);font-size:14px;font-weight:600;cursor:pointer;
+      ">📋 Arbeitsbericht erstellen →</button>
     </div>
   </div>
 </div>
@@ -184,7 +196,11 @@
   let currentId = null;
 
   function statusBadge(s) {
-    var map = { 'Neu':'badge-neu','In Arbeit':'badge-laufend','Fertig':'badge-fertig','Abgeholt':'badge-abgeholt','Abgelehnt':'badge-abgelehnt' };
+    var map = {
+      'Neu':'badge-neu','In Bearbeitung':'badge-bearbeitung',
+      'Teile bestellt':'badge-teile','Warten auf Kunde':'badge-warten',
+      'Fertig':'badge-fertig','Abgeholt':'badge-abgeholt','Abgelehnt':'badge-abgelehnt'
+    };
     return '<span class="badge ' + (map[s]||'badge-neu') + '">' + (s||'Neu') + '</span>';
   }
 
@@ -208,7 +224,7 @@
   function updateStats() {
     document.getElementById('s-total').textContent = allData.length;
     document.getElementById('s-neu').textContent   = allData.filter(r => r.status==='Neu').length;
-    document.getElementById('s-lauf').textContent  = allData.filter(r => r.status==='In Arbeit').length;
+    document.getElementById('s-lauf').textContent  = allData.filter(r => r.status==='In Bearbeitung').length;
     document.getElementById('s-fertig').textContent= allData.filter(r => r.status==='Fertig').length;
   }
 
@@ -376,6 +392,23 @@
       currentFilter = btn.dataset.filter;
       renderTable();
     });
+  });
+
+  // Arbeitsbericht erstellen
+  document.getElementById('modal-ab').addEventListener('click', function() {
+    var r = allData.find(x => x.id === currentId);
+    if (!r) return;
+    var params = new URLSearchParams({
+      from_reparatur: '1',
+      k_name:    r.k_name || '',
+      k_addr:    [r.k_adresse, r.k_plz_ort].filter(Boolean).join(', '),
+      geraet:    r.geraet_typ || '',
+      modell:    r.modell || '',
+      fehler:    r.fehler || '',
+      datum:     r.datum || '',
+      reparatur_nr: r.nr || ''
+    });
+    window.open('./arbeitsbericht.html?' + params.toString(), '_blank');
   });
 
   load();

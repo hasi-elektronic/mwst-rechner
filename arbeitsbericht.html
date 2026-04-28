@@ -422,6 +422,35 @@
   document.getElementById('ab-nr').value    = genNr();
   document.getElementById('ab-datum').value  = todayStr();
 
+  // Reparatur'dan otomatik doldur
+  (function() {
+    var p = new URLSearchParams(window.location.search);
+    if (p.get('from_reparatur') !== '1') return;
+    if (p.get('k_name'))  document.getElementById('k-name').value  = p.get('k_name');
+    if (p.get('k_addr'))  document.getElementById('k-addr').value  = p.get('k_addr');
+    if (p.get('datum'))   document.getElementById('ab-datum').value = p.get('datum');
+    if (p.get('reparatur_nr')) {
+      document.getElementById('ab-zeitraum').value = p.get('reparatur_nr');
+      document.getElementById('k-proj').value = 'Reparatur: ' + (p.get('geraet')||'') + ' ' + (p.get('modell')||'');
+    }
+    // Tätigkeit satırı ekle
+    var desc = '';
+    if (p.get('geraet')) desc += p.get('geraet');
+    if (p.get('modell')) desc += ' – ' + p.get('modell');
+    if (p.get('fehler')) desc += ' (' + p.get('fehler') + ')';
+    if (desc) {
+      setTimeout(function() {
+        var rows = document.querySelectorAll('.taet-row');
+        if (rows.length > 0) rows[0].querySelector('.t-desc').value = desc;
+      }, 100);
+    }
+    // Banner göster
+    var banner = document.createElement('div');
+    banner.style = 'background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);color:#34d399;padding:10px 16px;border-radius:10px;font-size:13px;margin-bottom:12px;';
+    banner.innerHTML = '✓ Daten aus Reparaturauftrag ' + (p.get('reparatur_nr')||'') + ' übernommen';
+    document.querySelector('.wrap').insertBefore(banner, document.querySelector('.page-header').nextSibling);
+  })();
+
   function calcTotals() {
     const stundensatz = parse(document.getElementById('ab-stundensatz').value) || 96;
     let arbeit = 0;
