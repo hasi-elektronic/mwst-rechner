@@ -312,7 +312,18 @@ function renderStats() {
 }
 
 function renderList() {
+  var q = (document.getElementById('search-inp').value || '').toLowerCase().trim();
   var d = filterVal === 'all' ? allRep : allRep.filter(r => r.status === filterVal);
+  if (q) {
+    d = d.filter(r =>
+      (r.k_name||'').toLowerCase().includes(q) ||
+      (r.nr||'').toLowerCase().includes(q) ||
+      (r.geraet_typ||'').toLowerCase().includes(q) ||
+      (r.modell||'').toLowerCase().includes(q) ||
+      (r.fehler||'').toLowerCase().includes(q) ||
+      (r.k_telefon||'').toLowerCase().includes(q)
+    );
+  }
   document.getElementById('list-msg').style.display = 'none';
   if (!d.length) {
     document.getElementById('list-msg').textContent = 'Keine Aufträge.';
@@ -337,6 +348,7 @@ function renderList() {
 }
 
 document.getElementById('btn-refresh').addEventListener('click', loadList);
+document.getElementById('search-inp').addEventListener('input', renderList);
 document.querySelectorAll('.fbtn[data-f]').forEach(b => {
   b.addEventListener('click', () => {
     document.querySelectorAll('.fbtn[data-f]').forEach(x => x.classList.remove('on'));
@@ -581,7 +593,7 @@ document.getElementById('ab-pdf').addEventListener('click', () => {
 // Rechnung PDF
 document.getElementById('ab-rechnung').addEventListener('click', () => {
   var d = getAbData();
-  printArbeitsbericht(curRep, curAb, d, true);
+  printRechnung(curRep, curAb, d);
 });
 
 // ── PDF FUNCTIONS ─────────────────────────
@@ -627,6 +639,157 @@ function printAuftrag(r) {
   '<div style="text-align:center"><div style="border-top:1px solid #333;padding-top:4px;font-size:9px;color:#888;margin-top:26px">Unterschrift Auftraggeber</div></div>' +
   '</div>' +
   '<div class="ft">Hasi Elektronic · Grabenstr. 18 · 71665 Vaihingen/Enz · +49 7042 16391 · '+(r.nr||'')+'</div>' +
+  '</body></html>';
+  openPrint(html);
+}
+
+function printRechnung(r, ab, d) {
+  var datum   = document.getElementById('ab-datum').value || today();
+  var notizen = document.getElementById('ab-notiz').value;
+  var reNr    = 'RE-' + datum.replace(/-/g,'').slice(2) + '-' + String(Math.floor(Math.random()*900)+100);
+
+  // Pozisyonlar: önce tätigkeiten, sonra material
+  var positions = [];
+  d.taet.forEach((t,i) => {
+    positions.push({
+      pos: i+1, artnr: '', bez: t.desc,
+      menge: String(t.std).replace('.',',')+' Std.',
+      ep: fmt(d.satz), ges: fmt(t.sum)
+    });
+  });
+  d.mat.forEach((m,i) => {
+    positions.push({
+      pos: d.taet.length+i+1, artnr: '', bez: m.desc,
+      menge: '1', ep: fmt(m.preis), ges: fmt(m.preis)
+    });
+  });
+
+  var posRows = positions.map(p =>
+    '<tr><td>'+p.pos+'</td><td>'+p.artnr+'</td>' +
+    '<td>'+p.bez+'</td>' +
+    '<td style="text-align:center">'+p.menge+'</td>' +
+    '<td style="text-align:right">'+p.ep+'</td>' +
+    '<td style="text-align:right">'+p.ges+'</td></tr>'
+  ).join('');
+
+  var netto  = d.netto;
+  var mwst   = netto * 0.19;
+  var brutto = netto + mwst;
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+reNr+'</title>' +
+  '<style>' +
+  '@page{size:A4;margin:15mm 15mm 20mm 20mm}' +
+  '*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
+  'body{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#1a1a1a;line-height:1.4;margin:0;padding:0}' +
+  /* Header - logo sağ, adres sol */
+  '.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6mm}' +
+  '.top-left{font-size:9px;color:#666}' +
+  '.logo-box{text-align:right}' +
+  '.logo-box img{height:50px;width:auto}' +
+  '.logo-sub{font-size:8px;color:#555;text-align:right;margin-top:3px;line-height:1.5}' +
+  /* Absender-Zeile (küçük üst çizgi) */
+  '.absender{font-size:7.5px;color:#666;border-bottom:1px solid #999;padding-bottom:1mm;margin-bottom:4mm}' +
+  /* Empfänger */
+  '.empfaenger{font-size:11px;line-height:1.7;margin-bottom:8mm}' +
+  /* Rechnung başlık */
+  '.rech-title{font-size:26px;font-weight:700;text-align:right;margin-bottom:4mm}' +
+  /* Meta tablo */
+  '.meta-table{width:100%;border-collapse:collapse;border-top:1.5px solid #333;border-bottom:1.5px solid #333;margin-bottom:6mm}' +
+  '.meta-table td{padding:3px 6px;font-size:9px;vertical-align:top}' +
+  '.meta-table .lbl{color:#555;white-space:nowrap}' +
+  /* Einleitung */
+  '.einleitung{font-size:10px;margin-bottom:4mm}' +
+  /* Positions Tabelle */
+  '.pos-table{width:100%;border-collapse:collapse;margin-bottom:8mm}' +
+  '.pos-table th{border-top:1.5px solid #333;border-bottom:1.5px solid #333;padding:4px 6px;text-align:left;font-size:10px;font-weight:700;text-decoration:underline}' +
+  '.pos-table th.r{text-align:right}.pos-table th.c{text-align:center}' +
+  '.pos-table td{padding:5px 6px;font-size:10px;vertical-align:top;border-bottom:1px solid #eee}' +
+  '.pos-table td.r{text-align:right}.pos-table td.c{text-align:center}' +
+  /* Summen */
+  '.summen{margin-left:auto;width:280px;border-top:1.5px solid #333;padding-top:3mm;margin-bottom:6mm}' +
+  '.sum-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}' +
+  '.sum-row.bold{font-weight:700;font-size:12px;border-top:1.5px solid #333;margin-top:3px;padding-top:4px}' +
+  /* Zahlungsbedingungen */
+  '.zb{font-size:9px;margin-bottom:8mm;line-height:1.6}' +
+  /* Footer - 3 kolon */
+  '.footer{position:fixed;bottom:10mm;left:15mm;right:15mm;border-top:1px solid #bbb;padding-top:3mm;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:8px;line-height:1.7}' +
+  '</style></head><body>' +
+
+  /* TOP */
+  '<div class="top">' +
+  '<div class="top-left"></div>' +
+  '<div class="logo-box">' +
+  '<img src="https://tools.hasi-elektronic.de/logo.jpg" alt="HASI elektronic"><br>' +
+  '<div class="logo-sub">Büro- und Datentechnik,<br>Dienstleistungen, Schulungen,<br>Kommunikationstechnik</div>' +
+  '</div></div>' +
+
+  /* Absender-Zeile */
+  '<div class="absender">HASI-elektronic &nbsp; Grabenstrasse 18 &nbsp; DE71665 Vaihingen / Enz</div>' +
+
+  /* Empfänger + Rechnung-Titel nebeneinander */
+  '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8mm">' +
+  '<div class="empfaenger">' +
+  '<strong>'+(r.k_name||'—')+'</strong><br>' +
+  (r.k_email?r.k_email+'<br>':'') +
+  (r.k_adresse?r.k_adresse+'<br>':'') +
+  (r.k_plz_ort?'DE '+r.k_plz_ort:'') +
+  '</div>' +
+  '<div class="rech-title">Rechnung</div>' +
+  '</div>' +
+
+  /* Meta Tabelle */
+  '<table class="meta-table"><tr>' +
+  '<td class="lbl">Ansprechpartner:</td><td>Hamdi Güncavdi</td>' +
+  '<td class="lbl">Ihre Auftrags-Nr.:</td><td></td>' +
+  '<td class="lbl">Rechnungs-Nr.:</td><td><strong>'+reNr+'</strong></td>' +
+  '</tr><tr>' +
+  '<td class="lbl">Durchwahl:</td><td>+49 7042 16391</td>' +
+  '<td class="lbl">Ihr Auftrag vom:</td><td></td>' +
+  '<td class="lbl">Rechnungsdatum:</td><td>'+datum.split("-").reverse().join(".")+'</td>' +
+  '</tr><tr>' +
+  '<td class="lbl">Steuernummer:</td><td>55158 58035</td>' +
+  '<td class="lbl">Kunden-Nr.:</td><td></td>' +
+  '<td class="lbl">Lieferschein-Nr.:</td><td></td>' +
+  '</tr><tr>' +
+  '<td class="lbl">Unsere Ust.-Id.-Nr.:</td><td>DE 367591246</td>' +
+  '<td></td><td></td>' +
+  '<td class="lbl">Lieferscheindatum:</td><td></td>' +
+  '</tr></table>' +
+
+  /* Einleitung */
+  '<div class="einleitung">Wir erlauben uns, die nachfolgenden Positionen in Rechnung zu stellen.</div>' +
+
+  /* Positionen */
+  '<table class="pos-table">' +
+  '<thead><tr>' +
+  '<th style="width:30px">Pos</th><th style="width:60px">Art.Nr.</th>' +
+  '<th>Bezeichnung</th><th class="c" style="width:80px">Menge</th>' +
+  '<th class="r" style="width:80px">Einzelpreis</th><th class="r" style="width:80px">Gesamt</th>' +
+  '</tr></thead><tbody>' +
+  posRows +
+  (notizen?'<tr><td></td><td></td><td style="font-size:9px;color:#555;padding-top:6px">'+notizen+'</td><td></td><td></td><td></td></tr>':'') +
+  '</tbody></table>' +
+
+  /* Summen */
+  '<div class="summen">' +
+  '<div class="sum-row"><span>Summe Netto EUR</span><span>'+fmt(netto)+'</span></div>' +
+  '<div class="sum-row"><span>Steuer 19% EUR</span><span>'+fmt(mwst)+'</span></div>' +
+  '<div class="sum-row bold"><span>Rechnungsbetrag EUR</span><span>'+fmt(brutto)+'</span></div>' +
+  '</div>' +
+
+  /* Zahlungsbedingungen */
+  '<div class="zb">' +
+  'Zahlungsbedingungen: Zahlbar sofort rein netto nach Erhalt der Rechnung.<br>' +
+  'Die Ware bleibt bis zur vollständigen Bezahlung unser Eigentum.<br>' +
+  'Soweit nichts anderes angegeben ist, gilt der Zeitpunkt der Rechnungsaustellung als Zeitpunkt der Leistung.' +
+  '</div>' +
+
+  /* Footer */
+  '<div class="footer">' +
+  '<div><strong>HASI-elektronic</strong><br>Inhaber: Hamdi Güncavdi<br>Grabenstrasse 18<br>71665 Vaihingen/Enz<br>Tel: +49 7042 16391<br>Fax: +49 7042 16582<br>www.HASI-elektronic.de<br>E-Mail: Info@HASI-elektronic.de</div>' +
+  '<div><strong>Sparkasse Ludwigsburg</strong><br>Kto.Nr.: 0030248801<br>IBAN : DE71604500500030248801<br>BIC : SOLADES1LBG</div>' +
+  '<div>Gerichtsstand: Amtsgericht Vaihingen.<br>Es gelten ausschließlich unsere AGB.<br>Beanstandungen innerhalb 14 Tagen</div>' +
+  '</div>' +
   '</body></html>';
   openPrint(html);
 }
