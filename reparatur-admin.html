@@ -40,59 +40,31 @@ tr:last-child td{border-bottom:none}
 .b-abgeholt{background:rgba(107,117,133,0.2);color:var(--m)}
 .b-abgelehnt{background:rgba(248,113,113,0.15);color:var(--red)}
 #msg{text-align:center;padding:50px;color:var(--m);font-family:"DM Mono",monospace}
-/* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
 .overlay.open{display:flex}
-.mbox{background:#151820;border:1px solid var(--b2);border-radius:18px;width:100%;max-width:640px;margin:auto}
-.mtop{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0}
-.mtop h2{font-size:16px;font-weight:600}
-.mclose{background:none;border:none;color:var(--m);font-size:22px;cursor:pointer;line-height:1}
+.mbox{background:#151820;border:1px solid var(--b2);border-radius:18px;width:100%;max-width:620px;margin:auto}
+.mtop{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 14px;border-bottom:1px solid var(--b2)}
+.mtop h2{font-size:15px;font-weight:600;color:var(--hasi)}
+.mclose{background:none;border:none;color:var(--m);font-size:22px;cursor:pointer;line-height:1;padding:0 4px}
 .mclose:hover{color:var(--t)}
-/* Info bölümü */
-.minfo{padding:16px 24px;display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
-.mfield .lbl{font-size:9px;font-family:"DM Mono",monospace;color:var(--m);text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px}
-.mfield .val{font-size:12px;color:var(--t)}
-/* Form bölümü */
-.mform{padding:0 24px 24px;border-top:1px solid var(--b2);margin-top:12px;padding-top:16px}
+.minfo{padding:14px 22px;display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;border-bottom:1px solid var(--b2)}
+.mf .lb{font-size:9px;font-family:"DM Mono",monospace;color:var(--m);text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px}
+.mf .vl{font-size:12px;color:var(--t)}
+.mform{padding:14px 22px 20px}
 .mform label{display:block;font-size:11px;color:var(--m);margin-bottom:4px;margin-top:12px}
 .mform label:first-child{margin-top:0}
 .mform select,.mform textarea{width:100%;background:#0d0f12;border:1px solid var(--b2);border-radius:8px;color:var(--t);padding:10px 12px;font-size:14px;font-family:"DM Sans",sans-serif;outline:none;transition:border-color .2s}
 .mform select:focus,.mform textarea:focus{border-color:var(--hasi)}
 .mform textarea{resize:vertical;min-height:70px}
 .mbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-.mbtn{padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;text-align:center}
-.mbtn-save{background:var(--hasi);color:#fff}
-.mbtn-save:hover{background:#1d8fbe}
-.mbtn-pdf{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3)!important;color:var(--green);border:none}
-.mbtn-pdf:hover{background:rgba(52,211,153,0.2)}
-.mbtn-ab{grid-column:1/-1;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3)!important;color:var(--amber);border:none}
-.mbtn-ab:hover{background:rgba(251,191,36,0.2)}
-/* Calisan notiz banner */
-.notiz-banner{background:rgba(51,175,226,0.08);border:1px solid rgba(51,175,226,0.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--t);margin-top:8px;white-space:pre-wrap}
-/* Print */
-#print-area{display:none}
-@media print{
-  @page{size:A4;margin:8mm 10mm}
-  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  body>*{display:none!important}
-  #print-area{display:block!important}
-  .pd{font-family:"DM Sans",sans-serif;font-size:10px;color:#1a1a1a;line-height:1.5}
-  .ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #33afe2}
-  .ph img{height:38px}
-  .phr{text-align:right;font-size:11px;color:#555}
-  .phr strong{display:block;font-size:14px;color:#111;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:3px}
-  .ps{margin-bottom:10px}
-  .pst{font-size:9px;font-weight:700;color:#33afe2;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid #e0e0e0}
-  .pg{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px}
-  .pf .pl{font-size:8px;font-weight:600;color:#888;text-transform:uppercase}
-  .pf .pv{font-size:10px;border-bottom:1px solid #e0e0e0;padding-bottom:2px;min-height:15px}
-  .pchk{display:flex;flex-wrap:wrap;gap:4px}
-  .pc{font-size:9px;background:#f0f0f0;padding:2px 6px;border-radius:3px}
-  .psig{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px}
-  .psig-box{text-align:center}
-  .psig-line{border-top:1px solid #333;padding-top:4px;font-size:9px;color:#888;margin-top:28px}
-  .pfoot{margin-top:10px;padding-top:8px;border-top:1px solid #ddd;font-size:9px;color:#aaa;text-align:center}
-}
+.mbtn{padding:12px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;text-align:center}
+.mb-save{background:var(--hasi);color:#fff}
+.mb-save:hover{background:#1d8fbe}
+.mb-pdf{background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.3)!important;color:var(--green)}
+.mb-pdf:hover{background:rgba(52,211,153,0.22)}
+.mb-ab{grid-column:1/-1;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3)!important;color:var(--amber)}
+.mb-ab:hover{background:rgba(251,191,36,0.2)}
+.save-status{font-size:12px;color:var(--green);height:18px;margin-top:8px;text-align:center}
 </style>
 </head>
 <body>
@@ -100,7 +72,7 @@ tr:last-child td{border-bottom:none}
   <a href="./index.html" class="back">← Hasi Tools</a>
   <div class="hdr">
     <h1>Reparatur<span>aufträge</span></h1>
-    <button class="fbtn" id="btn-refresh" style="font-size:13px;padding:8px 16px">⟳ Aktualisieren</button>
+    <button class="fbtn" id="btn-refresh" style="font-size:13px;padding:8px 16px">⟳ Laden</button>
   </div>
   <div class="stats">
     <div class="stat"><div class="v" id="st" style="color:var(--hasi)">—</div><div class="l">Gesamt</div></div>
@@ -128,13 +100,9 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- Modal -->
 <div class="overlay" id="modal">
   <div class="mbox">
-    <div class="mtop">
-      <h2 id="m-nr">—</h2>
-      <button class="mclose" id="m-close">✕</button>
-    </div>
+    <div class="mtop"><h2 id="m-title">—</h2><button class="mclose" id="m-close">✕</button></div>
     <div class="minfo" id="m-info"></div>
     <div class="mform">
       <label>Status</label>
@@ -148,171 +116,236 @@ tr:last-child td{border-bottom:none}
         <option>Abgelehnt</option>
       </select>
       <label>Notizen (für Mitarbeiter sichtbar)</label>
-      <textarea id="m-notiz" placeholder="z.B. Display bestellt, Lieferung Do. · Kunde informiert..."></textarea>
+      <textarea id="m-notiz" placeholder="z.B. Display bestellt, Lieferung Do..."></textarea>
       <div class="mbtns">
-        <button class="mbtn mbtn-save" id="m-save">💾 Speichern</button>
-        <button class="mbtn mbtn-pdf" id="m-pdf">🖨 PDF</button>
-        <button class="mbtn mbtn-ab" id="m-ab">📋 Arbeitsbericht erstellen →</button>
+        <button class="mbtn mb-save" id="m-save">💾 Speichern</button>
+        <button class="mbtn mb-pdf" id="m-pdf">🖨 PDF</button>
+        <button class="mbtn mb-ab" id="m-ab">📋 Arbeitsbericht erstellen →</button>
       </div>
+      <div class="save-status" id="save-status"></div>
     </div>
   </div>
 </div>
 
-<div id="print-area"></div>
-
 <script>
-var W='https://hasi-reparatur.hguencavdi.workers.dev';
-var A='Bearer 71665';
-var data=[], filter='all', curId=null;
+var W = 'https://hasi-reparatur.hguencavdi.workers.dev';
+var AUTH = 'Bearer 71665';
+var data = [], filter = 'all', curId = null;
 
-var BADGE={
+var BADGE = {
   'Neu':'b-neu','In Bearbeitung':'b-bearbeitung',
   'Teile bestellt':'b-teile','Warten auf Kunde':'b-warten',
   'Fertig':'b-fertig','Abgeholt':'b-abgeholt','Abgelehnt':'b-abgelehnt'
 };
 
-function badge(s){
-  return '<span class="badge '+(BADGE[s]||'b-neu')+'">'+(s||'Neu')+'</span>';
+function badge(s) {
+  return '<span class="badge ' + (BADGE[s]||'b-neu') + '">' + (s||'Neu') + '</span>';
 }
 
-async function load(){
-  document.getElementById('msg').style.display='block';
-  document.getElementById('tbl').style.display='none';
-  try{
-    var res=await fetch(W+'/api/reparatur',{headers:{Authorization:A}});
-    data=await res.json();
-    stats(); render();
-  }catch(e){
-    document.getElementById('msg').textContent='Fehler: '+e.message;
+async function load() {
+  document.getElementById('msg').style.display = 'block';
+  document.getElementById('msg').textContent = 'Lade...';
+  document.getElementById('tbl').style.display = 'none';
+  try {
+    var res = await fetch(W + '/api/reparatur', { headers: { Authorization: AUTH } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    data = await res.json();
+    stats();
+    render();
+  } catch(e) {
+    document.getElementById('msg').textContent = 'Fehler: ' + e.message;
   }
 }
 
-function stats(){
-  document.getElementById('st').textContent=data.length;
-  document.getElementById('sn').textContent=data.filter(r=>r.status==='Neu').length;
-  document.getElementById('sb').textContent=data.filter(r=>r.status==='In Bearbeitung'||r.status==='Teile bestellt'||r.status==='Warten auf Kunde').length;
-  document.getElementById('sf').textContent=data.filter(r=>r.status==='Fertig').length;
+function stats() {
+  document.getElementById('st').textContent = data.length;
+  document.getElementById('sn').textContent = data.filter(r => r.status === 'Neu').length;
+  document.getElementById('sb').textContent = data.filter(r => ['In Bearbeitung','Teile bestellt','Warten auf Kunde'].includes(r.status)).length;
+  document.getElementById('sf').textContent = data.filter(r => r.status === 'Fertig').length;
 }
 
-function render(){
-  var d=filter==='all'?data:data.filter(r=>r.status===filter);
-  document.getElementById('msg').style.display='none';
-  if(!d.length){document.getElementById('msg').textContent='Keine Aufträge.';document.getElementById('msg').style.display='block';document.getElementById('tbl').style.display='none';return;}
-  document.getElementById('tbl').style.display='table';
-  document.getElementById('tbody').innerHTML=d.map(r=>
-    '<tr class="row" data-id="'+r.id+'">'+
-    '<td><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--hasi)">'+(r.nr||'—')+'</span></td>'+
-    '<td style="color:var(--m);font-size:12px">'+(r.datum||'—')+'</td>'+
-    '<td><strong>'+(r.k_name||'—')+'</strong><br><span style="font-size:11px;color:var(--m)">'+(r.k_telefon||'')+'</span></td>'+
-    '<td style="font-size:12px">'+(r.geraet_typ||'—')+'<br><span style="color:var(--m)">'+(r.modell||'')+'</span></td>'+
-    '<td style="font-size:12px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(r.fehler||'—')+'</td>'+
-    '<td style="font-family:'DM Mono',monospace;font-size:11px">'+(r.kostenlimit?r.kostenlimit+' €':'—')+'</td>'+
-    '<td>'+badge(r.status)+'</td>'+
+function render() {
+  var d = filter === 'all' ? data : data.filter(r => r.status === filter);
+  document.getElementById('msg').style.display = 'none';
+  if (!d.length) {
+    document.getElementById('msg').textContent = 'Keine Aufträge.';
+    document.getElementById('msg').style.display = 'block';
+    document.getElementById('tbl').style.display = 'none';
+    return;
+  }
+  document.getElementById('tbl').style.display = 'table';
+  document.getElementById('tbody').innerHTML = d.map(r =>
+    '<tr class="row" data-id="' + r.id + '">' +
+    '<td><span style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--hasi)">' + (r.nr||'—') + '</span></td>' +
+    '<td style="color:var(--m);font-size:12px">' + (r.datum||'—') + '</td>' +
+    '<td><strong>' + (r.k_name||'—') + '</strong><br><span style="font-size:11px;color:var(--m)">' + (r.k_telefon||'') + '</span></td>' +
+    '<td style="font-size:12px">' + (r.geraet_typ||'—') + '<br><span style="color:var(--m)">' + (r.modell||'') + '</span></td>' +
+    '<td style="font-size:12px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (r.fehler||'—') + '</td>' +
+    '<td style="font-family:\'DM Mono\',monospace;font-size:11px">' + (r.kostenlimit ? r.kostenlimit + '€' : '—') + '</td>' +
+    '<td>' + badge(r.status) + '</td>' +
     '</tr>'
   ).join('');
-  document.querySelectorAll('tr.row').forEach(function(tr){
-    tr.addEventListener('click',function(){openModal(parseInt(tr.dataset.id));});
+  document.querySelectorAll('tr.row').forEach(function(tr) {
+    tr.addEventListener('click', function() { openModal(parseInt(tr.dataset.id)); });
   });
 }
 
-function openModal(id){
-  var r=data.find(x=>x.id===id);
-  if(!r)return;
-  curId=id;
-  document.getElementById('m-nr').textContent=(r.nr||'Auftrag')+' — '+(r.k_name||'');
-  document.getElementById('m-status').value=r.status||'Neu';
-  document.getElementById('m-notiz').value=r.notizen||'';
-  var fields=[
-    ['Telefon',r.k_telefon],['E-Mail',r.k_email],
-    ['Adresse',[r.k_adresse,r.k_plz_ort].filter(Boolean).join(', ')],
-    ['Gerät',r.geraet_typ],['Modell',r.modell],
-    ['Zustand','★'.repeat(r.zustand||0)+'☆'.repeat(5-(r.zustand||0))],
-    ['Kostenlimit',r.kostenlimit?r.kostenlimit+' €':'—'],
-    ['Zubehör',r.zubehoer],['Fehler',r.fehler],
-    ['Schäden',r.schaeden],['Win-PW',r.win_passwort||'—'],
-    ['Beschreibung',r.beschreibung],
+function openModal(id) {
+  var r = data.find(x => x.id === id);
+  if (!r) return;
+  curId = id;
+  document.getElementById('m-title').textContent = (r.nr||'Auftrag') + ' — ' + (r.k_name||'');
+  document.getElementById('m-status').value = r.status || 'Neu';
+  document.getElementById('m-notiz').value = r.notizen || '';
+  document.getElementById('save-status').textContent = '';
+
+  var fields = [
+    ['Telefon', r.k_telefon], ['E-Mail', r.k_email],
+    ['Adresse', [r.k_adresse, r.k_plz_ort].filter(Boolean).join(', ')],
+    ['Gerät', r.geraet_typ], ['Modell', r.modell],
+    ['Zustand', '★'.repeat(r.zustand||0) + '☆'.repeat(5-(r.zustand||0))],
+    ['Limit', r.kostenlimit ? r.kostenlimit + ' €' : '—'],
+    ['Zubehör', r.zubehoer], ['Fehler', r.fehler],
+    ['Schäden', r.schaeden], ['Win-PW', r.win_passwort || '—'],
   ];
-  document.getElementById('m-info').innerHTML=fields.filter(f=>f[1]).map(f=>
-    '<div class="mfield"><div class="lbl">'+f[0]+'</div><div class="val">'+f[1]+'</div></div>'
-  ).join('');
+  document.getElementById('m-info').innerHTML = fields
+    .filter(f => f[1])
+    .map(f => '<div class="mf"><div class="lb">' + f[0] + '</div><div class="vl">' + f[1] + '</div></div>')
+    .join('');
   document.getElementById('modal').classList.add('open');
 }
 
 // Speichern
-document.getElementById('m-save').addEventListener('click',async function(){
-  var btn=this;
-  btn.disabled=true; btn.textContent='Speichern...';
-  try{
-    var res=await fetch(W+'/api/reparatur/'+curId,{
-      method:'PATCH',
-      headers:{Authorization:A,'Content-Type':'application/json'},
-      body:JSON.stringify({
-        status:document.getElementById('m-status').value,
-        notizen:document.getElementById('m-notiz').value
+document.getElementById('m-save').addEventListener('click', async function() {
+  var btn = this;
+  btn.disabled = true;
+  btn.textContent = '...';
+  document.getElementById('save-status').textContent = '';
+  try {
+    var res = await fetch(W + '/api/reparatur/' + curId, {
+      method: 'PATCH',
+      headers: { 'Authorization': AUTH, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        status: document.getElementById('m-status').value,
+        notizen: document.getElementById('m-notiz').value
       })
     });
-    var j=await res.json();
-    if(j.ok){
-      await load();
-      document.getElementById('modal').classList.remove('open');
-    } else { alert('Fehler: '+JSON.stringify(j)); }
-  }catch(e){alert('Fehler: '+e.message);}
-  btn.disabled=false; btn.textContent='💾 Speichern';
+    var j = await res.json();
+    if (j.ok) {
+      document.getElementById('save-status').textContent = '✓ Gespeichert';
+      // Local update
+      var r = data.find(x => x.id === curId);
+      if (r) {
+        r.status = document.getElementById('m-status').value;
+        r.notizen = document.getElementById('m-notiz').value;
+      }
+      stats();
+      render();
+      // Modal başlığını güncelle
+      if (r) document.getElementById('m-title').textContent = (r.nr||'') + ' — ' + (r.k_name||'');
+    } else {
+      document.getElementById('save-status').style.color = 'var(--red)';
+      document.getElementById('save-status').textContent = 'Fehler!';
+    }
+  } catch(e) {
+    document.getElementById('save-status').style.color = 'var(--red)';
+    document.getElementById('save-status').textContent = 'Fehler: ' + e.message;
+  }
+  btn.disabled = false;
+  btn.textContent = '💾 Speichern';
 });
 
-// PDF
-document.getElementById('m-pdf').addEventListener('click',function(){
-  var r=data.find(x=>x.id===curId); if(!r)return;
-  var zList=(r.zubehoer||'').split(',').filter(Boolean).map(s=>'<span class="pc">'+s.trim()+'</span>').join('');
-  var fList=(r.fehler||'').split(',').filter(Boolean).map(s=>'<span class="pc">'+s.trim()+'</span>').join('');
-  document.getElementById('print-area').innerHTML=`
-    <div class="pd">
-      <div class="ph">
-        <img src="./logo.jpg" alt="Hasi Elektronic">
-        <div class="phr"><strong>Reparaturauftrag</strong>Nr. ${r.nr||'—'}<br>Datum: ${r.datum||'—'}<br>Status: ${r.status||'Neu'}</div>
-      </div>
-      <div class="ps"><div class="pst">Kunde & Gerät</div>
-        <div class="pg">
-          <div class="pf"><div class="pl">Kunde</div><div class="pv">${r.k_name||'—'}</div></div>
-          <div class="pf"><div class="pl">Telefon</div><div class="pv">${r.k_telefon||'—'}</div></div>
-          <div class="pf"><div class="pl">Adresse</div><div class="pv">${[r.k_adresse,r.k_plz_ort].filter(Boolean).join(', ')||'—'}</div></div>
-          <div class="pf"><div class="pl">Gerät / Modell</div><div class="pv">${r.geraet_typ||'—'} ${r.modell||''}</div></div>
-          <div class="pf"><div class="pl">Kostenlimit</div><div class="pv">${r.kostenlimit?r.kostenlimit+' €':'—'}</div></div>
-          <div class="pf"><div class="pl">Win-Passwort</div><div class="pv">${r.win_passwort||'—'}</div></div>
-          <div class="pf"><div class="pl">Schäden</div><div class="pv">${r.schaeden||'—'}</div></div>
-        </div>
-      </div>
-      <div class="ps"><div class="pst">Zubehör</div><div class="pchk">${zList||'—'}</div></div>
-      <div class="ps"><div class="pst">Fehler</div><div class="pchk">${fList||'—'}</div>${r.beschreibung?'<div style="font-size:9px;margin-top:4px">'+r.beschreibung+'</div>':''}</div>
-      ${r.notizen?'<div class="ps"><div class="pst">Notizen</div><div style="font-size:10px">'+r.notizen+'</div></div>':''}
-      <div class="psig"><div class="psig-box"><div class="psig-line">Ort, Datum</div></div><div class="psig-box"><div class="psig-line">Unterschrift Auftraggeber</div></div></div>
-      <div class="pfoot">Hasi Elektronic · Grabenstr. 18 · 71665 Vaihingen/Enz · +49 7042 16391 · ${r.nr||''}</div>
-    </div>`;
-  window.print();
+// PDF - yeni pencerede
+document.getElementById('m-pdf').addEventListener('click', function() {
+  var r = data.find(x => x.id === curId);
+  if (!r) return;
+
+  var zList = (r.zubehoer||'').split(',').filter(Boolean).map(s => '<span style="background:#f0f0f0;padding:2px 6px;border-radius:3px;font-size:9px;margin:2px">' + s.trim() + '</span>').join('');
+  var fList = (r.fehler||'').split(',').filter(Boolean).map(s => '<span style="background:#f0f0f0;padding:2px 6px;border-radius:3px;font-size:9px;margin:2px">' + s.trim() + '</span>').join('');
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + (r.nr||'RA') + '</title>' +
+  '<style>' +
+  '@page{size:A4;margin:10mm 12mm}' +
+  '*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
+  'body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:10px;color:#1a1a1a;line-height:1.5}' +
+  '.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #33afe2}' +
+  '.hdr img{height:38px}' +
+  '.hdr-r{text-align:right;font-size:11px;color:#555}' +
+  '.hdr-r strong{display:block;font-size:15px;color:#111;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px}' +
+  '.sec{margin-bottom:8px}' +
+  '.sec-t{font-size:9px;font-weight:700;color:#33afe2;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid #e0e0e0}' +
+  '.g2{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}' +
+  '.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 14px}' +
+  '.f .lb{font-size:8px;font-weight:600;color:#888;text-transform:uppercase}' +
+  '.f .vl{font-size:10px;border-bottom:1px solid #eee;padding-bottom:2px;min-height:14px}' +
+  '.chk{display:flex;flex-wrap:wrap;gap:3px}' +
+  '.notiz{background:#f0f7ff;border-left:3px solid #33afe2;padding:6px 10px;font-size:10px;border-radius:2px;margin-top:4px}' +
+  '.sig{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:14px}' +
+  '.sig-box{text-align:center}' +
+  '.sig-line{border-top:1px solid #333;padding-top:4px;font-size:9px;color:#888;margin-top:26px}' +
+  '.foot{margin-top:10px;padding-top:6px;border-top:1px solid #ddd;font-size:9px;color:#aaa;text-align:center}' +
+  '</style></head><body>' +
+  '<div class="hdr">' +
+  '<img src="https://tools.hasi-elektronic.de/logo.jpg" alt="Hasi Elektronic">' +
+  '<div class="hdr-r"><strong>Reparaturauftrag</strong>Nr. ' + (r.nr||'—') + '<br>Datum: ' + (r.datum||'—') + '<br>Status: ' + (r.status||'Neu') + '</div>' +
+  '</div>' +
+  '<div class="sec"><div class="sec-t">Auftraggeber</div>' +
+  '<div class="g2">' +
+  '<div class="f"><div class="lb">Auftragnehmer</div><div class="vl">Hasi Elektronic · Grabenstr. 18 · 71665 Vaihingen</div></div>' +
+  '<div class="f"><div class="lb">Kunde</div><div class="vl">' + (r.k_name||'—') + '</div></div>' +
+  '<div class="f"><div class="lb">Adresse</div><div class="vl">' + ([r.k_adresse,r.k_plz_ort].filter(Boolean).join(', ')||'—') + '</div></div>' +
+  '<div class="f"><div class="lb">Telefon / E-Mail</div><div class="vl">' + ([r.k_telefon,r.k_email].filter(Boolean).join(' · ')||'—') + '</div></div>' +
+  '</div></div>' +
+  '<div class="sec"><div class="sec-t">Geräteinformation</div>' +
+  '<div class="g3">' +
+  '<div class="f"><div class="lb">Gerät</div><div class="vl">' + (r.geraet_typ||'—') + '</div></div>' +
+  '<div class="f"><div class="lb">Modell</div><div class="vl">' + (r.modell||'—') + '</div></div>' +
+  '<div class="f"><div class="lb">Kostenlimit</div><div class="vl">' + (r.kostenlimit ? r.kostenlimit+' €' : '—') + '</div></div>' +
+  '<div class="f"><div class="lb">Zustand</div><div class="vl">' + '★'.repeat(r.zustand||0) + '☆'.repeat(5-(r.zustand||0)) + '</div></div>' +
+  '<div class="f"><div class="lb">Win-Passwort</div><div class="vl">' + (r.win_passwort||'—') + '</div></div>' +
+  '<div class="f"><div class="lb">Schäden</div><div class="vl">' + (r.schaeden||'—') + '</div></div>' +
+  '</div></div>' +
+  '<div class="sec"><div class="sec-t">Zubehör &amp; Fehler</div>' +
+  '<div class="g2">' +
+  '<div><div style="font-size:8px;font-weight:600;color:#888;text-transform:uppercase;margin-bottom:4px">Beigelegtes Zubehör</div><div class="chk">' + (zList||'—') + '</div>' + (r.sonst_zubehoer?'<div style="font-size:9px;margin-top:3px;color:#555">'+r.sonst_zubehoer+'</div>':'') + '</div>' +
+  '<div><div style="font-size:8px;font-weight:600;color:#888;text-transform:uppercase;margin-bottom:4px">Fehlerbeschreibung</div><div class="chk">' + (fList||'—') + '</div></div>' +
+  '</div>' +
+  (r.beschreibung ? '<div style="font-size:10px;margin-top:6px;color:#333">' + r.beschreibung + '</div>' : '') +
+  '</div>' +
+  (r.notizen ? '<div class="sec"><div class="sec-t">Notizen</div><div class="notiz">' + r.notizen + '</div></div>' : '') +
+  '<div class="sig">' +
+  '<div class="sig-box"><div class="sig-line">Ort, Datum</div></div>' +
+  '<div class="sig-box"><div class="sig-line">Unterschrift Auftraggeber</div></div>' +
+  '</div>' +
+  '<div class="foot">Hasi Elektronic · Grabenstr. 18 · 71665 Vaihingen/Enz · +49 7042 16391 · info@hasi-elektronic.de · ' + (r.nr||'') + '</div>' +
+  '</body></html>';
+
+  var w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  w.onload = function() { w.print(); };
 });
 
 // Arbeitsbericht
-document.getElementById('m-ab').addEventListener('click',function(){
-  var r=data.find(x=>x.id===curId); if(!r)return;
-  var p=new URLSearchParams({
-    from_reparatur:'1',k_name:r.k_name||'',
-    k_addr:[r.k_adresse,r.k_plz_ort].filter(Boolean).join(', '),
-    geraet:r.geraet_typ||'',modell:r.modell||'',
-    fehler:r.fehler||'',datum:r.datum||'',reparatur_nr:r.nr||''
+document.getElementById('m-ab').addEventListener('click', function() {
+  var r = data.find(x => x.id === curId);
+  if (!r) return;
+  var p = new URLSearchParams({
+    from_reparatur:'1', k_name: r.k_name||'',
+    k_addr: [r.k_adresse, r.k_plz_ort].filter(Boolean).join(', '),
+    geraet: r.geraet_typ||'', modell: r.modell||'',
+    fehler: r.fehler||'', datum: r.datum||'', reparatur_nr: r.nr||''
   });
-  window.open('./arbeitsbericht.html?'+p.toString(),'_blank');
+  window.open('./arbeitsbericht.html?' + p.toString(), '_blank');
 });
 
-// Kapat
-document.getElementById('m-close').addEventListener('click',function(){document.getElementById('modal').classList.remove('open');});
-document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
-
-// Filtreler
-document.getElementById('btn-refresh').addEventListener('click',load);
-document.querySelectorAll('.fbtn[data-f]').forEach(function(b){
-  b.addEventListener('click',function(){
-    document.querySelectorAll('.fbtn[data-f]').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on'); filter=b.dataset.f; render();
+document.getElementById('m-close').addEventListener('click', function() { document.getElementById('modal').classList.remove('open'); });
+document.getElementById('modal').addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); });
+document.getElementById('btn-refresh').addEventListener('click', load);
+document.querySelectorAll('.fbtn[data-f]').forEach(function(b) {
+  b.addEventListener('click', function() {
+    document.querySelectorAll('.fbtn[data-f]').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); filter = b.dataset.f; render();
   });
 });
 
