@@ -434,6 +434,19 @@
     Hasi Elektronic · Grabenstr. 18 · 71665 Vaihingen/Enz · +49 7042 16391 · info@hasi-elektronic.de
   </div>
 
+  <!-- Meine Aufträge -->
+  <div style="max-width:860px;margin:20px auto 0;padding:0 16px;">
+    <div style="background:#fff;border:1px solid #dde3ea;border-radius:14px;padding:20px 24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <div style="font-size:11px;font-weight:700;color:#33afe2;text-transform:uppercase;letter-spacing:1px;">
+          Meine letzten Aufträge
+        </div>
+        <button id="btn-load-mine" style="font-size:12px;padding:5px 14px;border-radius:8px;border:1px solid #dde3ea;background:#f8f9fb;color:#555;cursor:pointer;">⟳ Aktualisieren</button>
+      </div>
+      <div id="mine-list" style="font-size:13px;color:#6b7585;font-family:'DM Mono',monospace;">—</div>
+    </div>
+  </div>
+
   <div class="action-row">
     <button class="btn-reset" id="btn-reset">Eingabe löschen</button>
     <button class="btn-submit" id="btn-submit">Drucken / PDF</button>
@@ -502,6 +515,37 @@
 
   // Print
   document.getElementById('btn-submit').addEventListener('click', () => window.print());
+
+  // Meine Aufträge laden
+  async function loadMine() {
+    var list = document.getElementById('mine-list');
+    list.innerHTML = 'Lade...';
+    try {
+      var res = await fetch('https://hasi-reparatur.hguencavdi.workers.dev/api/reparatur', {
+        headers: { Authorization: 'Bearer 71665' }
+      });
+      var data = await res.json();
+      if (!data.length) { list.innerHTML = 'Noch keine Aufträge.'; return; }
+      var colors = {
+        'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c',
+        'Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'
+      };
+      list.innerHTML = data.slice(0,10).map(function(r) {
+        var c = colors[r.status] || '#33afe2';
+        return '<div style="padding:10px 0;border-bottom:1px solid #f0f0f0;last-child:border:none">'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">'+
+          '<div><span style="color:#111;font-family:'DM Sans',sans-serif;font-weight:600">'+(r.k_name||'—')+'</span> '+
+          '<span style="color:#888;font-size:11px">'+(r.geraet_typ||'')+(r.modell?' – '+r.modell:'')+'</span></div>'+
+          '<span style="font-size:11px;background:'+c+'22;border:1px solid '+c+'44;color:'+c+';padding:2px 9px;border-radius:100px">'+(r.status||'Neu')+'</span>'+
+          '</div>'+
+          (r.notizen ? '<div style="font-size:12px;color:#333;margin-top:5px;padding:7px 10px;background:#f0f7ff;border-left:3px solid #33afe2;border-radius:3px">'+
+          '💬 '+r.notizen+'</div>' : '')+
+          '</div>';
+      }).join('');
+    } catch(e) { list.innerHTML = 'Fehler: ' + e.message; }
+  }
+  document.getElementById('btn-load-mine').addEventListener('click', loadMine);
+  loadMine();
 
   // Absenden
   document.getElementById('btn-send').addEventListener('click', async () => {
