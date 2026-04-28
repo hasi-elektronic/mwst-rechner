@@ -4,7 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reparatur Admin</title>
-<script>if(sessionStorage.getItem("hasi-auth")!=="1")window.location.href="./index.html";</script>
+<script>
+// Admin kendi şifresini kontrol eder
+if(sessionStorage.getItem("hasi-admin-auth")!=="1"){
+  document.addEventListener("DOMContentLoaded",function(){
+    var ov=document.createElement("div");
+    ov.id="auth-ov";
+    ov.style.cssText="position:fixed;inset:0;z-index:9999;background:#0d0f12;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif";
+    ov.innerHTML='<div style="background:#151820;border:1px solid #2a3040;border-radius:20px;padding:40px 36px;width:100%;max-width:340px;text-align:center"><img src="./logo.jpg" style="height:44px;margin:0 auto 20px;display:block"><div style="font-size:13px;color:#6b7585;margin-bottom:24px;font-family:DM Mono,monospace">Admin-Zugang</div><input id="auth-inp" type="password" inputmode="numeric" placeholder="Passwort" style="width:100%;background:#0d0f12;border:1px solid #2a3040;border-radius:10px;color:#e8ecf0;padding:12px 16px;font-size:16px;text-align:center;letter-spacing:4px;outline:none;margin-bottom:10px"><div id="auth-err" style="font-size:12px;color:#f87171;height:16px;margin-bottom:10px"></div><button onclick="checkAuth()" style="width:100%;background:#33afe2;color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer">Einloggen</button></div>';
+    document.body.appendChild(ov);
+    document.getElementById("auth-inp").addEventListener("keydown",function(e){if(e.key==="Enter")checkAuth();});
+    document.getElementById("auth-inp").focus();
+  });
+}
+function checkAuth(){
+  var v=document.getElementById("auth-inp").value.trim();
+  if(v==="71665"){
+    sessionStorage.setItem("hasi-admin-auth","1");
+    sessionStorage.setItem("hasi-auth","1");
+    document.getElementById("auth-ov").style.display="none";
+  } else {
+    document.getElementById("auth-err").textContent="Falsches Passwort";
+    document.getElementById("auth-inp").value="";
+    setTimeout(function(){document.getElementById("auth-err").textContent="";},2000);
+  }
+}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
