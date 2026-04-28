@@ -236,14 +236,18 @@
   </div>
 </div>
 <script>
-  if (sessionStorage.getItem('hasi-reparatur-auth') === '1') {
+  function showForm() {
     document.getElementById('pw-overlay').style.display = 'none';
+    document.getElementById('form-page').style.display = 'block';
+  }
+  if (sessionStorage.getItem('hasi-reparatur-auth') === '1') {
+    showForm();
   }
   function checkPw() {
     const val = document.getElementById('pw-input').value.trim();
     if (val === '71665') {
       sessionStorage.setItem('hasi-reparatur-auth', '1');
-      document.getElementById('pw-overlay').style.display = 'none';
+      showForm();
     } else {
       const err = document.getElementById('pw-err');
       err.textContent = 'Falsches Passwort';
@@ -513,8 +517,17 @@
     document.getElementById('f-datum').value = new Date().toISOString().split('T')[0];
   });
 
-  // Print
-  document.getElementById('btn-submit').addEventListener('click', () => window.print());
+  // Print / PDF
+  document.getElementById('btn-submit').addEventListener('click', () => {
+    // Önce form-page içeriğini al, yeni pencerede bas
+    var style = Array.from(document.querySelectorAll('style')).map(s=>s.outerHTML).join('');
+    var content = document.getElementById('form-page').innerHTML;
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'+style+'</head><body><div class="page" style="display:block">'+content+'</div><script>window.onload=function(){window.print();}<\/script></body></html>';
+    var blob = new Blob([html], {type:'text/html'});
+    var url = URL.createObjectURL(blob);
+    var w = window.open(url,'_blank');
+    if (!w) { window.print(); } // fallback
+  });
 
   // Meine Aufträge laden
   async function loadMine() {
