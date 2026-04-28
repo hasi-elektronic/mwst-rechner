@@ -325,6 +325,71 @@
 </head>
 <body>
 
+<!-- Passwort-Schutz -->
+<div id="pw-overlay" style="
+  position:fixed;inset:0;z-index:9999;
+  background:#0d0f12;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Sans',sans-serif;
+">
+  <div style="
+    background:#151820;border:1px solid #2a3040;border-radius:20px;
+    padding:40px 36px;width:100%;max-width:360px;text-align:center;
+  ">
+    <div style="
+      width:52px;height:52px;background:#33afe2;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:#fff;
+      margin:0 auto 20px;
+    ">HE</div>
+    <div style="font-size:20px;font-weight:600;color:#e8ecf0;margin-bottom:6px;letter-spacing:-0.5px">Hasi Tools</div>
+    <div style="font-size:13px;color:#6b7585;margin-bottom:28px;font-family:'DM Mono',monospace">Zugang mit Passwort</div>
+    <input id="pw-input" type="password" inputmode="numeric" placeholder="Passwort eingeben"
+      style="
+        width:100%;background:#0d0f12;border:1px solid #2a3040;border-radius:10px;
+        color:#e8ecf0;padding:12px 16px;font-size:16px;font-family:'DM Sans',sans-serif;
+        outline:none;text-align:center;letter-spacing:4px;margin-bottom:12px;
+        transition:border-color .2s;
+      "
+      onkeydown="if(event.key==='Enter')checkPw()"
+      onfocus="this.style.borderColor='#33afe2'"
+      onblur="this.style.borderColor='#2a3040'"
+    >
+    <div id="pw-err" style="font-size:12px;color:#f87171;height:16px;margin-bottom:10px;"></div>
+    <button onclick="checkPw()" style="
+      width:100%;background:#33afe2;color:#fff;border:none;
+      padding:12px;border-radius:10px;font-size:15px;font-weight:600;
+      cursor:pointer;transition:background .2s;
+    "
+    onmouseover="this.style.background='#1d8fbe'"
+    onmouseout="this.style.background='#33afe2'"
+    >Einloggen</button>
+  </div>
+</div>
+
+<script>
+  // Session check
+  if (sessionStorage.getItem('hasi-auth') === '1') {
+    document.getElementById('pw-overlay').style.display = 'none';
+  }
+  function checkPw() {
+    const val = document.getElementById('pw-input').value.trim();
+    if (val === '71665') {
+      sessionStorage.setItem('hasi-auth', '1');
+      document.getElementById('pw-overlay').style.display = 'none';
+    } else {
+      const err = document.getElementById('pw-err');
+      err.textContent = 'Falsches Passwort';
+      document.getElementById('pw-input').value = '';
+      document.getElementById('pw-input').style.borderColor = '#f87171';
+      setTimeout(() => {
+        err.textContent = '';
+        document.getElementById('pw-input').style.borderColor = '#2a3040';
+      }, 2000);
+    }
+  }
+</script>
+
 <div class="container">
 
   <header>
