@@ -312,7 +312,8 @@ function renderStats() {
 }
 
 function renderList() {
-  var q = (document.getElementById('search-inp').value || '').toLowerCase().trim();
+  var el = document.getElementById('search-inp');
+  var q = (el ? el.value : '').toLowerCase().trim();
   var d = filterVal === 'all' ? allRep : allRep.filter(r => r.status === filterVal);
   if (q) {
     d = d.filter(r =>
