@@ -228,7 +228,10 @@ textarea.finput{resize:vertical;min-height:65px}
 <div class="page" id="page-ab">
   <div class="topbar">
     <button class="btn-back" id="back-to-detail">← Auftrag</button>
-    <h1 id="ab-title" style="font-size:18px">—</h1>
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <h1 id="ab-title" style="font-size:18px">—</h1>
+      <div id="ab-auftrag-nr" style="font-size:12px;font-family:'DM Mono',monospace;color:var(--hasi);font-weight:600;letter-spacing:.3px"></div>
+    </div>
   </div>
 
   <div class="card">
@@ -461,6 +464,8 @@ document.getElementById('d-new-ab').addEventListener('click', function() { openA
 function openAbForm(ab) {
   curAb = ab;
   document.getElementById('ab-title').textContent = ab ? (ab.ab_nr||'Arbeitsbericht') : 'Neuer Arbeitsbericht';
+  var _anEl = document.getElementById('ab-auftrag-nr');
+  if (_anEl) _anEl.textContent = r.nr ? '\u{1F4CB} Auftrag: ' + r.nr + (r.k_name ? '  \u00B7  ' + r.k_name : '') : '';
   var r = curRep;
   document.getElementById('ab-rep-info').innerHTML = [
     ['Kunde', r.k_name], ['Telefon', r.k_telefon],
