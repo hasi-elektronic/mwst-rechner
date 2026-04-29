@@ -55,6 +55,13 @@ tr.row:hover td{background:rgba(51,175,226,0.05)}
 td{padding:11px 12px;border-bottom:1px solid var(--b);font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 #list-msg{text-align:center;padding:50px;color:var(--m);font-family:"DM Mono",monospace}
+.rep-row{display:grid;grid-template-columns:160px 1fr 110px 90px;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--b);cursor:pointer;transition:background .15s}
+.rep-row:hover{background:rgba(51,175,226,0.06)}
+.rep-nr{font-family:"DM Mono",monospace;font-size:11px;color:var(--hasi)}
+.rep-name{font-size:13px;font-weight:600;color:var(--t)}
+.rep-sub{display:block;font-size:11px;color:var(--m);font-weight:400;margin-top:2px}
+.rep-date{font-size:12px;color:var(--m);text-align:right}
+@media(max-width:600px){.rep-row{grid-template-columns:1fr auto;gap:8px}.rep-nr,.rep-date{display:none}}
 
 /* DETAIL */
 .card{background:var(--s);border:1px solid var(--b2);border-radius:14px;padding:20px;margin-bottom:14px}
