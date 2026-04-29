@@ -235,27 +235,6 @@
     ">Einloggen</button>
   </div>
 </div>
-<script>
-  function showForm() {
-    document.getElementById('pw-overlay').style.display = 'none';
-    document.getElementById('form-page').style.display = 'block';
-  }
-  if (sessionStorage.getItem('hasi-reparatur-auth') === '1') {
-    showForm();
-  }
-  function checkPw() {
-    const val = document.getElementById('pw-input').value.trim();
-    if (val === '71665') {
-      sessionStorage.setItem('hasi-reparatur-auth', '1');
-      showForm();
-    } else {
-      const err = document.getElementById('pw-err');
-      err.textContent = 'Falsches Passwort';
-      document.getElementById('pw-input').value = '';
-      setTimeout(() => { err.textContent = ''; }, 2000);
-    }
-  }
-</script>
 <div class="page" id="form-page">
 
   <!-- Header -->
@@ -469,142 +448,150 @@
 </div>
 
 <script>
-  const WORKER_URL = 'https://hasi-reparatur.hguencavdi.workers.dev';
-  let starVal = 0;
+const WORKER = 'https://hasi-reparatur.hguencavdi.workers.dev';
+let starVal = 0;
 
-  // Datum
+// ── ŞİFRE ─────────────────────────────────────────────────────────
+function showForm() {
+  document.getElementById('pw-overlay').style.display = 'none';
+  document.getElementById('form-page').style.removeProperty('display'); // CSS default
+}
+
+// Sayfa açılışında session kontrolü
+if (sessionStorage.getItem('hasi-reparatur-auth') === '1') showForm();
+
+document.getElementById('auth-btn') && document.getElementById('auth-btn').addEventListener('click', doAuth);
+document.getElementById('pw-input') && document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
+
+// pw-overlay içindeki inline onclick checkPw() çağırıyor, onu da tanımla
+function checkPw() { doAuth(); }
+
+function doAuth() {
+  const v = (document.getElementById('pw-input') || {value:''}).value.trim();
+  if (v === '71665') {
+    sessionStorage.setItem('hasi-reparatur-auth', '1');
+    showForm();
+  } else {
+    const err = document.getElementById('pw-err');
+    if (err) { err.textContent = 'Falsches Passwort'; document.getElementById('pw-input').value = ''; setTimeout(() => err.textContent = '', 2000); }
+  }
+}
+
+// ── DATUM ──────────────────────────────────────────────────────────
+document.getElementById('f-datum').value = new Date().toISOString().split('T')[0];
+
+// ── STARS ──────────────────────────────────────────────────────────
+document.querySelectorAll('.star').forEach(s => {
+  s.addEventListener('click', () => {
+    starVal = parseInt(s.dataset.v);
+    document.querySelectorAll('.star').forEach(x => x.classList.toggle('active', parseInt(x.dataset.v) <= starVal));
+    const labels = ['','Sehr schlecht','Schlecht','Mittel','Gut','Sehr gut'];
+    const lbl = document.getElementById('star-label');
+    if (lbl) lbl.textContent = labels[starVal] || '';
+  });
+});
+
+// ── CHECKBOX HELPER ────────────────────────────────────────────────
+function getChecked(gridId) {
+  return Array.from(document.querySelectorAll('#' + gridId + ' input[type=checkbox]:checked'))
+    .map(c => c.value || c.nextElementSibling?.textContent || '').filter(Boolean).join(', ');
+}
+
+// ── RESET ──────────────────────────────────────────────────────────
+const btnReset = document.getElementById('btn-reset');
+if (btnReset) btnReset.addEventListener('click', () => {
+  document.querySelectorAll('#form-page input[type=text], #form-page input[type=email], #form-page input[type=date], #form-page textarea, #form-page select').forEach(el => el.value = '');
+  document.querySelectorAll('#form-page input[type=checkbox]').forEach(el => el.checked = false);
   document.getElementById('f-datum').value = new Date().toISOString().split('T')[0];
+  starVal = 0;
+  document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+  const lbl = document.getElementById('star-label');
+  if (lbl) lbl.textContent = '— bitte bewerten';
+});
 
-  // Vorläufige Nr
-  const tmpNr = 'RA-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-???';
-  document.getElementById('display-nr').textContent = 'Nr. ' + tmpNr;
+// ── PDF DRUCKEN ────────────────────────────────────────────────────
+document.getElementById('btn-submit').addEventListener('click', () => {
+  const style = Array.from(document.querySelectorAll('style')).map(s => s.outerHTML).join('');
+  const body  = document.getElementById('form-page').innerHTML;
+  const html  = `<!DOCTYPE html><html><head><meta charset="UTF-8">${style}</head><body><div class="page">${body}</div><script>window.onload=()=>window.print()<\/script></body></html>`;
+  const blob  = new Blob([html], {type:'text/html'});
+  const url   = URL.createObjectURL(blob);
+  const w     = window.open(url, '_blank');
+  if (!w) window.print(); // popup blocker fallback
+});
 
-  // Stars
-  document.querySelectorAll('.star').forEach(s => {
-    s.addEventListener('click', () => {
-      starVal = +s.dataset.val;
-      document.querySelectorAll('.star').forEach(x =>
-        x.classList.toggle('active', +x.dataset.val <= starVal));
-      const labels = ['','Sehr schlecht','Schlecht','Mittel','Gut','Sehr gut'];
-      document.getElementById('star-label').textContent = labels[starVal];
+// ── MEINE AUFTRÄGE ─────────────────────────────────────────────────
+async function loadMine() {
+  const list = document.getElementById('mine-list');
+  if (!list) return;
+  list.innerHTML = '<span style="color:#888;font-size:13px">Lade...</span>';
+  try {
+    const res  = await fetch(WORKER + '/api/reparatur', { headers: { Authorization: 'Bearer 71665' } });
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) { list.innerHTML = '<span style="color:#888;font-size:13px">Noch keine Aufträge.</span>'; return; }
+    const colors = { 'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171' };
+    list.innerHTML = data.slice(0, 10).map(r => {
+      const c = colors[r.status] || '#33afe2';
+      return `<div style="padding:10px 0;border-bottom:1px solid #f0f0f0">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+          <div><strong>${r.k_name||'—'}</strong> <span style="color:#888;font-size:11px">${r.geraet_typ||''}${r.modell?' – '+r.modell:''}</span></div>
+          <span style="font-size:11px;background:${c}22;border:1px solid ${c}44;color:${c};padding:2px 9px;border-radius:100px">${r.status||'Neu'}</span>
+        </div>${r.notizen?`<div style="font-size:12px;color:#333;margin-top:5px;padding:7px 10px;background:#f0f7ff;border-left:3px solid #33afe2;border-radius:3px">💬 ${r.notizen}</div>`:''}
+      </div>`;
+    }).join('');
+  } catch(e) { list.innerHTML = '<span style="color:red;font-size:13px">Fehler: '+e.message+'</span>'; }
+}
+const btnLoadMine = document.getElementById('btn-load-mine');
+if (btnLoadMine) { btnLoadMine.addEventListener('click', loadMine); loadMine(); }
+
+// ── ABSENDEN ───────────────────────────────────────────────────────
+document.getElementById('btn-send').addEventListener('click', async () => {
+  const name = document.getElementById('f-k-name').value.trim();
+  if (!name) { alert('Bitte Name eingeben.'); return; }
+  const agb = document.getElementById('f-agb');
+  if (agb && !agb.checked) { alert('Bitte AGB akzeptieren.'); return; }
+
+  const btn = document.getElementById('btn-send');
+  btn.disabled = true; btn.textContent = 'Wird gesendet...';
+
+  const payload = {
+    datum:          document.getElementById('f-datum').value,
+    k_name:         name,
+    k_adresse:      document.getElementById('f-k-adresse').value,
+    k_plz_ort:      document.getElementById('f-k-plz').value,
+    k_telefon:      document.getElementById('f-k-tel').value,
+    k_email:        document.getElementById('f-k-email').value,
+    geraet_typ:     document.getElementById('f-geraet').value,
+    modell:         document.getElementById('f-modell').value,
+    win_passwort:   document.getElementById('f-winpw').value,
+    zustand:        starVal,
+    schaeden:       document.getElementById('f-schaeden').value,
+    zubehoer:       getChecked('zubehoer-grid'),
+    sonst_zubehoer: document.getElementById('f-sonst-zub').value,
+    fehler:         getChecked('fehler-grid'),
+    beschreibung:   document.getElementById('f-beschreibung').value,
+    kostenlimit:    document.getElementById('f-kostenlimit').value,
+  };
+
+  try {
+    const res  = await fetch(WORKER + '/api/reparatur', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
-  });
-
-  // Checkbox visual
-  document.querySelectorAll('.check-item input[type=checkbox]').forEach(cb => {
-    cb.addEventListener('change', () =>
-      cb.closest('.check-item').classList.toggle('checked', cb.checked));
-  });
-
-  // Zubehör sammeln
-  function getChecked(gridId) {
-    return Array.from(document.querySelectorAll(`#${gridId} input:checked`))
-      .map(c => c.value).join(', ');
-  }
-
-  // Reset
-  document.getElementById('btn-reset').addEventListener('click', () => {
-    if (!confirm('Alle Eingaben löschen?')) return;
-    document.querySelectorAll('input[type=text],input[type=tel],input[type=email],textarea,select')
-      .forEach(el => el.value = el.tagName === 'SELECT' ? '' : '');
-    document.querySelectorAll('input[type=checkbox]').forEach(cb => {
-      cb.checked = false;
-      cb.closest('.check-item')?.classList.remove('checked');
-    });
-    starVal = 0;
-    document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
-    document.getElementById('star-label').textContent = '— bitte bewerten';
-    document.getElementById('f-datum').value = new Date().toISOString().split('T')[0];
-  });
-
-  // Print / PDF
-  document.getElementById('btn-submit').addEventListener('click', () => {
-    // Önce form-page içeriğini al, yeni pencerede bas
-    var style = Array.from(document.querySelectorAll('style')).map(s=>s.outerHTML).join('');
-    var content = document.getElementById('form-page').innerHTML;
-    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'+style+'</head><body><div class="page" style="display:block">'+content+'</div><script>window.onload=function(){window.print();}<\/script></body></html>';
-    var blob = new Blob([html], {type:'text/html'});
-    var url = URL.createObjectURL(blob);
-    var w = window.open(url,'_blank');
-    if (!w) { window.print(); } // fallback
-  });
-
-  // Meine Aufträge laden
-  async function loadMine() {
-    var list = document.getElementById('mine-list');
-    list.innerHTML = 'Lade...';
-    try {
-      var res = await fetch('https://hasi-reparatur.hguencavdi.workers.dev/api/reparatur', {
-        headers: { Authorization: 'Bearer 71665' }
-      });
-      var data = await res.json();
-      if (!data.length) { list.innerHTML = 'Noch keine Aufträge.'; return; }
-      var colors = {
-        'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c',
-        'Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'
-      };
-      list.innerHTML = data.slice(0,10).map(function(r) {
-        var c = colors[r.status] || '#33afe2';
-        return '<div style="padding:10px 0;border-bottom:1px solid #f0f0f0;last-child:border:none">'+
-          '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">'+
-          '<div><span style="color:#111;font-family:'DM Sans',sans-serif;font-weight:600">'+(r.k_name||'—')+'</span> '+
-          '<span style="color:#888;font-size:11px">'+(r.geraet_typ||'')+(r.modell?' – '+r.modell:'')+'</span></div>'+
-          '<span style="font-size:11px;background:'+c+'22;border:1px solid '+c+'44;color:'+c+';padding:2px 9px;border-radius:100px">'+(r.status||'Neu')+'</span>'+
-          '</div>'+
-          (r.notizen ? '<div style="font-size:12px;color:#333;margin-top:5px;padding:7px 10px;background:#f0f7ff;border-left:3px solid #33afe2;border-radius:3px">'+
-          '💬 '+r.notizen+'</div>' : '')+
-          '</div>';
-      }).join('');
-    } catch(e) { list.innerHTML = 'Fehler: ' + e.message; }
-  }
-  document.getElementById('btn-load-mine').addEventListener('click', loadMine);
-  loadMine();
-
-  // Absenden
-  document.getElementById('btn-send').addEventListener('click', async () => {
-    const name = document.getElementById('f-k-name').value.trim();
-    if (!name) { alert('Bitte Name eingeben.'); return; }
-    if (!document.getElementById('f-agb').checked) { alert('Bitte AGB akzeptieren.'); return; }
-
-    const btn = document.getElementById('btn-send');
-    btn.disabled = true; btn.textContent = 'Wird gesendet...';
-
-    const payload = {
-      datum:         document.getElementById('f-datum').value,
-      k_name:        name,
-      k_adresse:     document.getElementById('f-k-adresse').value,
-      k_plz_ort:     document.getElementById('f-k-plz').value,
-      k_telefon:     document.getElementById('f-k-tel').value,
-      k_email:       document.getElementById('f-k-email').value,
-      geraet_typ:    document.getElementById('f-geraet').value,
-      modell:        document.getElementById('f-modell').value,
-      win_passwort:  document.getElementById('f-winpw').value,
-      zustand:       starVal,
-      schaeden:      document.getElementById('f-schaeden').value,
-      zubehoer:      getChecked('zubehoer-grid'),
-      sonst_zubehoer:document.getElementById('f-sonst-zub').value,
-      fehler:        getChecked('fehler-grid'),
-      beschreibung:  document.getElementById('f-beschreibung').value,
-      kostenlimit:   document.getElementById('f-kostenlimit').value,
-    };
-
-    try {
-      const res = await fetch(WORKER_URL + '/api/reparatur', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        document.getElementById('form-page').style.display = 'none';
-        document.getElementById('success-screen').style.display = 'block';
-        document.getElementById('success-nr').textContent = data.nr;
-      } else throw new Error('Server error');
-    } catch(e) {
-      alert('Fehler beim Senden. Bitte versuchen Sie es erneut.');
-      btn.disabled = false; btn.textContent = 'Absenden ✓';
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('form-page').style.display    = 'none';
+      document.getElementById('success-screen').style.display = 'block';
+      document.getElementById('success-nr').textContent    = data.nr;
+    } else {
+      throw new Error(data.error || 'Server error');
     }
-  });
+  } catch(e) {
+    alert('Fehler: ' + e.message);
+    btn.disabled = false; btn.textContent = 'Absenden ✓';
+  }
+});
 </script>
 </body>
 </html>
