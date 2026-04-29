@@ -463,10 +463,10 @@ document.getElementById('d-new-ab').addEventListener('click', function() { openA
 // ── AB FORMU ───────────────────────────────────────────────────────
 function openAbForm(ab) {
   curAb = ab;
+  var r = curRep;
   document.getElementById('ab-title').textContent = ab ? (ab.ab_nr||'Arbeitsbericht') : 'Neuer Arbeitsbericht';
   var _anEl = document.getElementById('ab-auftrag-nr');
-  if (_anEl) _anEl.textContent = r.nr ? '\u{1F4CB} Auftrag: ' + r.nr + (r.k_name ? '  \u00B7  ' + r.k_name : '') : '';
-  var r = curRep;
+  if (_anEl) _anEl.textContent = r && r.nr ? '\u{1F4CB} Auftrag: ' + r.nr + (r.k_name ? '  \u00B7  ' + r.k_name : '') : '';
   document.getElementById('ab-rep-info').innerHTML = [
     ['Kunde', r.k_name], ['Telefon', r.k_telefon],
     ['Gerät', r.geraet_typ + ' ' + (r.modell||'')], ['Auftrag-Nr.', r.nr],
