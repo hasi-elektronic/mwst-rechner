@@ -559,6 +559,11 @@ document.getElementById('ab-satz').addEventListener('input', calcTotals);
 // AB Speichern
 document.getElementById('ab-save').addEventListener('click', async function() {
   var btn = this; btn.disabled = true; btn.textContent = '...';
+  if (!curRep || !curRep.id) {
+    showMsg('ab-save-msg', 'Fehler: Kein Auftrag ausgewählt!', true);
+    btn.disabled = false; btn.textContent = '💾 Speichern';
+    return;
+  }
   var satz  = parseNum(document.getElementById('ab-satz').value) || 84;
   var taet  = Array.from(document.querySelectorAll('.ab-row.taet')).map(function(row) {
     return { desc: row.querySelector('.td').value, std: parseNum(row.querySelector('.ts').value) };
@@ -587,8 +592,8 @@ document.getElementById('ab-save').addEventListener('click', async function() {
     if (j.ok) {
       if (!curAb) { curAb = { id: j.id, ab_nr: j.ab_nr }; document.getElementById('ab-title').textContent = j.ab_nr; }
       showMsg('ab-save-msg', '✓ Gespeichert');
-    } else { showMsg('ab-save-msg', 'Fehler!', true); }
-  } catch(e) { showMsg('ab-save-msg', e.message, true); }
+    } else { showMsg('ab-save-msg', 'Server-Fehler: ' + (j.error||'unbekannt'), true); }
+  } catch(e) { showMsg('ab-save-msg', 'Fehler: ' + e.message, true); console.error('AB save error:', e); }
   btn.disabled = false; btn.textContent = '💾 Speichern';
 });
 
