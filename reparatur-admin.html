@@ -246,44 +246,31 @@ textarea.finput{resize:vertical;min-height:65px}
 </div>
 
 <script>
+// ── SABITLER ───────────────────────────────────────────────────────
 var W    = 'https://hasi-reparatur.hguencavdi.workers.dev';
 var AUTH = 'Bearer 71665';
-var allRep = [], filterVal = 'all';
-var curRep = null, curAb = null;
+var allRep = [], curRep = null, curAb = null, filterVal = 'all', abRowId = 0;
 
-// ── HELPERS ──────────────────────────────
-function fmt(v) { return v.toFixed(2).replace('.', ',') + ' €'; }
-function parse(v) { return parseFloat((v||'').toString().replace(',','.').replace(/[^\d.]/g,'')) || 0; }
-function today() { return new Date().toISOString().slice(0,10); }
+function fmt(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
+function today() { return new Date().toISOString().split('T')[0]; }
+function showMsg(id, msg, isErr) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isErr ? '#e53e3e' : '#16a34a';
+  if (!isErr) setTimeout(() => { el.textContent = ''; }, 3000);
+}
 
-var BADGE_MAP = {
-  'Neu':'b-neu','In Bearbeitung':'b-bearbeitung','Teile bestellt':'b-teile',
-  'Warten auf Kunde':'b-warten','Fertig':'b-fertig','Abgeholt':'b-abgeholt','Abgelehnt':'b-abgelehnt'
-};
-function badge(s) { return '<span class="badge '+(BADGE_MAP[s]||'b-neu')+'">'+(s||'Neu')+'</span>'; }
-
+// ── SAYFA YÖNETİMİ ─────────────────────────────────────────────────
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === id));
 }
 
-function showMsg(id, msg, isErr) {
-  var el = document.getElementById(id);
-  el.textContent = msg;
-  el.style.color = isErr ? 'var(--red)' : 'var(--green)';
-  if (!isErr) setTimeout(() => { el.textContent = ''; }, 3000);
-}
-
-// ── AUTH ──────────────────────────────────
-if (sessionStorage.getItem('hasi-admin-ok') === '1') {
-  document.getElementById('auth-screen').style.display = 'none';
-  showPage('page-list');
-  loadList();
-}
+// ── AUTH ───────────────────────────────────────────────────────────
 function doAuth() {
   var v = document.getElementById('auth-inp').value.trim();
   if (v === '71665') {
-    sessionStorage.setItem('hasi-admin-ok','1');
-    sessionStorage.setItem('hasi-auth','1');
+    sessionStorage.setItem('hasi-admin-ok', '1');
     document.getElementById('auth-screen').style.display = 'none';
     showPage('page-list');
     loadList();
@@ -294,85 +281,82 @@ function doAuth() {
   }
 }
 document.getElementById('auth-btn').addEventListener('click', doAuth);
-document.getElementById('auth-inp').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
+document.getElementById('auth-inp').addEventListener('keydown', function(e) { if (e.key === 'Enter') doAuth(); });
 
-// ── LIST ──────────────────────────────────
+if (sessionStorage.getItem('hasi-admin-ok') === '1') {
+  document.getElementById('auth-screen').style.display = 'none';
+  showPage('page-list');
+  loadList();
+}
+
+// ── LİSTE ──────────────────────────────────────────────────────────
 async function loadList() {
-  document.getElementById('list-msg').style.display = 'block';
-  document.getElementById('list-msg').textContent = 'Lade...';
-  document.getElementById('tbl').style.display = 'none';
   try {
     var res = await fetch(W + '/api/reparatur', { headers: { Authorization: AUTH } });
-    allRep = await res.json();
+    allRep  = await res.json();
+    if (!Array.isArray(allRep)) allRep = [];
     renderStats();
     renderList();
-  } catch(e) { document.getElementById('list-msg').textContent = 'Fehler: ' + e.message; }
+  } catch(e) {
+    document.getElementById('rep-list').innerHTML = '<div style="color:red;padding:20px">Fehler: '+e.message+'</div>';
+  }
 }
 
 function renderStats() {
-  document.getElementById('st').textContent = allRep.length;
-  document.getElementById('sn').textContent = allRep.filter(r => r.status === 'Neu').length;
-  document.getElementById('sb').textContent = allRep.filter(r => ['In Bearbeitung','Teile bestellt','Warten auf Kunde'].includes(r.status)).length;
-  document.getElementById('sf').textContent = allRep.filter(r => r.status === 'Fertig').length;
+  var total = allRep.length;
+  var offen = allRep.filter(r => r.status !== 'Fertig' && r.status !== 'Abgeholt' && r.status !== 'Abgelehnt').length;
+  var fertig = allRep.filter(r => r.status === 'Fertig' || r.status === 'Abgeholt').length;
+  var heute  = allRep.filter(r => (r.datum||'').slice(0,10) === today()).length;
+  var el;
+  el = document.getElementById('st'); if(el) el.textContent = total;
+  el = document.getElementById('so'); if(el) el.textContent = offen;
+  el = document.getElementById('sf'); if(el) el.textContent = fertig;
+  el = document.getElementById('sh'); if(el) el.textContent = heute;
 }
 
 function renderList() {
-  var el = document.getElementById('search-inp');
-  var q = (el ? el.value : '').toLowerCase().trim();
-  var d = filterVal === 'all' ? allRep : allRep.filter(r => r.status === filterVal);
-  if (q) {
-    d = d.filter(r =>
-      (r.k_name||'').toLowerCase().includes(q) ||
-      (r.nr||'').toLowerCase().includes(q) ||
-      (r.geraet_typ||'').toLowerCase().includes(q) ||
-      (r.modell||'').toLowerCase().includes(q) ||
-      (r.fehler||'').toLowerCase().includes(q) ||
-      (r.k_telefon||'').toLowerCase().includes(q)
-    );
-  }
-  document.getElementById('list-msg').style.display = 'none';
-  if (!d.length) {
-    document.getElementById('list-msg').textContent = 'Keine Aufträge.';
-    document.getElementById('list-msg').style.display = 'block';
-    document.getElementById('tbl').style.display = 'none';
-    return;
-  }
-  document.getElementById('tbl').style.display = 'table';
-  document.getElementById('tbody').innerHTML = d.map(r =>
-    '<tr class="row" data-id="' + r.id + '">' +
-    '<td><span style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--hasi)">' + (r.nr||'—') + '</span></td>' +
-    '<td style="color:var(--m);font-size:12px">' + (r.datum||'—') + '</td>' +
-    '<td><strong>' + (r.k_name||'—') + '</strong><br><span style="font-size:11px;color:var(--m)">' + (r.k_telefon||'') + '</span></td>' +
-    '<td style="font-size:12px">' + (r.geraet_typ||'—') + ' ' + (r.modell||'') + '</td>' +
-    '<td style="font-size:12px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (r.fehler||'—') + '</td>' +
-    '<td>' + badge(r.status) + '</td>' +
-    '</tr>'
-  ).join('');
-  document.querySelectorAll('tr.row').forEach(tr => {
-    tr.addEventListener('click', () => openDetail(parseInt(tr.dataset.id)));
+  var q    = (document.getElementById('search-inp').value || '').toLowerCase();
+  var data = allRep.filter(r => {
+    if (filterVal !== 'all' && r.status !== filterVal) return false;
+    if (!q) return true;
+    return [r.k_name, r.nr, r.geraet_typ, r.modell, r.k_telefon].some(v => (v||'').toLowerCase().includes(q));
+  });
+  var colors = { 'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171' };
+  var el = document.getElementById('rep-list');
+  if (!data.length) { el.innerHTML = '<div style="color:#888;padding:30px;text-align:center;font-size:14px">Keine Einträge gefunden.</div>'; return; }
+  el.innerHTML = data.map(r => {
+    var c = colors[r.status] || '#33afe2';
+    return '<div class="rep-row" data-id="'+r.id+'">'
+      + '<div class="rep-nr">'+(r.nr||'—')+'</div>'
+      + '<div class="rep-name">'+(r.k_name||'—')+'<span class="rep-sub">'+(r.geraet_typ||'')+(r.modell?' · '+r.modell:'')+'</span></div>'
+      + '<div class="rep-date">'+(r.datum||'')+'</div>'
+      + '<div><span class="badge" style="background:'+c+'22;border:1px solid '+c+'44;color:'+c+'">'+(r.status||'Neu')+'</span></div>'
+      + '</div>';
+  }).join('');
+  document.querySelectorAll('.rep-row').forEach(function(row) {
+    row.addEventListener('click', function() { openDetail(parseInt(row.dataset.id)); });
   });
 }
 
-document.getElementById('btn-refresh').addEventListener('click', loadList);
 document.getElementById('search-inp').addEventListener('input', renderList);
-document.querySelectorAll('.fbtn[data-f]').forEach(b => {
-  b.addEventListener('click', () => {
+document.getElementById('btn-refresh').addEventListener('click', loadList);
+
+document.querySelectorAll('.fbtn[data-f]').forEach(function(b) {
+  b.addEventListener('click', function() {
     document.querySelectorAll('.fbtn[data-f]').forEach(x => x.classList.remove('on'));
     b.classList.add('on'); filterVal = b.dataset.f; renderList();
   });
 });
 
-// ── DETAIL ────────────────────────────────
+// ── DETAY ──────────────────────────────────────────────────────────
 async function openDetail(id) {
   curRep = allRep.find(r => r.id === id);
   if (!curRep) return;
-
   document.getElementById('detail-title').textContent = (curRep.nr||'') + ' · ' + (curRep.k_name||'');
   document.getElementById('d-status').value = curRep.status || 'Neu';
   document.getElementById('d-notiz').value  = curRep.notizen || '';
   document.getElementById('d-save-msg').textContent = '';
-
-  var f = [
+  var fields = [
     ['Kunde', curRep.k_name], ['Telefon', curRep.k_telefon],
     ['Adresse', [curRep.k_adresse, curRep.k_plz_ort].filter(Boolean).join(', ')],
     ['Gerät', curRep.geraet_typ], ['Modell', curRep.modell],
@@ -380,43 +364,38 @@ async function openDetail(id) {
     ['Zubehör', curRep.zubehoer], ['Kostenlimit', curRep.kostenlimit ? curRep.kostenlimit+' €' : ''],
     ['Win-PW', curRep.win_passwort], ['Beschreibung', curRep.beschreibung],
   ];
-  document.getElementById('detail-info').innerHTML = f.filter(x=>x[1])
+  document.getElementById('detail-info').innerHTML = fields.filter(x=>x[1])
     .map(x => '<div class="ifield"><div class="il">'+x[0]+'</div><div class="iv">'+x[1]+'</div></div>').join('');
-
   await loadAbList();
   showPage('page-detail');
 }
 
 async function loadAbList() {
   var wrap = document.getElementById('ab-list-wrap');
-  wrap.innerHTML = '<div style="color:var(--m);font-size:13px;font-family:\'DM Mono\',monospace">Lade...</div>';
+  wrap.innerHTML = '<div style="color:#888;font-size:13px">Lade...</div>';
   try {
     var res = await fetch(W + '/api/arbeitsbericht?reparatur_id=' + curRep.id, { headers: { Authorization: AUTH } });
     var abs = await res.json();
-    if (!abs.length) { wrap.innerHTML = '<div style="color:var(--m);font-size:13px">Noch keine Arbeitsberichte.</div>'; return; }
+    if (!Array.isArray(abs) || !abs.length) { wrap.innerHTML = '<div style="color:#888;font-size:13px">Noch keine Arbeitsberichte.</div>'; return; }
     wrap.innerHTML = abs.map(ab =>
-      '<div class="ab-list-item" data-ab-id="' + ab.id + '">' +
-      '<div>' +
-      '<div style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--hasi)">' + (ab.ab_nr||'—') + '</div>' +
-      '<div style="font-size:12px;color:var(--m);margin-top:2px">' + (ab.datum||'') + '</div>' +
-      '</div>' +
-      '<div style="text-align:right">' +
-      '<div style="font-size:14px;font-weight:600;color:var(--green)">' + fmt(Number(ab.total_netto)||0) + '</div>' +
-      '<div style="font-size:11px;color:var(--m)">netto</div>' +
-      '</div>' +
-      '</div>'
+      '<div class="ab-list-item" data-ab-id="'+ab.id+'">'
+      + '<div><div style="font-family:\'DM Mono\',monospace;font-size:12px;color:#33afe2">'+(ab.ab_nr||'—')+'</div>'
+      + '<div style="font-size:12px;color:#888;margin-top:2px">'+(ab.datum||'')+'</div></div>'
+      + '<div style="text-align:right"><div style="font-size:14px;font-weight:600;color:#16a34a">'+fmt(Number(ab.total_netto)||0)+'</div>'
+      + '<div style="font-size:11px;color:#888">netto</div></div></div>'
     ).join('');
-    document.querySelectorAll('.ab-list-item').forEach(el => {
-      el.addEventListener('click', async () => {
-        var abId = parseInt(el.dataset.abId);
-        var ab = abs.find(a => a.id === abId);
-        openAbForm(ab);
+    // AB tıklama
+    wrap._abs = abs;
+    document.querySelectorAll('.ab-list-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var ab = wrap._abs.find(a => a.id === parseInt(el.dataset.abId));
+        if (ab) openAbForm(ab);
       });
     });
-  } catch(e) { wrap.innerHTML = '<div style="color:var(--red);font-size:13px">Fehler: '+e.message+'</div>'; }
+  } catch(e) { wrap.innerHTML = '<div style="color:red;font-size:13px">Fehler: '+e.message+'</div>'; }
 }
 
-document.getElementById('back-to-list').addEventListener('click', () => showPage('page-list'));
+document.getElementById('back-to-list').addEventListener('click', function() { showPage('page-list'); });
 
 // Speichern
 document.getElementById('d-save').addEventListener('click', async function() {
@@ -429,60 +408,55 @@ document.getElementById('d-save').addEventListener('click', async function() {
     });
     var j = await res.json();
     if (j.ok) {
-      curRep.status  = document.getElementById('d-status').value;
+      curRep.status = document.getElementById('d-status').value;
       curRep.notizen = document.getElementById('d-notiz').value;
       var r = allRep.find(r => r.id === curRep.id);
       if (r) { r.status = curRep.status; r.notizen = curRep.notizen; }
       renderStats(); renderList();
       showMsg('d-save-msg', '✓ Gespeichert');
-    } else showMsg('d-save-msg', 'Fehler!', true);
+    } else { showMsg('d-save-msg', 'Fehler!', true); }
   } catch(e) { showMsg('d-save-msg', e.message, true); }
   btn.disabled = false; btn.textContent = '💾 Speichern';
 });
 
-// Yeni AB
-document.getElementById('d-new-ab').addEventListener('click', () => openAbForm(null));
-
 // Auftrag PDF
-document.getElementById('d-pdf-auftrag').addEventListener('click', () => printAuftrag(curRep));
+document.getElementById('d-pdf-auftrag').addEventListener('click', function() {
+  var r = curRep;
+  var html = buildAuftragPDF(r);
+  openPrint(html);
+});
 
-// ── AB FORM ───────────────────────────────
-var abRowId = 0;
+// Yeni Arbeitsbericht
+document.getElementById('d-new-ab').addEventListener('click', function() { openAbForm(null); });
 
+// ── AB FORMU ───────────────────────────────────────────────────────
 function openAbForm(ab) {
   curAb = ab;
+  document.getElementById('ab-title').textContent = ab ? (ab.ab_nr||'Arbeitsbericht') : 'Neuer Arbeitsbericht';
   var r = curRep;
-  document.getElementById('ab-title').textContent = ab ? (ab.ab_nr||'AB') : 'Neuer Arbeitsbericht';
-
-  // Rep info
-  var f = [
+  document.getElementById('ab-rep-info').innerHTML = [
     ['Kunde', r.k_name], ['Telefon', r.k_telefon],
     ['Gerät', r.geraet_typ + ' ' + (r.modell||'')], ['Auftrag-Nr.', r.nr],
-  ];
-  document.getElementById('ab-rep-info').innerHTML = f.filter(x=>x[1])
-    .map(x => '<div class="ifield"><div class="il">'+x[0]+'</div><div class="iv">'+x[1]+'</div></div>').join('');
-
-  document.getElementById('ab-datum').value  = ab ? ab.datum : today();
-  document.getElementById('ab-satz').value   = ab ? ab.stundensatz : 96;
+  ].filter(x=>x[1]).map(x => '<div class="ifield"><div class="il">'+x[0]+'</div><div class="iv">'+x[1]+'</div></div>').join('');
+  document.getElementById('ab-datum').value  = ab ? ab.datum  : today();
+  document.getElementById('ab-satz').value   = ab ? (ab.stundensatz||96) : 96;
   document.getElementById('ab-notiz').value  = ab ? (ab.notizen||'') : '';
   document.getElementById('ab-save-msg').textContent = '';
-
-  // Rows
   abRowId = 0;
   document.getElementById('taet-rows').innerHTML = '';
   document.getElementById('mat-rows').innerHTML  = '';
-
-  var taet = ab ? JSON.parse(ab.taetigkeiten||'[]') : [];
-  var mat  = ab ? JSON.parse(ab.material||'[]')     : [];
+  var taet = ab ? tryParse(ab.taetigkeiten) : [];
+  var mat  = ab ? tryParse(ab.material)     : [];
   taet.forEach(t => addTaet(t.desc, t.std));
   mat.forEach(m  => addMat(m.desc, m.preis));
   if (!taet.length) addTaet();
   calcTotals();
-
   showPage('page-ab');
 }
 
-document.getElementById('back-to-detail').addEventListener('click', async () => {
+function tryParse(s) { try { return JSON.parse(s||'[]'); } catch { return []; } }
+
+document.getElementById('back-to-detail').addEventListener('click', async function() {
   await loadAbList();
   showPage('page-detail');
 });
@@ -492,89 +466,84 @@ function addTaet(desc, std) {
   var id = abRowId;
   var div = document.createElement('div');
   div.className = 'ab-row taet'; div.id = 'tr-'+id;
-  div.innerHTML =
-    '<input type="text" class="td" placeholder="z.B. Festplatte tauschen" value="'+(desc||'')+'">' +
-    '<input type="text" class="ts" placeholder="0" inputmode="decimal" style="text-align:center" value="'+(std||'')+'">' +
-    '<input type="text" class="tb" readonly style="text-align:right;opacity:.6;cursor:default">' +
-    '<button class="btn-del">✕</button>';
+  div.innerHTML = '<input type="text" class="td" placeholder="z.B. Festplatte tauschen" value="'+(desc||'')+'">'
+    + '<input type="text" class="ts" placeholder="0" inputmode="decimal" style="text-align:center" value="'+(std||'')+'">'
+    + '<input type="text" class="tb" readonly style="text-align:right;opacity:.6;cursor:default">'
+    + '<button class="btn-del">✕</button>';
   document.getElementById('taet-rows').appendChild(div);
   div.querySelector('.ts').addEventListener('input', calcTotals);
-  div.querySelector('.btn-del').addEventListener('click', () => { div.remove(); calcTotals(); });
+  div.querySelector('.btn-del').addEventListener('click', function() { div.remove(); calcTotals(); });
   calcTotals();
 }
 
 function addMat(desc, preis) {
   abRowId++;
-  var id = abRowId;
   var div = document.createElement('div');
-  div.className = 'ab-row mat'; div.id = 'mr-'+id;
-  div.innerHTML =
-    '<input type="text" class="md" placeholder="z.B. 2,5 Zoll SSD 500GB" value="'+(desc||'')+'">' +
-    '<input type="text" class="mp" placeholder="0,00" inputmode="decimal" style="text-align:right" value="'+(preis!=null?String(preis).replace('.',','):'')+'">' +
-    '<button class="btn-del">✕</button>';
+  div.className = 'ab-row mat';
+  div.innerHTML = '<input type="text" class="md" placeholder="z.B. 2,5 Zoll SSD 500GB" value="'+(desc||'')+'">'
+    + '<input type="text" class="mp" placeholder="0,00" inputmode="decimal" style="text-align:right" value="'+(preis!=null?String(preis).replace('.',','):'')+'">'
+    + '<button class="btn-del">✕</button>';
   document.getElementById('mat-rows').appendChild(div);
   div.querySelector('.mp').addEventListener('input', calcTotals);
-  div.querySelector('.btn-del').addEventListener('click', () => { div.remove(); calcTotals(); });
+  div.querySelector('.btn-del').addEventListener('click', function() { div.remove(); calcTotals(); });
   calcTotals();
 }
 
-document.getElementById('btn-add-taet').addEventListener('click', () => addTaet());
-document.getElementById('btn-add-mat').addEventListener('click',  () => addMat());
-document.getElementById('ab-satz').addEventListener('input', calcTotals);
+document.getElementById('btn-add-taet').addEventListener('click', function() { addTaet(); });
+document.getElementById('btn-add-mat').addEventListener('click', function()  { addMat();  });
+
+function parseNum(s) {
+  if (s == null || s === '') return 0;
+  return parseFloat(String(s).replace(',', '.')) || 0;
+}
 
 function calcTotals() {
-  var satz = parse(document.getElementById('ab-satz').value) || 96;
+  var satz  = parseNum(document.getElementById('ab-satz').value) || 96;
+  var total = 0;
+  document.querySelectorAll('.ab-row.taet').forEach(function(row) {
+    var std = parseNum(row.querySelector('.ts').value);
+    var bet = std * satz;
+    total  += bet;
+    row.querySelector('.tb').value = bet > 0 ? fmt(bet) : '';
+  });
+  document.querySelectorAll('.ab-row.mat').forEach(function(row) {
+    total += parseNum(row.querySelector('.mp').value);
+  });
   var arbeit = 0;
-  document.querySelectorAll('#taet-rows .ab-row').forEach(row => {
-    var h = parse(row.querySelector('.ts').value);
-    var b = h * satz; arbeit += b;
-    row.querySelector('.tb').value = b > 0 ? fmt(b).replace(' €','') : '';
-  });
-  var mat = 0;
-  document.querySelectorAll('#mat-rows .ab-row').forEach(row => {
-    mat += parse(row.querySelector('.mp').value);
-  });
-  var netto = arbeit + mat, mwst = netto * 0.19, brutto = netto + mwst;
-  document.getElementById('tot-arbeit').textContent = fmt(arbeit);
-  document.getElementById('tot-mat').textContent    = fmt(mat);
-  document.getElementById('tot-netto').textContent  = fmt(netto);
-  document.getElementById('tot-mwst').textContent   = fmt(mwst);
-  document.getElementById('tot-brutto').textContent = fmt(brutto);
+  document.querySelectorAll('.ab-row.taet').forEach(function(row){arbeit+=parseNum(row.querySelector('.ts').value)*satz;});
+  var matSum = 0;
+  document.querySelectorAll('.ab-row.mat').forEach(function(row){matSum+=parseNum(row.querySelector('.mp').value);});
+  var mwst = total * 0.19;
+  var el;
+  el = document.getElementById('tot-arbeit'); if(el) el.textContent = fmt(arbeit);
+  el = document.getElementById('tot-mat');    if(el) el.textContent = fmt(matSum);
+  el = document.getElementById('tot-netto');  if(el) el.textContent = fmt(total);
+  el = document.getElementById('tot-mwst');   if(el) el.textContent = fmt(mwst);
+  el = document.getElementById('tot-brutto'); if(el) el.textContent = fmt(total + mwst);
 }
-
-function getAbData() {
-  var satz = parse(document.getElementById('ab-satz').value) || 96;
-  var taet = [], arbeit = 0;
-  document.querySelectorAll('#taet-rows .ab-row').forEach(row => {
-    var desc = row.querySelector('.td').value;
-    var std  = parse(row.querySelector('.ts').value);
-    var sum  = std * satz; arbeit += sum;
-    if (desc || std) taet.push({desc, std, sum});
-  });
-  var mat = [], matSum = 0;
-  document.querySelectorAll('#mat-rows .ab-row').forEach(row => {
-    var desc  = row.querySelector('.md').value;
-    var preis = parse(row.querySelector('.mp').value);
-    matSum += preis;
-    if (desc || preis) mat.push({desc, preis});
-  });
-  return { satz, taet, mat, arbeit, matSum, netto: arbeit+matSum };
-}
+document.getElementById('ab-satz').addEventListener('input', calcTotals);
 
 // AB Speichern
 document.getElementById('ab-save').addEventListener('click', async function() {
   var btn = this; btn.disabled = true; btn.textContent = '...';
-  var d = getAbData();
+  var satz  = parseNum(document.getElementById('ab-satz').value) || 96;
+  var taet  = Array.from(document.querySelectorAll('.ab-row.taet')).map(function(row) {
+    return { desc: row.querySelector('.td').value, std: parseNum(row.querySelector('.ts').value) };
+  }).filter(t => t.desc || t.std);
+  var mat   = Array.from(document.querySelectorAll('.ab-row.mat')).map(function(row) {
+    return { desc: row.querySelector('.md').value, preis: parseNum(row.querySelector('.mp').value) };
+  }).filter(m => m.desc || m.preis);
+  var total = taet.reduce((s,t) => s + t.std*satz, 0) + mat.reduce((s,m) => s + m.preis, 0);
   var payload = {
     reparatur_id: curRep.id,
     datum:        document.getElementById('ab-datum').value,
-    stundensatz:  d.satz,
-    taetigkeiten: d.taet,
-    material:     d.mat,
-    total_netto:  d.netto,
+    stundensatz:  satz,
+    taetigkeiten: taet,
+    material:     mat,
+    total_netto:  total,
     notizen:      document.getElementById('ab-notiz').value,
   };
-  if (curAb && curAb.id) payload.id = curAb.id;
+  if (curAb) payload.id = curAb.id;
   try {
     var res = await fetch(W + '/api/arbeitsbericht', {
       method: 'POST',
@@ -583,282 +552,168 @@ document.getElementById('ab-save').addEventListener('click', async function() {
     });
     var j = await res.json();
     if (j.ok) {
-      if (!curAb) { curAb = { ...payload, id: j.id, ab_nr: j.ab_nr }; document.getElementById('ab-title').textContent = j.ab_nr; }
+      if (!curAb) { curAb = { id: j.id, ab_nr: j.ab_nr }; document.getElementById('ab-title').textContent = j.ab_nr; }
       showMsg('ab-save-msg', '✓ Gespeichert');
-    } else showMsg('ab-save-msg', 'Fehler!', true);
+    } else { showMsg('ab-save-msg', 'Fehler!', true); }
   } catch(e) { showMsg('ab-save-msg', e.message, true); }
   btn.disabled = false; btn.textContent = '💾 Speichern';
 });
 
 // AB PDF
-document.getElementById('ab-pdf').addEventListener('click', () => {
-  var d = getAbData();
-  printArbeitsbericht(curRep, curAb, d, false);
+document.getElementById('ab-pdf').addEventListener('click', function() {
+  openPrint(buildAbPDF(curAb, curRep));
 });
 
 // Rechnung PDF
-document.getElementById('ab-rechnung').addEventListener('click', () => {
-  var d = getAbData();
-  printRechnung(curRep, curAb, d);
+document.getElementById('ab-rechnung').addEventListener('click', function() {
+  openPrint(buildRechnungPDF(curAb, curRep));
 });
 
-// ── PDF FUNCTIONS ─────────────────────────
-function pdfBase() {
-  return '<style>@page{size:A4;margin:10mm 12mm}*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
-  'body{font-family:Helvetica,Arial,sans-serif;font-size:10px;color:#1a1a1a;line-height:1.5}' +
-  '.h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #33afe2}' +
-  '.h img{height:38px}.hr{text-align:right;font-size:11px;color:#555}' +
-  '.hr strong{display:block;font-size:14px;color:#111;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px}' +
-  '.g2{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-bottom:10px}' +
-  '.f .l{font-size:8px;font-weight:600;color:#888;text-transform:uppercase}.f .v{font-size:10px;border-bottom:1px solid #eee;padding-bottom:2px;min-height:14px}' +
-  'table{width:100%;border-collapse:collapse;margin-bottom:12px}' +
-  'th{background:#f0f4f8;padding:7px 10px;text-align:left;font-size:9px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.7px;border-bottom:2px solid #dde3ea}' +
-  'td{padding:7px 10px;border-bottom:1px solid #f0f0f0;font-size:10px}tr:last-child td{border-bottom:none}' +
-  '.tot{margin-left:auto;width:260px}.tr2{display:flex;justify-content:space-between;padding:3px 0;font-size:11px;color:#555;border-bottom:1px solid #f0f0f0}' +
-  '.tbig{display:flex;justify-content:space-between;padding:10px 0 4px;font-size:15px;font-weight:700;border-top:2px solid #33afe2;margin-top:4px}' +
-  '.tbig span:last-child{color:#33afe2}' +
-  '.bank{margin-top:10px;padding:8px 10px;background:#f0f7ff;border-radius:4px;font-size:9px;line-height:1.9}' +
-  '.ft{margin-top:8px;padding-top:6px;border-top:1px solid #ddd;font-size:9px;color:#aaa;text-align:center}</style>';
-}
-
-function printAuftrag(r) {
-  var zL = (r.zubehoer||'').split(',').filter(Boolean).map(s=>'<span style="background:#f0f0f0;padding:2px 5px;border-radius:3px;font-size:9px;margin:2px">'+s.trim()+'</span>').join('');
-  var fL = (r.fehler||'').split(',').filter(Boolean).map(s=>'<span style="background:#f0f0f0;padding:2px 5px;border-radius:3px;font-size:9px;margin:2px">'+s.trim()+'</span>').join('');
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+(r.nr||'RA')+'</title>' + pdfBase() + '</head><body>' +
-  '<div class="h"><img src="https://tools.hasi-elektronic.de/logo.jpg"><div class="hr"><strong>Reparaturauftrag</strong>Nr. '+(r.nr||'—')+'<br>Datum: '+(r.datum||'—')+'<br>Status: '+(r.status||'Neu')+'</div></div>' +
-  '<div class="g2">' +
-  '<div class="f"><div class="l">Auftragnehmer</div><div class="v">Hasi Elektronic · Grabenstr. 18 · 71665 Vaihingen</div></div>' +
-  '<div class="f"><div class="l">Kunde</div><div class="v"><strong>'+(r.k_name||'—')+'</strong><br>'+([r.k_adresse,r.k_plz_ort].filter(Boolean).join(', '))+'</div></div>' +
-  '<div class="f"><div class="l">Telefon/E-Mail</div><div class="v">'+([r.k_telefon,r.k_email].filter(Boolean).join(' · ')||'—')+'</div></div>' +
-  '<div class="f"><div class="l">Gerät / Modell</div><div class="v">'+(r.geraet_typ||'—')+' '+(r.modell||'')+'</div></div>' +
-  '<div class="f"><div class="l">Kostenlimit</div><div class="v">'+(r.kostenlimit?r.kostenlimit+' €':'—')+'</div></div>' +
-  '<div class="f"><div class="l">Win-Passwort</div><div class="v">'+(r.win_passwort||'—')+'</div></div>' +
-  '<div class="f"><div class="l">Schäden</div><div class="v">'+(r.schaeden||'—')+'</div></div>' +
-  '<div class="f"><div class="l">Zustand</div><div class="v">'+'★'.repeat(r.zustand||0)+'☆'.repeat(5-(r.zustand||0))+'</div></div>' +
-  '</div>' +
-  '<div style="margin-bottom:8px"><div style="font-size:8px;font-weight:600;color:#888;text-transform:uppercase;margin-bottom:4px">Zubehör</div><div style="display:flex;flex-wrap:wrap;gap:3px">'+(zL||'—')+'</div></div>' +
-  '<div style="margin-bottom:10px"><div style="font-size:8px;font-weight:600;color:#888;text-transform:uppercase;margin-bottom:4px">Fehler</div><div style="display:flex;flex-wrap:wrap;gap:3px">'+(fL||'—')+'</div>' +
-  (r.beschreibung?'<div style="font-size:9px;margin-top:4px;color:#333">'+r.beschreibung+'</div>':'') + '</div>' +
-  (r.notizen?'<div style="margin-bottom:10px;padding:6px 10px;background:#f0f7ff;border-left:3px solid #33afe2;font-size:10px">'+r.notizen+'</div>':'')+
-  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:14px">' +
-  '<div style="text-align:center"><div style="border-top:1px solid #333;padding-top:4px;font-size:9px;color:#888;margin-top:26px">Ort, Datum</div></div>' +
-  '<div style="text-align:center"><div style="border-top:1px solid #333;padding-top:4px;font-size:9px;color:#888;margin-top:26px">Unterschrift Auftraggeber</div></div>' +
-  '</div>' +
-  '<div class="ft">Hasi Elektronic · Grabenstr. 18 · 71665 Vaihingen/Enz · +49 7042 16391 · '+(r.nr||'')+'</div>' +
-  '</body></html>';
-  openPrint(html);
-}
-
-function printRechnung(r, ab, d) {
-  var datum   = document.getElementById('ab-datum').value || today();
-  var notizen = document.getElementById('ab-notiz').value;
-  var reNr    = 'RE-' + datum.replace(/-/g,'').slice(2) + '-' + String(Math.floor(Math.random()*900)+100);
-
-  // Pozisyonlar: önce tätigkeiten, sonra material
-  var positions = [];
-  d.taet.forEach((t,i) => {
-    positions.push({
-      pos: i+1, artnr: '', bez: t.desc,
-      menge: String(t.std).replace('.',',')+' Std.',
-      ep: fmt(d.satz), ges: fmt(t.sum)
-    });
-  });
-  d.mat.forEach((m,i) => {
-    positions.push({
-      pos: d.taet.length+i+1, artnr: '', bez: m.desc,
-      menge: '1', ep: fmt(m.preis), ges: fmt(m.preis)
-    });
-  });
-
-  var posRows = positions.map(p =>
-    '<tr><td>'+p.pos+'</td><td>'+p.artnr+'</td>' +
-    '<td>'+p.bez+'</td>' +
-    '<td style="text-align:center">'+p.menge+'</td>' +
-    '<td style="text-align:right">'+p.ep+'</td>' +
-    '<td style="text-align:right">'+p.ges+'</td></tr>'
-  ).join('');
-
-  var netto  = d.netto;
-  var mwst   = netto * 0.19;
-  var brutto = netto + mwst;
-
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+reNr+'</title>' +
-  '<style>' +
-  '@page{size:A4;margin:15mm 15mm 20mm 20mm}' +
-  '*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
-  'body{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#1a1a1a;line-height:1.4;margin:0;padding:0}' +
-  /* Header - logo sağ, adres sol */
-  '.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6mm}' +
-  '.top-left{font-size:9px;color:#666}' +
-  '.logo-box{text-align:right}' +
-  '.logo-box img{height:50px;width:auto}' +
-  '.logo-sub{font-size:8px;color:#555;text-align:right;margin-top:3px;line-height:1.5}' +
-  /* Absender-Zeile (küçük üst çizgi) */
-  '.absender{font-size:7.5px;color:#666;border-bottom:1px solid #999;padding-bottom:1mm;margin-bottom:4mm}' +
-  /* Empfänger */
-  '.empfaenger{font-size:11px;line-height:1.7;margin-bottom:8mm}' +
-  /* Rechnung başlık */
-  '.rech-title{font-size:26px;font-weight:700;text-align:right;margin-bottom:4mm}' +
-  /* Meta tablo */
-  '.meta-table{width:100%;border-collapse:collapse;border-top:1.5px solid #333;border-bottom:1.5px solid #333;margin-bottom:6mm}' +
-  '.meta-table td{padding:3px 6px;font-size:9px;vertical-align:top}' +
-  '.meta-table .lbl{color:#555;white-space:nowrap}' +
-  /* Einleitung */
-  '.einleitung{font-size:10px;margin-bottom:4mm}' +
-  /* Positions Tabelle */
-  '.pos-table{width:100%;border-collapse:collapse;margin-bottom:8mm}' +
-  '.pos-table th{border-top:1.5px solid #333;border-bottom:1.5px solid #333;padding:4px 6px;text-align:left;font-size:10px;font-weight:700;text-decoration:underline}' +
-  '.pos-table th.r{text-align:right}.pos-table th.c{text-align:center}' +
-  '.pos-table td{padding:5px 6px;font-size:10px;vertical-align:top;border-bottom:1px solid #eee}' +
-  '.pos-table td.r{text-align:right}.pos-table td.c{text-align:center}' +
-  /* Summen */
-  '.summen{margin-left:auto;width:280px;border-top:1.5px solid #333;padding-top:3mm;margin-bottom:6mm}' +
-  '.sum-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}' +
-  '.sum-row.bold{font-weight:700;font-size:12px;border-top:1.5px solid #333;margin-top:3px;padding-top:4px}' +
-  /* Zahlungsbedingungen */
-  '.zb{font-size:9px;margin-bottom:8mm;line-height:1.6}' +
-  /* Footer - 3 kolon */
-  '.footer{position:fixed;bottom:10mm;left:15mm;right:15mm;border-top:1px solid #bbb;padding-top:3mm;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:8px;line-height:1.7}' +
-  '</style></head><body>' +
-
-  /* TOP */
-  '<div class="top">' +
-  '<div class="top-left"></div>' +
-  '<div class="logo-box">' +
-  '<img src="https://tools.hasi-elektronic.de/logo.jpg" alt="HASI elektronic"><br>' +
-  '<div class="logo-sub">Büro- und Datentechnik,<br>Dienstleistungen, Schulungen,<br>Kommunikationstechnik</div>' +
-  '</div></div>' +
-
-  /* Absender-Zeile */
-  '<div class="absender">HASI-elektronic &nbsp; Grabenstrasse 18 &nbsp; DE71665 Vaihingen / Enz</div>' +
-
-  /* Empfänger + Rechnung-Titel nebeneinander */
-  '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8mm">' +
-  '<div class="empfaenger">' +
-  '<strong>'+(r.k_name||'—')+'</strong><br>' +
-  (r.k_email?r.k_email+'<br>':'') +
-  (r.k_adresse?r.k_adresse+'<br>':'') +
-  (r.k_plz_ort?'DE '+r.k_plz_ort:'') +
-  '</div>' +
-  '<div class="rech-title">Rechnung</div>' +
-  '</div>' +
-
-  /* Meta Tabelle */
-  '<table class="meta-table"><tr>' +
-  '<td class="lbl">Ansprechpartner:</td><td>Hamdi Güncavdi</td>' +
-  '<td class="lbl">Ihre Auftrags-Nr.:</td><td></td>' +
-  '<td class="lbl">Rechnungs-Nr.:</td><td><strong>'+reNr+'</strong></td>' +
-  '</tr><tr>' +
-  '<td class="lbl">Durchwahl:</td><td>+49 7042 16391</td>' +
-  '<td class="lbl">Ihr Auftrag vom:</td><td></td>' +
-  '<td class="lbl">Rechnungsdatum:</td><td>'+datum.split("-").reverse().join(".")+'</td>' +
-  '</tr><tr>' +
-  '<td class="lbl">Steuernummer:</td><td>55158 58035</td>' +
-  '<td class="lbl">Kunden-Nr.:</td><td></td>' +
-  '<td class="lbl">Lieferschein-Nr.:</td><td></td>' +
-  '</tr><tr>' +
-  '<td class="lbl">Unsere Ust.-Id.-Nr.:</td><td>DE 367591246</td>' +
-  '<td></td><td></td>' +
-  '<td class="lbl">Lieferscheindatum:</td><td></td>' +
-  '</tr></table>' +
-
-  /* Einleitung */
-  '<div class="einleitung">Wir erlauben uns, die nachfolgenden Positionen in Rechnung zu stellen.</div>' +
-
-  /* Positionen */
-  '<table class="pos-table">' +
-  '<thead><tr>' +
-  '<th style="width:30px">Pos</th><th style="width:60px">Art.Nr.</th>' +
-  '<th>Bezeichnung</th><th class="c" style="width:80px">Menge</th>' +
-  '<th class="r" style="width:80px">Einzelpreis</th><th class="r" style="width:80px">Gesamt</th>' +
-  '</tr></thead><tbody>' +
-  posRows +
-  (notizen?'<tr><td></td><td></td><td style="font-size:9px;color:#555;padding-top:6px">'+notizen+'</td><td></td><td></td><td></td></tr>':'') +
-  '</tbody></table>' +
-
-  /* Summen */
-  '<div class="summen">' +
-  '<div class="sum-row"><span>Summe Netto EUR</span><span>'+fmt(netto)+'</span></div>' +
-  '<div class="sum-row"><span>Steuer 19% EUR</span><span>'+fmt(mwst)+'</span></div>' +
-  '<div class="sum-row bold"><span>Rechnungsbetrag EUR</span><span>'+fmt(brutto)+'</span></div>' +
-  '</div>' +
-
-  /* Zahlungsbedingungen */
-  '<div class="zb">' +
-  'Zahlungsbedingungen: Zahlbar sofort rein netto nach Erhalt der Rechnung.<br>' +
-  'Die Ware bleibt bis zur vollständigen Bezahlung unser Eigentum.<br>' +
-  'Soweit nichts anderes angegeben ist, gilt der Zeitpunkt der Rechnungsaustellung als Zeitpunkt der Leistung.' +
-  '</div>' +
-
-  /* Footer */
-  '<div class="footer">' +
-  '<div><strong>HASI-elektronic</strong><br>Inhaber: Hamdi Güncavdi<br>Grabenstrasse 18<br>71665 Vaihingen/Enz<br>Tel: +49 7042 16391<br>Fax: +49 7042 16582<br>www.HASI-elektronic.de<br>E-Mail: Info@HASI-elektronic.de</div>' +
-  '<div><strong>Sparkasse Ludwigsburg</strong><br>Kto.Nr.: 0030248801<br>IBAN : DE71604500500030248801<br>BIC : SOLADES1LBG</div>' +
-  '<div>Gerichtsstand: Amtsgericht Vaihingen.<br>Es gelten ausschließlich unsere AGB.<br>Beanstandungen innerhalb 14 Tagen</div>' +
-  '</div>' +
-  '</body></html>';
-  openPrint(html);
-}
-
-function printArbeitsbericht(r, ab, d, isRechnung) {
-  var nr     = ab ? ab.ab_nr : ('AB-'+today().replace(/-/g,'')+'-XXX');
-  var datum  = document.getElementById('ab-datum').value || today();
-  var notizen = document.getElementById('ab-notiz').value;
-  var title  = isRechnung ? 'Rechnung' : 'Arbeitsbericht';
-  var rNr    = isRechnung ? ('RE-'+datum.replace(/-/g,'')+'-'+String(Math.floor(Math.random()*900)+100)) : nr;
-
-  var taetRows = d.taet.map((t,i) =>
-    '<tr><td>'+(i+1)+'</td><td>'+t.desc+'</td><td style="text-align:center">'+String(t.std).replace('.',',')+'</td>' +
-    '<td style="text-align:right">'+fmt(d.satz)+'</td><td style="text-align:right"><strong>'+fmt(t.sum)+'</strong></td></tr>'
-  ).join('');
-  var matRows = d.mat.length ?
-    '<tr style="background:#f8f8f8"><td colspan="5" style="font-size:9px;font-weight:700;color:#33afe2;text-transform:uppercase;padding:5px 10px">Material & Ersatzteile</td></tr>' +
-    d.mat.map((m,i) => '<tr><td>'+(d.taet.length+i+1)+'</td><td>'+m.desc+'</td><td style="text-align:center">1</td><td style="text-align:right">'+fmt(m.preis)+'</td><td style="text-align:right"><strong>'+fmt(m.preis)+'</strong></td></tr>').join('') : '';
-
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+rNr+'</title>' + pdfBase() + '</head><body>' +
-  '<div class="h"><img src="https://tools.hasi-elektronic.de/logo.jpg"><div class="hr"><strong>'+title+'</strong>Nr. '+rNr+'<br>Datum: '+datum+'<br>Auftrag: '+(r.nr||'—')+'</div></div>' +
-  '<div class="g2">' +
-  '<div class="f"><div class="l">Auftragnehmer</div><div class="v">Hasi Elektronic · Grabenstr. 18 · 71665 Vaihingen/Enz<br>info@hasi-elektronic.de · +49 7042 16391</div></div>' +
-  '<div class="f"><div class="l">Auftraggeber</div><div class="v"><strong>'+(r.k_name||'—')+'</strong><br>'+([r.k_adresse,r.k_plz_ort].filter(Boolean).join(', '))+'<br>'+(r.k_telefon||'')+'</div></div>' +
-  '<div class="f"><div class="l">Gerät</div><div class="v">'+(r.geraet_typ||'—')+' — '+(r.modell||'')+'</div></div>' +
-  '<div class="f"><div class="l">Stundensatz</div><div class="v">'+fmt(d.satz)+' netto</div></div>' +
-  '</div>' +
-  '<table><thead><tr><th style="width:30px">Pos.</th><th>Leistung</th><th style="width:55px;text-align:center">Std.</th><th style="width:95px;text-align:right">Stundensatz</th><th style="width:95px;text-align:right">Betrag</th></tr></thead>' +
-  '<tbody>'+taetRows+matRows+'</tbody></table>' +
-  '<div class="tot">' +
-  (d.matSum>0?'<div class="tr2"><span>Arbeitszeit netto</span><span>'+fmt(d.arbeit)+'</span></div><div class="tr2"><span>Material netto</span><span>'+fmt(d.matSum)+'</span></div>':'')+
-  '<div class="tr2"><span>Netto gesamt</span><span>'+fmt(d.netto)+'</span></div>' +
-  '<div class="tr2"><span>MwSt. 19%</span><span>'+fmt(d.netto*0.19)+'</span></div>' +
-  '<div class="tbig"><span>Gesamt Brutto</span><span>'+fmt(d.netto*1.19)+'</span></div>' +
-  '</div>' +
-  (notizen?'<div style="margin-top:10px;padding:7px 10px;background:#f0f7ff;border-left:3px solid #33afe2;font-size:10px">'+notizen+'</div>':'')+
-  '<div class="bank"><strong>Zahlungsbedingungen:</strong> Zahlbar innerhalb von 14 Tagen ohne Abzug<br>' +
-  '<strong>IBAN:</strong> DE71 6045 0050 0030 2488 01 &nbsp;·&nbsp; <strong>BIC:</strong> KRSPDE6K &nbsp;·&nbsp; <strong>USt-IdNr:</strong> DE367591246</div>' +
-  '<div class="ft">Hasi Elektronic · Grabenstr. 18 · 71665 Vaihingen/Enz · Inhaber: Hamdi Güncavdi</div>' +
-  '</body></html>';
-  openPrint(html);
-}
-
+// ── PDF BUILDER ────────────────────────────────────────────────────
 function openPrint(html) {
-  var blob = new Blob([html], {type: 'text/html'});
+  var blob = new Blob([html], {type:'text/html'});
   var url  = URL.createObjectURL(blob);
   var w    = window.open(url, '_blank');
   if (!w) {
-    // Popup blocker varsa iframe ile aç
-    var iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;border:none;background:#fff';
-    iframe.src = url;
-    document.body.appendChild(iframe);
-    var closeBtn = document.createElement('button');
-    closeBtn.textContent = '✕ Schließen';
-    closeBtn.style.cssText = 'position:fixed;top:10px;right:10px;z-index:10000;background:#e53e3e;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:14px;cursor:pointer;font-family:"DM Sans",sans-serif;font-weight:600';
-    closeBtn.onclick = function() { document.body.removeChild(iframe); document.body.removeChild(closeBtn); URL.revokeObjectURL(url); };
-    document.body.appendChild(closeBtn);
-  } else {
-    w.onload = function() { w.print(); };
+    // Popup blocker: iframe ile aç
+    var old = document.getElementById('_print_iframe');
+    if (old) old.remove();
+    var old2 = document.getElementById('_print_close');
+    if (old2) old2.remove();
+    var ifr = document.createElement('iframe');
+    ifr.id = '_print_iframe';
+    ifr.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;border:none;background:#fff';
+    ifr.src = url;
+    document.body.appendChild(ifr);
+    var cls = document.createElement('button');
+    cls.id = '_print_close';
+    cls.textContent = '✕ Schließen';
+    cls.style.cssText = 'position:fixed;top:12px;right:12px;z-index:10001;background:#e53e3e;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600';
+    cls.onclick = function() { ifr.remove(); cls.remove(); URL.revokeObjectURL(url); };
+    document.body.appendChild(cls);
   }
+}
+
+function pdfBase() {
+  return `<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;font-size:12px;color:#1a1a1a;padding:20mm 15mm}
+    h1{font-size:20px;font-weight:700;color:#33afe2;margin-bottom:4px}
+    h2{font-size:14px;font-weight:600;margin:16px 0 8px}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #33afe2;padding-bottom:12px;margin-bottom:16px}
+    .logo{font-size:22px;font-weight:800;color:#33afe2;letter-spacing:-0.5px}
+    .logo span{font-weight:300;color:#555;font-size:14px;display:block}
+    table{width:100%;border-collapse:collapse;margin-bottom:12px}
+    th{background:#f0f8ff;padding:6px 8px;text-align:left;font-size:11px;border-bottom:1px solid #dde3ea}
+    td{padding:6px 8px;border-bottom:1px solid #f0f0f0;font-size:12px}
+    .total-box{background:#f8f9fb;border:1px solid #dde3ea;border-radius:8px;padding:12px 16px;max-width:280px;margin-left:auto}
+    .total-row{display:flex;justify-content:space-between;padding:3px 0;font-size:12px}
+    .total-row.gross{font-weight:700;font-size:14px;border-top:1px solid #dde3ea;padding-top:6px;margin-top:4px}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+    .info-item{background:#f8f9fb;border:1px solid #dde3ea;border-radius:6px;padding:8px 10px}
+    .info-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px}
+    .info-val{font-size:12px;font-weight:600;margin-top:2px}
+    .footer{margin-top:30px;padding-top:10px;border-top:1px solid #dde3ea;font-size:10px;color:#888;text-align:center}
+    @media print{body{padding:0}button{display:none}}
+  </style>`;
+}
+
+function buildAuftragPDF(r) {
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Auftrag '+( r.nr||'')+'</title>'
+    + pdfBase()
+    + '</head><body>'
+    + '<div class="header"><div class="logo">HASI <span>elektronic</span></div>'
+    + '<div style="text-align:right"><div style="font-weight:700;font-size:14px">Reparaturauftrag</div>'
+    + '<div style="color:#888;font-size:11px">'+( r.nr||'—')+'</div>'
+    + '<div style="color:#888;font-size:11px">'+(r.datum||today())+'</div></div></div>'
+    + '<h2>Kundendaten</h2>'
+    + '<div class="info-grid">'
+    + '<div class="info-item"><div class="info-label">Name</div><div class="info-val">'+(r.k_name||'—')+'</div></div>'
+    + '<div class="info-item"><div class="info-label">Telefon</div><div class="info-val">'+(r.k_telefon||'—')+'</div></div>'
+    + '<div class="info-item"><div class="info-label">Adresse</div><div class="info-val">'+(r.k_adresse||'—')+'</div></div>'
+    + '<div class="info-item"><div class="info-label">PLZ / Ort</div><div class="info-val">'+(r.k_plz_ort||'—')+'</div></div>'
+    + '</div>'
+    + '<h2>Gerät</h2>'
+    + '<div class="info-grid">'
+    + '<div class="info-item"><div class="info-label">Gerätetyp</div><div class="info-val">'+(r.geraet_typ||'—')+'</div></div>'
+    + '<div class="info-item"><div class="info-label">Modell</div><div class="info-val">'+(r.modell||'—')+'</div></div>'
+    + '<div class="info-item"><div class="info-label">Fehler</div><div class="info-val">'+(r.fehler||'—')+'</div></div>'
+    + '<div class="info-item"><div class="info-label">Kostenlimit</div><div class="info-val">'+(r.kostenlimit ? r.kostenlimit+' €' : '—')+'</div></div>'
+    + '</div>'
+    + (r.beschreibung ? '<h2>Beschreibung</h2><p style="padding:8px;background:#f8f9fb;border-radius:6px">'+r.beschreibung+'</p>' : '')
+    + '<div class="footer">Hasi Elektronic · Grabenstraße 18 · 71665 Vaihingen/Enz · +49 7042 16391 · info@hasi-elektronic.de</div>'
+    + '<script>window.onload=function(){window.print()}<\/script>'
+    + '</body></html>';
+}
+
+function buildAbPDF(ab, r) {
+  var taet  = ab ? tryParse(ab.taetigkeiten) : [];
+  var mat   = ab ? tryParse(ab.material)     : [];
+  var satz  = ab ? (ab.stundensatz||96) : 96;
+  var total = ab ? (ab.total_netto||0) : 0;
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Arbeitsbericht '+(ab&&ab.ab_nr||'')+'</title>'
+    + pdfBase()
+    + '</head><body>'
+    + '<div class="header"><div class="logo">HASI <span>elektronic</span></div>'
+    + '<div style="text-align:right"><div style="font-weight:700;font-size:14px">Arbeitsbericht</div>'
+    + '<div style="color:#888;font-size:11px">'+(ab&&ab.ab_nr||'—')+'</div>'
+    + '<div style="color:#888;font-size:11px">'+(ab&&ab.datum||today())+'</div></div></div>'
+    + '<div class="info-grid">'
+    + '<div class="info-item"><div class="info-label">Kunde</div><div class="info-val">'+(r.k_name||'—')+'</div></div>'
+    + '<div class="info-item"><div class="info-label">Auftrag</div><div class="info-val">'+(r.nr||'—')+'</div></div>'
+    + '<div class="info-item"><div class="info-label">Gerät</div><div class="info-val">'+(r.geraet_typ||'')+(r.modell?' – '+r.modell:'')+'</div></div>'
+    + '<div class="info-item"><div class="info-label">Stundensatz</div><div class="info-val">'+fmt(satz)+'</div></div>'
+    + '</div>'
+    + (taet.length ? '<h2>Tätigkeiten</h2><table><thead><tr><th>Beschreibung</th><th style="width:80px;text-align:right">Std.</th><th style="width:100px;text-align:right">Betrag</th></tr></thead><tbody>'
+      + taet.map(t => '<tr><td>'+t.desc+'</td><td style="text-align:right">'+t.std+'</td><td style="text-align:right">'+fmt(t.std*satz)+'</td></tr>').join('')
+      + '</tbody></table>' : '')
+    + (mat.length ? '<h2>Material</h2><table><thead><tr><th>Bezeichnung</th><th style="width:100px;text-align:right">Preis</th></tr></thead><tbody>'
+      + mat.map(m => '<tr><td>'+m.desc+'</td><td style="text-align:right">'+fmt(m.preis)+'</td></tr>').join('')
+      + '</tbody></table>' : '')
+    + '<div class="total-box">'
+    + '<div class="total-row"><span>Netto</span><span>'+fmt(total)+'</span></div>'
+    + '<div class="total-row"><span>MwSt. 19%</span><span>'+fmt(total*0.19)+'</span></div>'
+    + '<div class="total-row gross"><span>Gesamt</span><span>'+fmt(total*1.19)+'</span></div>'
+    + '</div>'
+    + '<div class="footer">Hasi Elektronic · Grabenstraße 18 · 71665 Vaihingen/Enz · +49 7042 16391 · info@hasi-elektronic.de</div>'
+    + '<script>window.onload=function(){window.print()}<\/script>'
+    + '</body></html>';
+}
+
+function buildRechnungPDF(ab, r) {
+  var taet  = ab ? tryParse(ab.taetigkeiten) : [];
+  var mat   = ab ? tryParse(ab.material)     : [];
+  var satz  = ab ? (ab.stundensatz||96) : 96;
+  var total = ab ? (ab.total_netto||0) : 0;
+  var rechnNr = 'RE-' + (ab&&ab.ab_nr||'').replace('AB-','') || ('RE-'+Date.now());
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rechnung '+rechnNr+'</title>'
+    + pdfBase()
+    + '</head><body>'
+    + '<div class="header"><div class="logo">HASI <span>elektronic</span></div>'
+    + '<div style="text-align:right"><div style="font-weight:700;font-size:16px">RECHNUNG</div>'
+    + '<div style="color:#888;font-size:11px">Nr. '+rechnNr+'</div>'
+    + '<div style="color:#888;font-size:11px">Datum: '+(ab&&ab.datum||today())+'</div></div></div>'
+    + '<div style="margin-bottom:16px"><div style="font-weight:600">'+(r.k_name||'—')+'</div>'
+    + '<div style="color:#555">'+(r.k_adresse||'')+'</div>'
+    + '<div style="color:#555">'+(r.k_plz_ort||'')+'</div></div>'
+    + '<p style="margin-bottom:12px;color:#555">Vielen Dank für Ihren Auftrag. Wir erlauben uns, folgende Leistungen in Rechnung zu stellen:</p>'
+    + '<table><thead><tr><th>Beschreibung</th><th style="width:80px;text-align:right">Menge</th><th style="width:100px;text-align:right">Einzelpreis</th><th style="width:110px;text-align:right">Gesamtpreis</th></tr></thead><tbody>'
+    + taet.map(t => '<tr><td>'+t.desc+'</td><td style="text-align:right">'+t.std+' Std.</td><td style="text-align:right">'+fmt(satz)+'</td><td style="text-align:right">'+fmt(t.std*satz)+'</td></tr>').join('')
+    + mat.map(m => '<tr><td>'+m.desc+'</td><td style="text-align:right">1</td><td style="text-align:right">'+fmt(m.preis)+'</td><td style="text-align:right">'+fmt(m.preis)+'</td></tr>').join('')
+    + '</tbody></table>'
+    + '<div class="total-box">'
+    + '<div class="total-row"><span>Nettobetrag</span><span>'+fmt(total)+'</span></div>'
+    + '<div class="total-row"><span>zzgl. 19% MwSt.</span><span>'+fmt(total*0.19)+'</span></div>'
+    + '<div class="total-row gross"><span>Rechnungsbetrag</span><span>'+fmt(total*1.19)+'</span></div>'
+    + '</div>'
+    + '<div style="margin-top:24px;padding:12px;background:#f0f8ff;border-radius:8px;font-size:12px">'
+    + '<strong>Zahlungsziel:</strong> 14 Tage nach Rechnungsdatum<br>'
+    + '<strong>Bankverbindung:</strong> Bitte auf Anfrage</div>'
+    + '<div class="footer">Hasi Elektronic · Grabenstraße 18 · 71665 Vaihingen/Enz · +49 7042 16391 · info@hasi-elektronic.de<br>'
+    + 'USt-IdNr. auf Anfrage · Kleinunternehmer gemäß §19 UStG</div>'
+    + '<script>window.onload=function(){window.print()}<\/script>'
+    + '</body></html>';
 }
 </script>
 </body>
 </html>
-
