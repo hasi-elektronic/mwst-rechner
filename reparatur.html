@@ -722,12 +722,31 @@ function buildPdf(type,rep,ab,taet,mat){
   return lines.join('\n');
 }
 
-function openPdfWin(html){
-  var w=window.open('about:blank','_blank');
-  if(!w){alert('Bitte Popup-Blocker für diese Seite erlauben.');return;}
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
+function openPdfWin(htmlContent){
+  var ex=document.getElementById('pdf-modal');
+  if(ex) ex.remove();
+  var modal=document.createElement('div');
+  modal.id='pdf-modal';
+  modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;flex-direction:column';
+  var bar=document.createElement('div');
+  bar.style.cssText='background:#1a2a3a;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0';
+  var pb=document.createElement('button');
+  pb.textContent='Drucken';
+  pb.style.cssText='background:#33afe2;color:#fff;border:none;padding:9px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer';
+  pb.onclick=function(){var fr=document.getElementById('pdf-frame');if(fr&&fr.contentWindow)fr.contentWindow.print();};
+  var cb=document.createElement('button');
+  cb.textContent='Schliessen';
+  cb.style.cssText='margin-left:auto;background:rgba(255,255,255,.2);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px';
+  cb.onclick=function(){modal.remove();};
+  bar.appendChild(pb);
+  bar.appendChild(cb);
+  var frame=document.createElement('iframe');
+  frame.id='pdf-frame';
+  frame.style.cssText='flex:1;border:none;background:#fff';
+  frame.srcdoc=htmlContent;
+  modal.appendChild(bar);
+  modal.appendChild(frame);
+  document.body.appendChild(modal);
 }
 
 function getTaetMat(){
