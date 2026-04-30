@@ -968,6 +968,12 @@ window.addEventListener('load',function(){
   };
   loadDash();
   loadList();
+  // Her 30 saniyede otomatik guncelle
+  setInterval(function(){
+    var active=document.querySelector('.pg.on');
+    if(active&&active.id==='pg-dash') loadDash();
+    loadList();
+  }, 30000);
 });
 </script>
 </body>
