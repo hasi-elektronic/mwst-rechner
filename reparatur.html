@@ -734,42 +734,38 @@ function buildPdf(type,rep,ab,taet,mat){
   return lines.join('\n');
 }
 
-function openPdfWin(htmlContent){
+function openPdfWin(htmlContent,repData){
+  // iPad/Teams uyumlu: print.html'e yonlendir
+  var base='https://tools.hasi-elektronic.de/print.html';
+  if(repData){
+    // Veriyi URL param olarak gec
+    var enc=encodeURIComponent(JSON.stringify(repData));
+    if(enc.length<8000){
+      window.open(base+'?data='+enc,'_blank');
+      return;
+    }
+  }
+  // ID varsa ID ile ac
+  if(repData&&repData.id){
+    window.open(base+'?id='+repData.id,'_blank');
+    return;
+  }
+  // Fallback: eski modal
   var ex=document.getElementById('pdf-modal');
   if(ex) ex.remove();
   var modal=document.createElement('div');
   modal.id='pdf-modal';
   modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;flex-direction:column';
   var bar=document.createElement('div');
-  bar.style.cssText='background:#1a2a3a;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap';
-  // Print butonu
-  var pb=document.createElement('button');
-  pb.textContent='Drucken';
-  pb.style.cssText='background:#33afe2;color:#fff;border:none;padding:9px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer';
-  pb.onclick=pb.ontouchend=function(e){
-    if(e) e.preventDefault();
-    var fr=document.getElementById('pdf-frame');
-    if(fr&&fr.contentWindow){
-      try{fr.contentWindow.print();}
-      catch(err){
-        // iPad fallback: yeni sekme ac
-        var w=window.open('','_blank');
-        if(w){w.document.write(htmlContent);w.document.close();setTimeout(function(){try{w.print();}catch(e2){}},600);}
-        else{alert('Bitte Long-Press auf "Drucken" und "In neuem Tab öffnen" wählen.');}
-      }
-    }
-  };
-  // Kapat butonu
-  var cb=document.createElement('button');
-  cb.textContent='× Schließen';
-  cb.style.cssText='margin-left:auto;background:rgba(255,255,255,.2);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px';
-  cb.onclick=cb.ontouchend=function(e){if(e)e.preventDefault();modal.remove();};
-  bar.appendChild(pb);
-  bar.appendChild(cb);
-  // iframe
+  bar.style.cssText='background:#1a2a3a;padding:10px 16px;display:flex;gap:12px;flex-shrink:0';
+  var cb2=document.createElement('button');
+  cb2.textContent='× Schließen';
+  cb2.style.cssText='margin-left:auto;background:rgba(255,255,255,.2);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px';
+  cb2.onclick=function(){modal.remove();};
+  bar.appendChild(cb2);
   var frame=document.createElement('iframe');
   frame.id='pdf-frame';
-  frame.style.cssText='flex:1;border:none;background:#fff;-webkit-overflow-scrolling:touch';
+  frame.style.cssText='flex:1;border:none;background:#fff';
   frame.srcdoc=htmlContent;
   modal.appendChild(bar);
   modal.appendChild(frame);
@@ -954,7 +950,7 @@ function buildVorlagePdf(r){
     '<div class="fbar"><span>Hasi Elektronic · Graßenstraße 18 · 71665 Vaihingen/Enz · +49 7042 163914</span><span>'+NR+'</span></div>',
     '</div></body></html>'
   ];
-  openPdfWin(H.join(''));
+  openPdfWin(H.join(''),r);
 }
 
 
