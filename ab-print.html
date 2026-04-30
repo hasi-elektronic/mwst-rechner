@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arbeitsbericht / Rechnung</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,700;0,800;1,300&display=swap" rel="stylesheet">
+<style>
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none}}
+*{box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:16px;color:#2C3E50;font-size:10pt;background:#dce8f5}
+.no-print{position:fixed;bottom:20px;right:20px;display:flex;gap:10px;z-index:999}
+.no-print button{padding:12px 22px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-print{background:#0090c4;color:#fff;box-shadow:0 4px 12px rgba(0,144,196,.4)}
+.btn-close{background:#fff;color:#333;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.loading{text-align:center;padding:80px;font-size:16px;color:#555;font-family:monospace}
+.page{width:210mm;margin:0 auto;background:white;box-shadow:0 4px 24px rgba(0,0,0,.2);padding:16mm 14mm 24mm}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #4FC1E9;padding-bottom:10px;margin-bottom:16px}
+.htitle .big{font-family:Raleway,Arial,sans-serif;font-size:22pt;font-weight:800;color:#2C3E50;letter-spacing:2px}
+.htitle .sml{font-family:Raleway,Arial,sans-serif;font-size:18pt;font-weight:300;font-style:italic;color:#4FC1E9}
+.htitle .sub{font-size:8pt;color:#7F8C8D;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.hdr img{height:50px}
+.absender{font-size:7.5pt;color:#7F8C8D;border-bottom:1px solid #BDC3C7;padding-bottom:3px;margin-bottom:8px}
+.addr-row{display:flex;justify-content:space-between;margin-bottom:16px}
+.meta{text-align:right;font-size:9.5pt;line-height:1.8}
+.meta .nr{font-size:13pt;font-weight:700;color:#4FC1E9}
+table{width:100%;border-collapse:collapse}
+thead th{background:#4FC1E9;color:white;padding:7px 9px;text-align:left;font-size:9.5pt;font-weight:600}
+thead th.r{text-align:right}
+tbody tr:nth-child(even){background:#F0F9FF}
+tbody td{padding:6px 9px;border-bottom:1px solid #E8F0F5;font-size:9.5pt}
+.sum-wrap{display:flex;justify-content:flex-end;margin-top:4px}
+.sum-tbl{width:280px}
+.sum-tbl table{width:100%;border:1.5px solid #BDC3C7}
+.sum-tbl td{padding:5px 9px;font-size:9.5pt;border-bottom:1px solid #E8F0F5}
+.sum-tbl td.r{text-align:right;font-weight:600}
+.sum-total{background:#4FC1E9;color:white;font-size:11pt;font-weight:700}
+.sum-total td{border-bottom:none;padding:7px 9px}
+.zahlung{margin-top:16px;font-size:9.5pt;line-height:1.6;background:#F0F9FF;border-left:3px solid #4FC1E9;padding:10px 12px}
+.footer{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #BDC3C7;text-align:center;font-size:7pt;color:#7F8C8D;padding:5px}
+@media(max-width:600px){.page{width:100%;padding:10px}}
+</style>
+</head>
+<body>
+<div class="no-print">
+  <button class="btn-close" onclick="window.close()">&#x2715; Schlie&szlig;en</button>
+  <button class="btn-print" onclick="window.print()">&#x1F5A8; Drucken</button>
+</div>
+<div id="root"><div class="loading">Lade...</div></div>
+
+<script>
+var W='https://hasi-reparatur.hguencavdi.workers.dev';
+var A='Bearer 71665';
+var SATZ=84;
+var FIRMA={name:'Hasi Elektronic',str:'Gra\u00dfenstra\u00dfe 18',plz:'71665 Vaihingen an der Enz',tel:'07042 163914',mail:'info@hasi-elektronic.de',ust:'DE367591246',iban:'DE71 6045 0050 0030 2488 01',inhaber:'Hamdi G\u00fcncavdi'};
+
+function fmt(n){return Number(n||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' \u20ac';}
+function fmtD(s){if(!s)return '\u2014';var p=s.slice(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
+
+function render(rep, ab, type){
+  var taet=JSON.parse(ab.taetigkeiten||'[]');
+  var mat=JSON.parse(ab.material||'[]');
+  var isRec=type==='rechnung';
+  var arb=taet.reduce(function(s,t){return s+(parseFloat(t.std)||0)*SATZ;},0);
+  var matT=mat.reduce(function(s,m){return s+(parseFloat(m.preis)||0);},0);
+  var net=arb+matT, mwst=net*0.19, bru=net+mwst;
+  var nr=ab.ab_nr||(isRec?'RE':'AB')+'-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
+  var datum=ab.datum?fmtD(ab.datum):new Date().toLocaleDateString('de-DE');
+
+  var taetRows=taet.map(function(t){
+    return '<tr><td>'+(t.desc||'')+'</td><td style="text-align:right">'+((parseFloat(t.std)||0).toFixed(2).replace('.',','))+' Std.</td><td style="text-align:right">'+fmt((parseFloat(t.std)||0)*SATZ)+'</td></tr>';
+  }).join('');
+
+  var matRows=mat.length?
+    '<tr style="background:#E8F0F5"><td colspan="3" style="padding:5px 9px;font-weight:700;color:#4FC1E9;font-size:9pt">Material</td></tr>'+
+    mat.map(function(m){return '<tr><td>'+(m.desc||'')+'</td><td></td><td style="text-align:right">'+fmt(parseFloat(m.preis)||0)+'</td></tr>';}).join('')
+    :'';
+
+  document.title=(isRec?'Rechnung':'Arbeitsbericht')+' '+nr;
+
+  document.getElementById('root').innerHTML=[
+    '<div class="page">',
+    '<div class="hdr">',
+    '<div class="htitle"><div><span class="big">HASI</span> <span class="sml">Elektronic</span></div><div class="sub">IT-Service &amp; Dienstleistungen</div></div>',
+    '<img src="https://tools.hasi-elektronic.de/logo.jpg" alt="Hasi" onerror="this.style.display=\'none\'">',
+    '</div>',
+    '<div class="absender">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+'</div>',
+    '<div class="addr-row">',
+    '<div style="font-size:10pt;line-height:1.7"><b>'+(rep.k_name||'')+'</b><br>'+(rep.k_adresse||'')+(rep.k_plz_ort?'<br>'+rep.k_plz_ort:'')+(rep.k_telefon?'<br>Tel: '+rep.k_telefon:'')+'</div>',
+    '<div class="meta"><div class="nr">'+nr+'</div><div>'+(isRec?'Rechnung':'Arbeitsbericht')+'</div><div>Datum: '+datum+'</div><div>Auftrag: '+(rep.nr||'')+'</div></div>',
+    '</div>',
+    '<p style="font-size:9.5pt;margin-bottom:12px">Folgende T\u00e4tigkeiten wurden durchgef\u00fchrt:</p>',
+    '<table><thead><tr><th>Beschreibung</th><th class="r">Std.</th><th class="r">Betrag netto</th></tr></thead><tbody>'+taetRows+matRows+'</tbody></table>',
+    '<div class="sum-wrap"><div class="sum-tbl"><table><tbody>',
+    '<tr><td>Arbeitszeit netto</td><td class="r">'+fmt(arb)+'</td></tr>',
+    mat.length?'<tr><td>Material netto</td><td class="r">'+fmt(matT)+'</td></tr>':'',
+    '<tr><td>Zwischensumme netto</td><td class="r">'+fmt(net)+'</td></tr>',
+    '<tr><td>MwSt. 19%</td><td class="r">'+fmt(mwst)+'</td></tr>',
+    '<tr class="sum-total"><td>Gesamt brutto</td><td class="r">'+fmt(bru)+'</td></tr>',
+    '</tbody></table></div></div>',
+    isRec?'<div class="zahlung"><b>Zahlungsinformationen</b><br>Bitte \u00fcberweisen Sie den Betrag innerhalb von 14 Tagen.<br><br>Empf\u00e4nger: '+FIRMA.inhaber+'<br>IBAN: '+FIRMA.iban+'</div>':'',
+    '<div class="footer">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+' | Tel: '+FIRMA.tel+' | '+FIRMA.mail+' | USt: '+FIRMA.ust+'</div>',
+    '</div>'
+  ].join('');
+}
+
+// URL params
+var params=new URLSearchParams(window.location.search);
+var repId=params.get('rep');
+var abId=params.get('ab');
+var type=params.get('type')||'arbeitsbericht';
+
+if(repId&&abId){
+  Promise.all([
+    fetch(W+'/api/reparatur/'+repId,{headers:{Authorization:A}}).then(function(r){return r.json();}),
+    fetch(W+'/api/arbeitsbericht/'+abId,{headers:{Authorization:A}}).then(function(r){return r.json();})
+  ]).then(function(results){
+    render(results[0],results[1],type);
+  }).catch(function(e){
+    document.getElementById('root').innerHTML='<div class="loading" style="color:red">Fehler: '+e.message+'</div>';
+  });
+} else {
+  document.getElementById('root').innerHTML='<div class="loading" style="color:red">Fehlende Parameter (rep, ab).</div>';
+}
+</script>
+</body>
+</html>
