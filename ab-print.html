@@ -58,8 +58,17 @@ function fmt(n){return Number(n||0).toFixed(2).replace('.',',').replace(/\B(?=(\
 function fmtD(s){if(!s)return '\u2014';var p=s.slice(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 
 function render(rep, ab, type){
-  var taet=JSON.parse(ab.taetigkeiten||'[]');
-  var mat=JSON.parse(ab.material||'[]');
+  // Double-encoded JSON fix
+  function safeParse(s){
+    if(!s) return [];
+    try{
+      var r=JSON.parse(s);
+      if(typeof r==='string') r=JSON.parse(r);
+      return Array.isArray(r)?r:[];
+    }catch(e){return [];}
+  }
+  var taet=safeParse(ab.taetigkeiten);
+  var mat=safeParse(ab.material);
   var isRec=type==='rechnung';
   var arb=taet.reduce(function(s,t){return s+(parseFloat(t.std)||0)*SATZ;},0);
   var matT=mat.reduce(function(s,m){return s+(parseFloat(m.preis)||0);},0);
@@ -113,9 +122,16 @@ var type=params.get('type')||'arbeitsbericht';
 if(repId&&abId){
   Promise.all([
     fetch(W+'/api/reparatur/'+repId,{headers:{Authorization:A}}).then(function(r){return r.json();}),
-    fetch(W+'/api/arbeitsbericht/'+abId,{headers:{Authorization:A}}).then(function(r){return r.json();})
+    fetch(W+'/api/arbeitsbericht?reparatur_id='+repId,{headers:{Authorization:A}}).then(function(r){return r.json();})
   ]).then(function(results){
-    render(results[0],results[1],type);
+    var rep=results[0];
+    var abs=results[1];
+    var ab=Array.isArray(abs)?abs.find(function(x){return String(x.id)===String(abId);}):null;
+    if(!ab){
+      document.getElementById('root').innerHTML='<div class="loading" style="color:red">Arbeitsbericht nicht gefunden.</div>';
+      return;
+    }
+    render(rep,ab,type);
   }).catch(function(e){
     document.getElementById('root').innerHTML='<div class="loading" style="color:red">Fehler: '+e.message+'</div>';
   });
