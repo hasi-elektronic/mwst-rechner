@@ -621,13 +621,11 @@ function buildPdf(type,rep,ab,taet,mat){
 }
 
 function openPdfWin(html){
-  var blob=new Blob([html],{type:'text/html'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.target='_blank';
-  a.click();
-  setTimeout(function(){URL.revokeObjectURL(url);},5000);
+  var w=window.open('about:blank','_blank');
+  if(!w){alert('Bitte Popup-Blocker für diese Seite erlauben.');return;}
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
 }
 
 function getTaetMat(){
