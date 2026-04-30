@@ -800,12 +800,12 @@ document.getElementById('det-zettel').onclick=function(){
 };
 
 document.getElementById('ab-pdf').onclick=function(){
-  var tm=getTaetMat();
-  openPdfWin(buildPdf('arbeitsbericht',cur,curAb,tm.taet,tm.mat),cur);
+  if(!cur||!curAb||!curAb.id){alert('Bitte zuerst Arbeitsbericht speichern!');return;}
+  window.open('https://tools.hasi-elektronic.de/ab-print.html?rep='+cur.id+'&ab='+curAb.id+'&type=arbeitsbericht','_blank');
 };
 document.getElementById('ab-rec').onclick=function(){
-  var tm=getTaetMat();
-  openPdfWin(buildPdf('rechnung',cur,curAb,tm.taet,tm.mat),cur);
+  if(!cur||!curAb||!curAb.id){alert('Bitte zuerst Arbeitsbericht speichern!');return;}
+  window.open('https://tools.hasi-elektronic.de/ab-print.html?rep='+cur.id+'&ab='+curAb.id+'&type=rechnung','_blank');
 };
 
 // KALENDER
