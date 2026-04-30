@@ -219,7 +219,7 @@ tbody tr:last-child td{border-bottom:none}
     </div>
     <div style="display:flex;gap:12px;align-items:center">
       <button class="btn p" id="f-send">&#x2713; Auftrag absenden</button>
-      <button class="btn" id="f-print" style="display:none">&#x1F4C4; Auftragszettel drucken</button>
+      <button class="btn" id="f-print">&#x1F4C4; Auftragszettel drucken</button>
       <span id="f-msg" style="font-size:13px;font-weight:600"></span>
     </div>
   </div>
@@ -761,8 +761,10 @@ document.getElementById('kal-next').onclick=function(){kalM++;if(kalM>11){kalM=0
 
 
 document.getElementById('f-print').onclick = function(){
-  if(!lastSaved) return;
-  var r = lastSaved;
+  // Direkt formdan oku
+  lastSaved = {k_name:document.getElementById('f-name').value||'',k_telefon:document.getElementById('f-tel').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,geraet_typ:document.getElementById('f-typ').value,modell:document.getElementById('f-mod').value,fehler:document.getElementById('f-fehler').value,kostenlimit:document.getElementById('f-limit').value,win_passwort:document.getElementById('f-pw').value,datum:document.getElementById('f-dat').value,nr:'',status:'Neu',id:null};
+  var r=lastSaved;
+  if(!r.k_name&&!r.geraet_typ){alert('Bitte mindestens Name oder Ger\u00e4te-Typ eingeben.');return;}
   var sc={'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'};
   var col=sc[r.status||'Neu']||'#33afe2';
   var lines=[
