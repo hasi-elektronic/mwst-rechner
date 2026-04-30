@@ -215,7 +215,7 @@ tbody tr:last-child td{border-bottom:none}
 
 <!-- NEUER AUFTRAG -->
 <div id="pg-form" class="pg">
-  <div class="wrap" style="padding-top:20px;padding-bottom:60px">
+  <div class="wrap" style="padding-top:20px;padding-bottom:60px;-webkit-overflow-scrolling:touch">
     <div class="vl">
       <div class="vl-header">
         <img class="vl-logo" id="vl-logo-img" src="" alt="Hasi">
@@ -481,7 +481,7 @@ function renderDashTbl(data,q){
   q=q.toLowerCase();
   var rows=data.filter(function(r){return !q||[r.k_name,r.nr,r.geraet_typ].some(function(v){return (v||'').toLowerCase().includes(q);});});
   document.getElementById('dash-tbody').innerHTML=rows.map(function(r){
-    return '<tr onclick="openDet('+r.id+')"><td style="font-family:DM Mono,monospace;font-size:11px;color:var(--hasi)">'+(r.nr||'')+'</td><td>'+fmtD(r.datum)+'</td><td>'+(r.k_name||'')+'</td><td>'+(r.geraet_typ||'')+'</td><td>'+sbadge(r.status)+'</td><td class="r" style="color:var(--green);font-weight:600">'+fmt(r.umsatz_netto)+'</td></tr>';
+    return '<tr onclick="openDet('+r.id+')" ontouchend="event.preventDefault();openDet('+r.id+')"><td style="font-family:DM Mono,monospace;font-size:11px;color:var(--hasi)">'+(r.nr||'')+'</td><td>'+fmtD(r.datum)+'</td><td>'+(r.k_name||'')+'</td><td>'+(r.geraet_typ||'')+'</td><td>'+sbadge(r.status)+'</td><td class="r" style="color:var(--green);font-weight:600">'+fmt(r.umsatz_netto)+'</td></tr>';
   }).join('')||'<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--m)">Keine Eintr\u00e4ge</td></tr>';
 }
 document.getElementById('dash-q').oninput=function(){if(allDash) renderDashTbl(allDash.history,this.value);};
@@ -516,7 +516,7 @@ function renderList(){
   var el=document.getElementById('list-body');
   if(!data.length){el.innerHTML='<div style="padding:30px;text-align:center;color:var(--m)">Keine Eintr\u00e4ge</div>';return;}
   el.innerHTML=data.map(function(r){
-    return '<div class="row" onclick="openDet('+r.id+')">'
+    return '<div class="row" onclick="openDet('+r.id+')" ontouchend="openDet('+r.id+')">'
       +'<div class="nr">'+(r.nr||'\u2014')+'</div>'
       +'<div class="nm">'+(r.k_name||'\u2014')+'<span class="sub">'+(r.geraet_typ||'')+(r.modell?' \u00b7 '+r.modell:'')+'</span></div>'
       +'<div class="dt">'+fmtD(r.datum)+'</div>'
@@ -570,7 +570,8 @@ async function loadAbList(){
       return '<div class="ab-item" data-ab-id="'+ab.id+'"><div><div style="font-family:DM Mono,monospace;font-size:12px;color:var(--hasi)">'+(ab.ab_nr||'\u2014')+'</div><div style="font-size:12px;color:var(--m)">'+(ab.datum||'')+'</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--green)">'+fmt(ab.total_netto||0)+'</div></div></div>';
     }).join('');
     document.querySelectorAll('.ab-item').forEach(function(el){
-      el.onclick=function(){
+      el.onclick=el.ontouchend=function(e){
+        if(e) e.preventDefault();
         var ab=wrap._abs.find(function(a){return a.id===parseInt(el.dataset.abId);});
         if(ab) openAbForm(ab);
       };
@@ -740,20 +741,35 @@ function openPdfWin(htmlContent){
   modal.id='pdf-modal';
   modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;flex-direction:column';
   var bar=document.createElement('div');
-  bar.style.cssText='background:#1a2a3a;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0';
+  bar.style.cssText='background:#1a2a3a;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap';
+  // Print butonu
   var pb=document.createElement('button');
   pb.textContent='Drucken';
   pb.style.cssText='background:#33afe2;color:#fff;border:none;padding:9px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer';
-  pb.onclick=function(){var fr=document.getElementById('pdf-frame');if(fr&&fr.contentWindow)fr.contentWindow.print();};
+  pb.onclick=pb.ontouchend=function(e){
+    if(e) e.preventDefault();
+    var fr=document.getElementById('pdf-frame');
+    if(fr&&fr.contentWindow){
+      try{fr.contentWindow.print();}
+      catch(err){
+        // iPad fallback: yeni sekme ac
+        var w=window.open('','_blank');
+        if(w){w.document.write(htmlContent);w.document.close();setTimeout(function(){try{w.print();}catch(e2){}},600);}
+        else{alert('Bitte Long-Press auf "Drucken" und "In neuem Tab öffnen" wählen.');}
+      }
+    }
+  };
+  // Kapat butonu
   var cb=document.createElement('button');
-  cb.textContent='Schliessen';
+  cb.textContent='× Schließen';
   cb.style.cssText='margin-left:auto;background:rgba(255,255,255,.2);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px';
-  cb.onclick=function(){modal.remove();};
+  cb.onclick=cb.ontouchend=function(e){if(e)e.preventDefault();modal.remove();};
   bar.appendChild(pb);
   bar.appendChild(cb);
+  // iframe
   var frame=document.createElement('iframe');
   frame.id='pdf-frame';
-  frame.style.cssText='flex:1;border:none;background:#fff';
+  frame.style.cssText='flex:1;border:none;background:#fff;-webkit-overflow-scrolling:touch';
   frame.srcdoc=htmlContent;
   modal.appendChild(bar);
   modal.appendChild(frame);
