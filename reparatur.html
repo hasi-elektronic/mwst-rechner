@@ -323,39 +323,7 @@ tbody tr:last-child td{border-bottom:none}
 </head>
 <body>
 
-<div id="auth-screen">
-  <div class="auth-box">
-    <img id="__logo_img_1" src="" alt="Hasi Elektronic">
-    <div class="auth-sub">Reparatur-System</div>
-    <input class="auth-inp" type="password" inputmode="numeric" id="auth-inp" placeholder="Passwort">
-    <div class="auth-err" id="auth-err"></div>
-    <button class="auth-btn" id="auth-btn">Einloggen</button>
-  </div>
-</div>
 
-<div id="app">
-  <div class="tab-nav">
-    <div class="tab-nav-inner">
-      <img id="__logo_img_1" src="" class="tab-logo" alt="Hasi">
-      <button class="tab-btn active" onclick="showTab('tab-dash')">&#x1F4CA; Dashboard</button>
-      <button class="tab-btn" onclick="showTab('tab-list')">&#x1F4CB; Auftr&auml;ge</button>
-      <button class="tab-btn" onclick="showTab('tab-form')">&#xFF0B; Neuer Auftrag</button>
-      <span id="tab-detail-btn" style="display:none"><button class="tab-btn" onclick="showTab('tab-detail')">&#x1F527; Auftrag</button></span>
-      <span id="tab-ab-btn" style="display:none"><button class="tab-btn" onclick="showTab('tab-ab')">&#x1F4C4; Arbeitsbericht</button></span>
-    </div>
-  </div>
-
-  <div id="tab-dash" class="tab-page active">
-    <div class="page-inner">
-      <div class="topbar"><h1>Hasi <span>Dashboard</span></h1><span class="badge-live" id="last-update">&mdash;</span><button class="fbtn" id="btn-refresh" style="margin-left:auto">&#x21BB;</button></div>
-      <div id="dash-loading" style="text-align:center;padding:60px;color:var(--m);font-family:'DM Mono',monospace;font-size:13px">Lade...</div>
-      <div id="dash-content" style="display:none">
-        <div class="kpi-grid">
-          <div class="kpi" style="--accent:#33afe2"><div class="kpi-icon">&#x1F4CB;</div><div class="kpi-val" id="k-gesamt">&mdash;</div><div class="kpi-label">Gesamt Auftr&auml;ge</div></div>
-          <div class="kpi" style="--accent:#0d9f6e"><div class="kpi-icon">&#x1F4B6;</div><div class="kpi-val" id="k-umsatz">&mdash;</div><div class="kpi-label">Umsatz Netto</div><div class="kpi-sub" id="k-umsatz-brutto">&mdash;</div></div>
-          <div class="kpi" style="--accent:#d97706"><div class="kpi-icon">&#x1F527;</div><div class="kpi-val" id="k-offen">&mdash;</div><div class="kpi-label">Offen</div></div>
-          <div class="kpi" style="--accent:#7c3aed"><div class="kpi-icon">&#x2705;</div><div class="kpi-val" id="k-done">&mdash;</div><div class="kpi-label">Abgeschlossen</div></div>
-        </div>
         <div class="charts-row">
           <div class="card"><div class="card-title">Monatlicher Umsatz</div><canvas id="chart-monthly" height="200"></canvas></div>
           <div class="card"><div class="card-title">Status</div><canvas id="chart-status" height="160"></canvas><div class="donut-legend" id="legend-status"></div></div>
@@ -574,16 +542,7 @@ document.getElementById('pw-input') && document.getElementById('pw-input').addEv
 // pw-overlay içindeki inline onclick checkPw() çağırıyor, onu da tanımla
 function checkPw() { doAuth(); }
 
-function doAuth() {
-  const v = (document.getElementById('pw-input') || {value:''}).value.trim();
-  if (v === '71665') {
-    sessionStorage.setItem('hasi-reparatur-auth', '1');
-    showForm();
-  } else {
-    const err = document.getElementById('pw-err');
-    if (err) { err.textContent = 'Falsches Passwort'; document.getElementById('pw-input').value = ''; setTimeout(() => err.textContent = '', 2000); }
-  }
-}
+
 
 // ── DATUM ──────────────────────────────────────────────────────────
 document.getElementById('f-datum').value = new Date().toISOString().split('T')[0];
@@ -779,27 +738,10 @@ var WORKER = 'https://hasi-reparatur.hguencavdi.workers.dev';
 var AUTH   = 'Bearer 71665';
 var allRep=[], curRep=null, curAb=null, filterVal='all', abRowId=0, allData=null;
 
-function doAuth() {
-  var v=document.getElementById('auth-inp').value.trim();
-  if(v==='71665'){
-    localStorage.setItem('hasi-rep-ok','1');
-    document.getElementById('auth-screen').style.display='none';
-    document.getElementById('app').style.display='block';
-    initApp();
-  } else {
-    var e=document.getElementById('auth-err');
-    e.textContent='Falsches Passwort';
-    document.getElementById('auth-inp').value='';
-    setTimeout(()=>e.textContent='',2000);
-  }
-}
-document.getElementById('auth-btn').addEventListener('click',doAuth);
-document.getElementById('auth-inp').addEventListener('keydown',e=>{ if(e.key==='Enter') doAuth(); });
-if(localStorage.getItem('hasi-rep-ok')==='1'){
-  document.getElementById('auth-screen').style.display='none';
-  document.getElementById('app').style.display='block';
-  initApp();
-}
+
+
+
+
 
 function showTab(id){
   document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
@@ -811,6 +753,7 @@ function showTab(id){
 }
 
 function initApp(){
+  document.getElementById('app').style.display='block';
   loadDashboard();
   loadList();
   var el=document.getElementById('f-datum'); if(el) el.value=new Date().toISOString().split('T')[0];
@@ -1412,6 +1355,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var el=document.getElementById(id); if(el) el.src=window.__LOGO;
   });
 });
+initApp();
 </script>
 </body></html>';
 }
@@ -1472,6 +1416,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var el=document.getElementById(id); if(el) el.src=window.__LOGO;
   });
 });
+initApp();
 </script>
 </body></html>';
 }
@@ -1518,6 +1463,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var el=document.getElementById(id); if(el) el.src=window.__LOGO;
   });
 });
+initApp();
 </script>
 </body></html>';
 }
@@ -1774,6 +1720,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var el=document.getElementById(id); if(el) el.src=window.__LOGO;
   });
 });
+initApp();
 </script>
 </body></html>`;
   const blob  = new Blob([html], {type:'text/html'});
@@ -1866,6 +1813,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var el=document.getElementById(id); if(el) el.src=window.__LOGO;
   });
 });
+initApp();
 </script>
 </body>
 </html>
