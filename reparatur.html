@@ -108,6 +108,39 @@ tbody tr:last-child td{border-bottom:none}
 .kal-dot.s-off{background:#d9770622;color:#d97706;border:1px solid #d9770644}
 .kal-dot.s-fer{background:#0d9f6e22;color:#0d9f6e;border:1px solid #0d9f6e44}
 .kal-dot.s-alarm{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+.vl{max-width:900px;margin:0 auto;background:#fff;border:1.5px solid var(--b);border-radius:16px;overflow:hidden}
+.vl-header{display:flex;justify-content:space-between;align-items:flex-start;padding:22px 28px 16px;border-bottom:2px solid var(--b)}
+.vl-logo{height:52px}
+.vl-title{text-align:right}
+.vl-title h2{font-size:19px;font-weight:800;letter-spacing:2px;color:var(--t);text-transform:uppercase;margin:0}
+.vl-title .nr{font-size:11px;color:var(--hasi);font-family:'DM Mono',monospace;margin-top:4px}
+.vl-title .dat-row{display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-top:8px;font-size:13px}
+.vl-notice{background:#fffbeb;border-left:3px solid #d97706;padding:10px 28px;font-size:12px;color:#92400e}
+.vl-body{padding:22px 28px}
+.vl-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:18px}
+.vl-sec{margin-bottom:18px}
+.vl-sec-title{font-size:10px;font-family:'DM Mono',monospace;color:var(--hasi);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:5px;border-bottom:1.5px solid var(--b)}
+.vl-auftnehmer{background:var(--bg);border:1.5px solid var(--b);border-radius:10px;padding:13px;font-size:13px;line-height:1.8}
+.vl-inp{width:100%;background:#fff;border:1.5px solid var(--b2);border-radius:8px;color:var(--t);padding:9px 12px;font-size:13px;font-family:inherit;outline:none;margin-bottom:9px}
+.vl-inp:focus{border-color:var(--hasi)}
+.vl-inp.warn{border-color:#d97706;background:#fffbeb}
+.vl-lbl{font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;display:block}
+.vl-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vl-stars{display:flex;gap:6px;margin:4px 0 10px}
+.vl-star{font-size:24px;cursor:pointer;color:#d1d5db;transition:color .15s;line-height:1}
+.vl-star.on{color:#f59e0b}
+.vl-cb-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.vl-cb{display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--b);border-radius:8px;padding:9px 12px;cursor:pointer;font-size:13px;transition:all .15s;user-select:none}
+.vl-cb:hover{border-color:var(--hasi);background:var(--hasi-soft)}
+.vl-cb input{width:16px;height:16px;accent-color:var(--hasi);cursor:pointer;flex-shrink:0;pointer-events:none}
+.vl-cb.checked{border-color:var(--hasi);background:var(--hasi-soft)}
+.vl-agb{display:flex;align-items:flex-start;gap:10px;background:var(--bg);border:1.5px solid var(--b);border-radius:10px;padding:12px 14px;font-size:12px;margin-bottom:18px;cursor:pointer}
+.vl-agb input{margin-top:2px;width:16px;height:16px;accent-color:var(--hasi);flex-shrink:0}
+.vl-sig{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:18px}
+.vl-sig-box .line{border-bottom:1.5px solid var(--t);height:44px;margin-bottom:6px}
+.vl-sig-box .lbl{font-size:11px;color:var(--m);text-align:center}
+.vl-footer-bar{background:var(--bg);border-top:1.5px solid var(--b);padding:10px 28px;font-size:11px;color:var(--m);display:flex;justify-content:space-between}
+.vl-actions{display:flex;gap:10px;padding:16px 28px;border-top:1.5px solid var(--b);background:#fff;flex-wrap:wrap}
 .kh{padding:8px;text-align:center;font-size:10px;font-family:"DM Mono",monospace;color:var(--m);text-transform:uppercase;font-weight:600}
 </style>
 </head>
@@ -182,45 +215,106 @@ tbody tr:last-child td{border-bottom:none}
 
 <!-- NEUER AUFTRAG -->
 <div id="pg-form" class="pg">
-  <div class="wrap">
-    <div class="topbar"><h1>Neuer <span>Auftrag</span></h1></div>
-    <div class="card">
-      <div class="grid2">
-        <div>
-          <label>Kunde Name *</label><input class="inp" id="f-name" placeholder="Max Mustermann">
-          <label>Telefon</label><input class="inp" id="f-tel" placeholder="+49...">
-          <label>E-Mail</label><input class="inp" id="f-mail" placeholder="kunde@example.de">
-        </div>
-        <div>
-          <label>Adresse</label><input class="inp" id="f-adr" placeholder="Musterstr. 1">
-          <label>PLZ / Ort</label><input class="inp" id="f-plz" placeholder="71665 Vaihingen">
-          <label>Datum</label><input class="inp" id="f-dat" type="date">
+  <div class="wrap" style="padding-top:20px;padding-bottom:60px">
+    <div class="vl">
+      <div class="vl-header">
+        <img class="vl-logo" id="vl-logo-img" src="" alt="Hasi">
+        <div class="vl-title">
+          <h2>Reparaturauftrag</h2>
+          <div class="nr" id="vl-nr">Nr: &mdash;</div>
+          <div class="dat-row"><span>Datum:</span><input class="vl-inp" id="f-dat" type="date" style="width:155px;margin:0;padding:6px 10px"></div>
         </div>
       </div>
-    </div>
-    <div class="card">
-      <div class="grid2">
-        <div>
-          <label>Ger&auml;te-Typ *</label>
-          <select class="inp" id="f-typ">
-            <option value="">-- bitte w&auml;hlen --</option>
-            <option>Laptop / Notebook</option><option>Desktop PC</option><option>All-in-One PC</option>
-            <option>Tablet</option><option>Smartphone</option><option>Drucker / Scanner</option>
-            <option>Monitor</option><option>Sonstiges</option>
-          </select>
-          <label>Modell</label><input class="inp" id="f-mod" placeholder="z.B. Dell Latitude 5510">
-          <label>Windows Passwort</label><input class="inp" id="f-pw" placeholder="Nur falls erforderlich">
+      <div class="vl-notice">Bitte f&uuml;llen Sie das Formular leserlich aus. Die Rechnung wird auf den angegebenen Namen ausgestellt und kann nachtr&auml;glich nicht ge&auml;ndert werden.</div>
+      <div class="vl-body">
+        <div class="vl-cols">
+          <div class="vl-sec">
+            <div class="vl-sec-title">Auftragnehmer</div>
+            <div class="vl-auftnehmer"><b>Hasi Elektronic</b><br>Gra&szlig;enstra&szlig;e 18 &middot; 71665 Vaihingen/Enz<br>Tel: +49 7042 163914<br>info@hasi-elektronic.de<br>www.hasi-elektronic.de</div>
+          </div>
+          <div class="vl-sec">
+            <div class="vl-sec-title">Auftraggeber</div>
+            <span class="vl-lbl">Name *</span><input class="vl-inp" id="f-name" placeholder="Vor- und Nachname">
+            <span class="vl-lbl">Adresse</span><input class="vl-inp" id="f-adr" placeholder="Stra&szlig;e und Hausnummer">
+            <span class="vl-lbl">PLZ / Ort</span><input class="vl-inp" id="f-plz" placeholder="71665 Vaihingen/Enz">
+            <div class="vl-row2">
+              <div><span class="vl-lbl">Telefon</span><input class="vl-inp" id="f-tel" placeholder="+49 ..."></div>
+              <div><span class="vl-lbl">E-Mail</span><input class="vl-inp" id="f-mail" placeholder="name@beispiel.de"></div>
+            </div>
+          </div>
         </div>
-        <div>
-          <label>Fehlerbeschreibung</label><textarea class="inp" id="f-fehler" rows="4" placeholder="Was ist das Problem?"></textarea>
-          <label>Kostenlimit (€)</label><input class="inp" id="f-limit" type="number" placeholder="z.B. 150">
+        <div class="vl-cols">
+          <div class="vl-sec">
+            <div class="vl-sec-title">Ger&auml;teinformation</div>
+            <span class="vl-lbl">Ger&auml;te-Typ</span>
+            <select class="vl-inp" id="f-typ"><option value="">&mdash; bitte w&auml;hlen &mdash;</option><option>Laptop / Notebook</option><option>Desktop PC</option><option>All-in-One PC</option><option>Tablet</option><option>Smartphone</option><option>Drucker / Scanner</option><option>Monitor</option><option>Sonstiges</option></select>
+            <span class="vl-lbl">Modellbezeichnung</span><input class="vl-inp" id="f-mod" placeholder="z.B. Dell Latitude 5510">
+            <span class="vl-lbl" style="color:#d97706">Windows Passwort</span><input class="vl-inp warn" id="f-pw" placeholder="Nur falls erforderlich">
+            <span class="vl-lbl">Allgemeiner Zustand</span>
+            <div class="vl-stars" id="vl-stars"><span class="vl-star" data-v="1">&#9733;</span><span class="vl-star" data-v="2">&#9733;</span><span class="vl-star" data-v="3">&#9733;</span><span class="vl-star" data-v="4">&#9733;</span><span class="vl-star" data-v="5">&#9733;</span></div>
+            <div style="font-size:11px;color:var(--m)" id="vl-star-lbl">&mdash; bitte bewerten</div>
+          </div>
+          <div>
+            <div class="vl-sec">
+              <div class="vl-sec-title">Kostenlimit</div>
+              <span class="vl-lbl">Maximaler Betrag (&euro;)</span><input class="vl-inp" id="f-limit" type="number" placeholder="z.B. 150">
+              <div style="font-size:11px;color:var(--m);margin-top:-4px">Bis zu diesem Betrag wird die Reparatur ohne R&uuml;ckfrage durchgef&uuml;hrt.</div>
+            </div>
+            <div class="vl-sec">
+              <div class="vl-sec-title">Zustand &amp; Sch&auml;den</div>
+              <span class="vl-lbl">Sichtbare Sch&auml;den vor der Reparatur</span>
+              <textarea class="vl-inp" id="f-schaeden" rows="3" placeholder="z.B. Displayriss, Geh&auml;usekratzer ..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="vl-cols">
+          <div class="vl-sec">
+            <div class="vl-sec-title">Beigelegtes Zubeh&ouml;r</div>
+            <div class="vl-cb-grid">
+              <label class="vl-cb"><input type="checkbox" id="cb-akku"> Akku</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-netzteil"> Netzteil</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-tasche"> Tasche / Rucksack</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-hdd"> Festplatte / SSD</label>
+            </div>
+            <span class="vl-lbl" style="margin-top:10px">Sonstiges Zubeh&ouml;r</span>
+            <input class="vl-inp" id="f-zubehoer" placeholder="z.B. Maus, Tastatur ...">
+          </div>
+          <div class="vl-sec">
+            <div class="vl-sec-title">Fehlerbeschreibung</div>
+            <div class="vl-cb-grid">
+              <label class="vl-cb"><input type="checkbox" id="cb-keine"> Keine Reaktion</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-wupdate"> Windows Update</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-akku2"> Akku tausch</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-display"> Display tausch</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-boot"> Probleme b. Booten</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-sw"> Softwareprobleme</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-absturz"> Windows Absturz</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-viren"> Viren &amp; Trojaner</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-daten"> Datenrettung</label>
+              <label class="vl-cb"><input type="checkbox" id="cb-sonst2"> Sonstiges</label>
+            </div>
+          </div>
+        </div>
+        <div class="vl-sec">
+          <div class="vl-sec-title">Weitere Beschreibung</div>
+          <textarea class="vl-inp" id="f-fehler" rows="3" placeholder="Detaillierte Beschreibung des Problems ..."></textarea>
+        </div>
+        <label class="vl-agb"><input type="checkbox" id="f-agb"><span>Ich akzeptiere die <b>AGB der Hasi Elektronic</b> &mdash; www.hasi-elektronic.de</span></label>
+        <div class="vl-sig">
+          <div class="vl-sig-box"><div class="line"></div><div class="lbl">Ort, Datum</div></div>
+          <div class="vl-sig-box"><div class="line"></div><div class="lbl">Unterschrift Auftraggeber</div></div>
         </div>
       </div>
-    </div>
-    <div style="display:flex;gap:12px;align-items:center">
-      <button class="btn p" id="f-send">&#x2713; Auftrag absenden</button>
-      <button class="btn" id="f-print">&#x1F4C4; Auftragszettel drucken</button>
-      <span id="f-msg" style="font-size:13px;font-weight:600"></span>
+      <div class="vl-footer-bar">
+        <span>Hasi Elektronic &middot; Gra&szlig;enstra&szlig;e 18 &middot; 71665 Vaihingen/Enz &middot; +49 7042 163914 &middot; info@hasi-elektronic.de</span>
+        <span id="vl-nr-footer"></span>
+      </div>
+      <div class="vl-actions">
+        <button class="btn" id="f-clear">Eingabe l&ouml;schen</button>
+        <button class="btn p" id="f-print">&#x1F5A8; Drucken / PDF</button>
+        <button class="btn" id="f-send" style="background:#0d9f6e;color:#fff;border-color:#0d9f6e">&#x2713; Absenden &amp; Speichern</button>
+        <span id="f-msg" style="font-size:13px;font-weight:600;margin-left:8px"></span>
+      </div>
     </div>
   </div>
 </div>
@@ -488,20 +582,28 @@ document.getElementById('det-new-ab').onclick=function(){openAbForm(null);};
 // FORM
 document.getElementById('f-send').onclick=async function(){
   var name=document.getElementById('f-name').value.trim();
-  var typ=document.getElementById('f-typ').value;
-  if(!name||!typ){msg('f-msg','Name und Ger\u00e4t-Typ erforderlich!',true);return;}
+  if(!name){msg('f-msg','Name ist erforderlich!',true);return;}
+  var FEHLER_MAP={'cb-keine':'Keine Reaktion','cb-wupdate':'Windows Update','cb-akku2':'Akku tausch','cb-display':'Display tausch','cb-boot':'Probleme b. Booten','cb-sw':'Softwareprobleme','cb-absturz':'Windows Absturz','cb-viren':'Viren & Trojaner','cb-daten':'Datenrettung','cb-sonst2':'Sonstiges'};
+  var ZUB_MAP={'cb-akku':'Akku','cb-netzteil':'Netzteil','cb-tasche':'Tasche/Rucksack','cb-hdd':'Festplatte/SSD'};
+  var fa=Object.keys(FEHLER_MAP).filter(function(id){var el=document.getElementById(id);return el&&el.checked;}).map(function(id){return FEHLER_MAP[id];});
+  var bd=document.getElementById('f-fehler').value.trim(); if(bd) fa.push(bd);
+  var za=Object.keys(ZUB_MAP).filter(function(id){var el=document.getElementById(id);return el&&el.checked;}).map(function(id){return ZUB_MAP[id];});
+  var sz=document.getElementById('f-zubehoer').value.trim(); if(sz) za.push(sz);
   var btn=this; btn.disabled=true;
   try{
-    var body={k_name:name,k_telefon:document.getElementById('f-tel').value,k_email:document.getElementById('f-mail').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,datum:document.getElementById('f-dat').value,geraet_typ:typ,modell:document.getElementById('f-mod').value,win_passwort:document.getElementById('f-pw').value,fehler:document.getElementById('f-fehler').value,kostenlimit:document.getElementById('f-limit').value};
+    var body={k_name:name,k_telefon:document.getElementById('f-tel').value,k_email:document.getElementById('f-mail').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,datum:document.getElementById('f-dat').value,geraet_typ:document.getElementById('f-typ').value||'Sonstiges',modell:document.getElementById('f-mod').value,win_passwort:document.getElementById('f-pw').value,fehler:fa.join(', '),kostenlimit:document.getElementById('f-limit').value,zustand:window._starVal||0,schaeden:document.getElementById('f-schaeden').value,zubehoer:za.join(', ')};
     var r=await fetch(W+'/api/reparatur',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     var j=await r.json();
     if(j.ok||j.id){
-      msg('f-msg','\u2713 Auftrag gespeichert! Nr: '+(j.nr||''));
-      lastSaved={k_name:name,k_telefon:document.getElementById('f-tel').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,geraet_typ:typ,modell:document.getElementById('f-mod').value,fehler:document.getElementById('f-fehler').value,kostenlimit:document.getElementById('f-limit').value,win_passwort:document.getElementById('f-pw').value,datum:document.getElementById('f-dat').value,nr:j.nr||'',status:'Neu',id:j.id};
-      document.getElementById('f-print').style.display='';
-      setTimeout(function(){loadList();},500);
-    }
-    else msg('f-msg','Fehler!',true);
+      var nr=j.nr||window._vlNr||'';
+      document.getElementById('vl-nr').textContent='Nr: '+nr;
+      document.getElementById('vl-nr-footer').textContent='Nr: '+nr;
+      window._vlNr=nr;
+      lastSaved=Object.assign({},body,{nr:nr,status:'Neu',id:j.id});
+      msg('f-msg','✓ Gespeichert! Nr: '+nr);
+      loadList();
+      setTimeout(function(){document.getElementById('f-print').click();},400);
+    } else msg('f-msg','Fehler!',true);
   }catch(e){msg('f-msg',e.message,true);}
   btn.disabled=false;
 };
@@ -657,23 +759,7 @@ document.getElementById('det-pdf').onclick=function(){
 
 document.getElementById('det-zettel').onclick=function(){
   if(!cur) return;
-  var sc={'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'};
-  var col=sc[cur.status||'Neu']||'#33afe2';
-  var lines=[
-    '<!DOCTYPE html><html><head><meta charset="UTF-8">',
-    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,700;0,800;1,300&display=swap">',
-    '<style>@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;color:#2C3E50;font-size:10pt}.page{width:210mm;min-height:297mm;margin:0 auto;padding:16mm 14mm 24mm;background:white}.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #4FC1E9;padding-bottom:10px;margin-bottom:16px}.htitle .big{font-family:Raleway,Arial,sans-serif;font-size:22pt;font-weight:800;color:#2C3E50;letter-spacing:2px}.htitle .sml{font-family:Raleway,Arial,sans-serif;font-size:18pt;font-weight:300;font-style:italic;color:#4FC1E9;letter-spacing:1px}.htitle .sub{font-size:8pt;color:#7F8C8D;letter-spacing:1px;text-transform:uppercase;margin-top:2px}.hdr img{height:50px}.sec{border:1.5px solid #E0E8F0;border-radius:8px;margin-bottom:12px;overflow:hidden}.sh{background:#4FC1E9;color:white;padding:6px 12px;font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:1px}.sb{padding:10px 12px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}.f .l{font-size:7.5pt;color:#7F8C8D;text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px}.f .v{font-size:10pt;font-weight:500;min-height:14px}.fehler{background:#FFF8F0;border:1.5px solid #FBD38D;border-radius:6px;padding:8px 10px;font-size:10pt;line-height:1.5;color:#744210}.sig-area{margin-top:18px;border-top:1.5px dashed #BDC3C7;padding-top:14px}.sig-row{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:8px}.sig-box .line{border-bottom:1.5px solid #2C3E50;height:38px;margin-bottom:5px}.sig-box .lbl{font-size:8pt;color:#7F8C8D;text-align:center}.notice{background:#F0F9FF;border-left:3px solid #4FC1E9;padding:8px 10px;font-size:8.5pt;line-height:1.5;margin-top:10px}.footer{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #BDC3C7;text-align:center;font-size:7pt;color:#7F8C8D;padding:5px;line-height:1.6}</style>',
-    '</head><body><div class="page">',
-    '<div class="hdr"><div class="htitle"><div><span class="big">HASI</span> <span class="sml">Elektronic</span></div><div class="sub">IT-Service &amp; Dienstleistungen</div></div><img src="'+window._LOGO+'" alt="Hasi Elektronic"></div>',
-    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div><div style="font-size:15pt;font-weight:700;color:#2C3E50">Reparaturauftrag</div><div style="font-size:12pt;color:#4FC1E9;font-weight:700;font-family:Courier New,monospace">'+(cur.nr||'')+'</div></div><span style="background:'+col+';color:white;padding:4px 14px;border-radius:100px;font-size:10pt;font-weight:700">'+(cur.status||'Neu')+'</span><span style="margin-left:auto;font-size:9.5pt;color:#7F8C8D">'+fmtD(cur.datum)+'</span></div>',
-    '<div class="sec"><div class="sh">Kundendaten</div><div class="sb"><div class="g2"><div class="f"><div class="l">Name</div><div class="v">'+(cur.k_name||'\u2014')+'</div></div><div class="f"><div class="l">Telefon</div><div class="v">'+(cur.k_telefon||'\u2014')+'</div></div><div class="f"><div class="l">Adresse</div><div class="v">'+(cur.k_adresse||'\u2014')+'</div></div><div class="f"><div class="l">PLZ / Ort</div><div class="v">'+(cur.k_plz_ort||'\u2014')+'</div></div></div></div></div>',
-    '<div class="sec"><div class="sh">Ger\u00e4teinformationen</div><div class="sb"><div class="g2"><div class="f"><div class="l">Ger\u00e4te-Typ</div><div class="v">'+(cur.geraet_typ||'\u2014')+'</div></div><div class="f"><div class="l">Modell</div><div class="v">'+(cur.modell||'\u2014')+'</div></div>'+(cur.kostenlimit?'<div class="f"><div class="l">Kostenlimit</div><div class="v">'+cur.kostenlimit+' \u20ac</div></div>':'')+'</div></div></div>',
-    '<div class="sec"><div class="sh">Fehlerbeschreibung</div><div class="sb"><div class="fehler">'+(cur.fehler||cur.beschreibung||'Keine Beschreibung angegeben.')+'</div></div></div>',
-    '<div class="sig-area"><div style="font-size:9pt;font-weight:700;margin-bottom:10px">Best\u00e4tigung der Ger\u00e4te\u00fcbergabe</div><div class="sig-row"><div class="sig-box"><div class="line"></div><div class="lbl">Unterschrift Kunde</div></div><div class="sig-box"><div class="line"></div><div class="lbl">Unterschrift Hasi Elektronic</div></div></div><div class="notice">Mit meiner Unterschrift best\u00e4tige ich die \u00dcbergabe des oben genannten Ger\u00e4ts zur Reparatur. Ich akzeptiere die AGB der Hasi Elektronic. Alle Preise zzgl. 19% MwSt.</div></div>',
-    '<div class="footer">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+' | Tel: '+FIRMA.tel+' | '+FIRMA.mail+' | USt: '+FIRMA.ust+'</div>',
-    '</div></body></html>'
-  ];
-  openPdfWin(lines.join('\n'));
+  buildVorlagePdf(cur);
 };
 
 document.getElementById('ab-pdf').onclick=function(){
@@ -761,33 +847,106 @@ document.getElementById('kal-prev').onclick=function(){kalM--;if(kalM<0){kalM=11
 document.getElementById('kal-next').onclick=function(){kalM++;if(kalM>11){kalM=0;kalY++;}renderKal();};
 
 
-document.getElementById('f-print').onclick = function(){
-  // Direkt formdan oku
-  lastSaved = {k_name:document.getElementById('f-name').value||'',k_telefon:document.getElementById('f-tel').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,geraet_typ:document.getElementById('f-typ').value,modell:document.getElementById('f-mod').value,fehler:document.getElementById('f-fehler').value,kostenlimit:document.getElementById('f-limit').value,win_passwort:document.getElementById('f-pw').value,datum:document.getElementById('f-dat').value,nr:'',status:'Neu',id:null};
+document.getElementById('f-print').onclick=function(){
   var r=lastSaved;
-  if(!r.k_name&&!r.geraet_typ){alert('Bitte mindestens Name oder Ger\u00e4te-Typ eingeben.');return;}
-  var sc={'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'};
-  var col=sc[r.status||'Neu']||'#33afe2';
-  var lines=[
+  if(!r){
+    var FM={'cb-keine':'Keine Reaktion','cb-wupdate':'Windows Update','cb-akku2':'Akku tausch','cb-display':'Display tausch','cb-boot':'Probleme b. Booten','cb-sw':'Softwareprobleme','cb-absturz':'Windows Absturz','cb-viren':'Viren & Trojaner','cb-daten':'Datenrettung','cb-sonst2':'Sonstiges'};
+    var ZM={'cb-akku':'Akku','cb-netzteil':'Netzteil','cb-tasche':'Tasche/Rucksack','cb-hdd':'Festplatte/SSD'};
+    var fa=Object.keys(FM).filter(function(id){var el=document.getElementById(id);return el&&el.checked;}).map(function(id){return FM[id];});
+    var bd=document.getElementById('f-fehler').value.trim(); if(bd) fa.push(bd);
+    var za=Object.keys(ZM).filter(function(id){var el=document.getElementById(id);return el&&el.checked;}).map(function(id){return ZM[id];});
+    var sz=document.getElementById('f-zubehoer').value.trim(); if(sz) za.push(sz);
+    r={k_name:document.getElementById('f-name').value,k_telefon:document.getElementById('f-tel').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,geraet_typ:document.getElementById('f-typ').value,modell:document.getElementById('f-mod').value,fehler:fa.join(', '),schaeden:document.getElementById('f-schaeden').value,zubehoer:za.join(', '),kostenlimit:document.getElementById('f-limit').value,win_passwort:document.getElementById('f-pw').value,datum:document.getElementById('f-dat').value,nr:window._vlNr||'',status:'Neu',zustand:window._starVal||0};
+  }
+  buildVorlagePdf(r);
+};
+
+
+function buildVorlagePdf(r){
+  var zubArr=r.zubehoer?r.zubehoer.split(',').filter(function(s){return s.trim();}):[]; 
+  var fehlerArr=r.fehler?r.fehler.split(',').filter(function(s){return s.trim();}):[]; 
+  var starH=''; for(var si=1;si<=5;si++) starH+=(si<=(r.zustand||0)?'&#9733;':'&#9734;');
+  var cb=function(t){return '<span style="display:inline-block;background:#e8f5fc;border:1px solid #b3e0f5;border-radius:4px;padding:2px 9px;font-size:9pt;margin:2px 2px">'+t.trim()+'</span>';};
+  var L=window._LOGO;
+  var NR=r.nr||window._vlNr||'NEU';
+  var css='@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none}}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:16px;color:#2C3E50;font-size:10pt;background:#eef4fb}.page{width:210mm;margin:0 auto;background:white;box-shadow:0 2px 20px rgba(0,0,0,.12)}.hdr{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 24px 14px;border-bottom:3px solid #33afe2}.hdr img{height:52px}.tbox{text-align:right}.tbox h2{font-family:Raleway,Arial,sans-serif;font-size:17pt;font-weight:800;color:#2C3E50;letter-spacing:2px;text-transform:uppercase;margin:0}.tnr{font-size:11pt;color:#33afe2;font-family:Courier New,monospace;margin-top:4px;font-weight:700}.tdat{font-size:9pt;color:#7F8C8D;margin-top:3px}.notice{background:#fffbeb;border-left:3px solid #d97706;padding:9px 20px;font-size:9pt;color:#92400e}.body{padding:18px 24px}.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:14px}.st{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#33afe2;border-bottom:1.5px solid #e0e8f0;padding-bottom:4px;margin-bottom:9px}.box{background:#f5f9fc;border:1.5px solid #d6e4f0;border-radius:7px;padding:11px;font-size:9.5pt;line-height:1.75}.f{margin-bottom:7px}.f .l{font-size:7.5pt;color:#7F8C8D;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}.f .v{font-size:10pt;font-weight:500;border-bottom:1px solid #e0e8f0;padding-bottom:2px;min-height:15px}.cbw{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}.stars{color:#f59e0b;font-size:14pt;letter-spacing:2px}.sig-area{margin-top:14px;border-top:1.5px dashed #BDC3C7;padding-top:12px}.sig-row{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:8px}.sbox .line{border-bottom:1.5px solid #2C3E50;height:42px;margin-bottom:5px}.sbox .lbl{font-size:8pt;color:#7F8C8D;text-align:center}.agb{background:#f0f9ff;border-left:3px solid #33afe2;padding:8px 12px;font-size:9pt;margin-top:10px}.fbar{background:#f5f9fc;border-top:1.5px solid #d6e4f0;padding:8px 24px;font-size:8pt;color:#7F8C8D;display:flex;justify-content:space-between}.pbtn{position:fixed;bottom:20px;right:20px;background:#33afe2;color:white;border:none;padding:11px 22px;border-radius:10px;font-size:13px;cursor:pointer;box-shadow:0 4px 12px rgba(51,175,226,.4);font-weight:700}';
+  var H=[
     '<!DOCTYPE html><html><head><meta charset="UTF-8">',
-    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,700;0,800;1,300&display=swap">',
-    '<style>@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;color:#2C3E50;font-size:10pt}.page{width:210mm;min-height:297mm;margin:0 auto;padding:16mm 14mm 24mm;background:white}.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #4FC1E9;padding-bottom:10px;margin-bottom:16px}.htitle .big{font-family:Raleway,Arial,sans-serif;font-size:22pt;font-weight:800;color:#2C3E50;letter-spacing:2px}.htitle .sml{font-family:Raleway,Arial,sans-serif;font-size:18pt;font-weight:300;font-style:italic;color:#4FC1E9;letter-spacing:1px}.htitle .sub{font-size:8pt;color:#7F8C8D;letter-spacing:1px;text-transform:uppercase;margin-top:2px}.hdr img{height:50px}.sec{border:1.5px solid #E0E8F0;border-radius:8px;margin-bottom:12px;overflow:hidden}.sh{background:#4FC1E9;color:white;padding:6px 12px;font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:1px}.sb{padding:10px 12px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}.f .l{font-size:7.5pt;color:#7F8C8D;text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px}.f .v{font-size:10pt;font-weight:500;min-height:14px}.fehler{background:#FFF8F0;border:1.5px solid #FBD38D;border-radius:6px;padding:8px 10px;font-size:10pt;line-height:1.5;color:#744210}.sig-area{margin-top:18px;border-top:1.5px dashed #BDC3C7;padding-top:14px}.sig-row{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:8px}.sig-box .line{border-bottom:1.5px solid #2C3E50;height:38px;margin-bottom:5px}.sig-box .lbl{font-size:8pt;color:#7F8C8D;text-align:center}.notice{background:#F0F9FF;border-left:3px solid #4FC1E9;padding:8px 10px;font-size:8.5pt;line-height:1.5;margin-top:10px}.footer{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #BDC3C7;text-align:center;font-size:7pt;color:#7F8C8D;padding:5px;line-height:1.6}</style>',
-    '</head><body><div class="page">',
-    '<div class="hdr"><div class="htitle"><div><span class="big">HASI</span> <span class="sml">Elektronic</span></div><div class="sub">IT-Service &amp; Dienstleistungen</div></div><img src="'+window._LOGO+'" alt="Hasi Elektronic"></div>',
-    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div><div style="font-size:15pt;font-weight:700;color:#2C3E50">Reparaturauftrag</div><div style="font-size:12pt;color:#4FC1E9;font-weight:700;font-family:Courier New,monospace">'+(r.nr||'NEU')+'</div></div><span style="background:'+col+';color:white;padding:4px 14px;border-radius:100px;font-size:10pt;font-weight:700">'+(r.status||'Neu')+'</span><span style="margin-left:auto;font-size:9.5pt;color:#7F8C8D">'+fmtD(r.datum)+'</span></div>',
-    '<div class="sec"><div class="sh">Kundendaten</div><div class="sb"><div class="g2"><div class="f"><div class="l">Name</div><div class="v">'+(r.k_name||'\u2014')+'</div></div><div class="f"><div class="l">Telefon</div><div class="v">'+(r.k_telefon||'\u2014')+'</div></div><div class="f"><div class="l">Adresse</div><div class="v">'+(r.k_adresse||'\u2014')+'</div></div><div class="f"><div class="l">PLZ / Ort</div><div class="v">'+(r.k_plz_ort||'\u2014')+'</div></div></div></div></div>',
-    '<div class="sec"><div class="sh">Ger\u00e4teinformationen</div><div class="sb"><div class="g2"><div class="f"><div class="l">Ger\u00e4te-Typ</div><div class="v">'+(r.geraet_typ||'\u2014')+'</div></div><div class="f"><div class="l">Modell</div><div class="v">'+(r.modell||'\u2014')+'</div></div>'+(r.kostenlimit?'<div class="f"><div class="l">Kostenlimit</div><div class="v">'+r.kostenlimit+' \u20ac</div></div>':'')+'</div></div></div>',
-    '<div class="sec"><div class="sh">Fehlerbeschreibung</div><div class="sb"><div class="fehler">'+(r.fehler||'Keine Beschreibung angegeben.')+'</div></div></div>',
-    '<div class="sig-area"><div style="font-size:9pt;font-weight:700;margin-bottom:10px">Best\u00e4tigung der Ger\u00e4te\u00fcbergabe</div><div class="sig-row"><div class="sig-box"><div class="line"></div><div class="lbl">Unterschrift Kunde</div></div><div class="sig-box"><div class="line"></div><div class="lbl">Unterschrift Hasi Elektronic</div></div></div><div class="notice">Mit meiner Unterschrift best\u00e4tige ich die \u00dcbergabe des oben genannten Ger\u00e4ts zur Reparatur. Ich akzeptiere die AGB der Hasi Elektronic. Alle Preise zzgl. 19% MwSt.</div></div>',
-    '<div class="footer">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+' | Tel: '+FIRMA.tel+' | '+FIRMA.mail+' | USt: '+FIRMA.ust+'</div>',
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@800&display=swap">',
+    '<style>'+css+'</style></head><body>',
+    '<button class="pbtn no-print" onclick="window.print()">Drucken</button>',
+    '<div class="page">',
+    '<div class="hdr"><img src="'+L+'" alt="Hasi"><div class="tbox"><h2>Reparaturauftrag</h2><div class="tnr">'+NR+'</div><div class="tdat">Datum: '+fmtD(r.datum)+'</div></div></div>',
+    '<div class="notice">Bitte füllen Sie das Formular leserlich aus. Die Rechnung wird auf den angegebenen Namen ausgestellt.</div>',
+    '<div class="body">',
+    '<div class="cols">',
+    '<div><div class="st">Auftragnehmer</div><div class="box"><b>Hasi Elektronic</b><br>Graßenstraße 18 · 71665 Vaihingen/Enz<br>Tel: +49 7042 163914<br>info@hasi-elektronic.de</div></div>',
+    '<div><div class="st">Auftraggeber</div>',
+    '<div class="f"><div class="l">Name</div><div class="v">'+(r.k_name||'')+'</div></div>',
+    '<div class="f"><div class="l">Adresse</div><div class="v">'+(r.k_adresse||'')+'</div></div>',
+    '<div class="f"><div class="l">PLZ / Ort</div><div class="v">'+(r.k_plz_ort||'')+'</div></div>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="f"><div class="l">Telefon</div><div class="v">'+(r.k_telefon||'')+'</div></div></div>',
+    '</div></div>',
+    '<div class="cols">',
+    '<div><div class="st">Geräteinformation</div>',
+    '<div class="f"><div class="l">Geräte-Typ</div><div class="v">'+(r.geraet_typ||'')+'</div></div>',
+    '<div class="f"><div class="l">Modell</div><div class="v">'+(r.modell||'')+'</div></div>',
+    (r.win_passwort?'<div class="f"><div class="l" style="color:#d97706">Windows Passwort</div><div class="v">'+r.win_passwort+'</div></div>':''),
+    '<div class="f"><div class="l">Allg. Zustand</div><div class="stars">'+starH+'</div></div>',
+    '</div>',
+    '<div><div class="st">Kostenlimit</div>',
+    '<div class="f"><div class="l">Maximaler Betrag</div><div class="v">'+(r.kostenlimit?r.kostenlimit+' €':'')+'</div></div>',
+    '<div style="font-size:8.5pt;color:#7F8C8D;margin-bottom:10px">Bis zu diesem Betrag ohne Rückfrage.</div>',
+    (r.schaeden?'<div class="st">Schäden</div><div class="f"><div class="l">Sichtbare Schäden</div><div class="v">'+r.schaeden+'</div></div>':''),
+    '</div></div>',
+    (zubArr.length?'<div class="st">Beigelegtes Zubehör</div><div class="cbw">'+zubArr.map(cb).join('')+'</div><br>':''),
+    (fehlerArr.length?'<div class="st">Fehlerbeschreibung</div><div class="cbw">'+fehlerArr.map(cb).join('')+'</div><br>':''),
+    '<div class="agb">&#9745; Ich akzeptiere die <b>AGB der Hasi Elektronic</b> — www.hasi-elektronic.de</div>',
+    '<div class="sig-area"><div style="font-size:9pt;font-weight:700;margin-bottom:8px">Bestätigung der Geräteübergabe</div>',
+    '<div class="sig-row"><div class="sbox"><div class="line"></div><div class="lbl">Ort, Datum</div></div><div class="sbox"><div class="line"></div><div class="lbl">Unterschrift Auftraggeber</div></div></div></div>',
+    '</div>',
+    '<div class="fbar"><span>Hasi Elektronic · Graßenstraße 18 · 71665 Vaihingen/Enz · +49 7042 163914</span><span>'+NR+'</span></div>',
     '</div></body></html>'
   ];
-  openPdfWin(lines.join('\n'));
-};
+  openPdfWin(H.join(''));
+}
+
 
 // INIT
 window.addEventListener('load',function(){
   document.getElementById('f-dat').value=tod();
+  document.getElementById('vl-logo-img').src=window._LOGO;
+  var nr0='RA-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+String(Math.floor(Math.random()*900)+100);
+  document.getElementById('vl-nr').textContent='Nr: '+nr0;
+  document.getElementById('vl-nr-footer').textContent='Nr: '+nr0;
+  window._vlNr=nr0;
+  window._starVal=0;
+  var starLabels=['','mangelhaft','ausreichend','befriedigend','gut','sehr gut'];
+  document.querySelectorAll('.vl-star').forEach(function(s){
+    s.onclick=function(){
+      window._starVal=parseInt(s.dataset.v);
+      document.querySelectorAll('.vl-star').forEach(function(x){x.classList.toggle('on',parseInt(x.dataset.v)<=window._starVal);});
+      document.getElementById('vl-star-lbl').textContent=starLabels[window._starVal]||'';
+    };
+  });
+  document.querySelectorAll('.vl-cb input[type=checkbox]').forEach(function(cb){
+    cb.addEventListener('change',function(){cb.closest('.vl-cb').classList.toggle('checked',cb.checked);});
+  });
+  document.getElementById('f-clear').onclick=function(){
+    ['f-name','f-adr','f-plz','f-tel','f-mail','f-mod','f-pw','f-limit','f-schaeden','f-zubehoer','f-fehler'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+    var st=document.getElementById('f-typ'); if(st) st.value='';
+    var ag=document.getElementById('f-agb'); if(ag) ag.checked=false;
+    document.querySelectorAll('.vl-cb input[type=checkbox]').forEach(function(cb){cb.checked=false;cb.closest('.vl-cb').classList.remove('checked');});
+    window._starVal=0;
+    document.querySelectorAll('.vl-star').forEach(function(x){x.classList.remove('on');});
+    document.getElementById('vl-star-lbl').textContent='— bitte bewerten';
+    lastSaved=null;
+    var nr2='RA-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+String(Math.floor(Math.random()*900)+100);
+    document.getElementById('vl-nr').textContent='Nr: '+nr2;
+    document.getElementById('vl-nr-footer').textContent='Nr: '+nr2;
+    window._vlNr=nr2;
+    msg('f-msg','');
+  };
   loadDash();
   loadList();
 });
