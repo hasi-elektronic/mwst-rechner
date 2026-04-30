@@ -108,6 +108,22 @@ tbody tr:last-child td{border-bottom:none}
 .kal-dot.s-off{background:#d9770622;color:#d97706;border:1px solid #d9770644}
 .kal-dot.s-fer{background:#0d9f6e22;color:#0d9f6e;border:1px solid #0d9f6e44}
 .kal-dot.s-alarm{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+/* HIZLI DURUM */
+.qs-btn{font-size:10px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:6px;cursor:pointer;border:1.5px solid transparent;font-weight:600;white-space:nowrap;transition:all .15s}
+.qs-btn:hover{opacity:.8;transform:scale(1.05)}
+/* BİLDİRİM BANNER */
+#notif-bar{position:fixed;top:0;left:0;right:0;z-index:10000;display:flex;flex-direction:column;gap:4px;padding:8px;pointer-events:none}
+.notif{background:#1a2a3a;color:#fff;border-radius:12px;padding:12px 18px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.3);pointer-events:all;animation:slideIn .3s ease;max-width:420px;margin:0 auto}
+.notif.green{background:linear-gradient(135deg,#0d9f6e,#059669)}
+.notif.blue{background:linear-gradient(135deg,#33afe2,#0090c4)}
+.notif.amber{background:linear-gradient(135deg,#d97706,#b45309)}
+.notif .close{margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+@keyframes slideIn{from{transform:translateY(-60px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideOut{from{transform:translateY(0);opacity:1}to{transform:translateY(-60px);opacity:0}}
+.notif.out{animation:slideOut .3s ease forwards}
+/* YENİ AUFTRAG PULSE */
+.row.new-pulse{animation:rowPulse 1s ease 3}
+@keyframes rowPulse{0%{background:white}50%{background:#e8f5fc}100%{background:white}}
 /* GLOBAL SEARCH */
 .gs-btn{background:none;border:1.5px solid var(--b2);border-radius:10px;padding:7px 14px;font-size:13px;color:var(--m);cursor:pointer;display:flex;align-items:center;gap:7px;font-family:inherit;transition:all .15s}
 .gs-btn:hover{border-color:var(--hasi);color:var(--hasi)}
@@ -171,6 +187,7 @@ tbody tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
+<div id="notif-bar"></div>
 <nav>
   <div class="ni">
     <img id="logo-img" src="" alt="Hasi">
@@ -555,11 +572,26 @@ function renderList(){
   });
   var el=document.getElementById('list-body');
   if(!data.length){el.innerHTML='<div style="padding:30px;text-align:center;color:var(--m)">Keine Eintr\u00e4ge</div>';return;}
+  el.addEventListener('click',function(e){
+    var btn=e.target.closest('.qs-btn');
+    if(btn){e.stopPropagation();quickStatus(parseInt(btn.dataset.qid),btn.dataset.qs);}
+  });
+  el.addEventListener('touchend',function(e){
+    var btn=e.target.closest('.qs-btn');
+    if(btn){e.stopPropagation();e.preventDefault();quickStatus(parseInt(btn.dataset.qid),btn.dataset.qs);}
+  });
   el.innerHTML=data.map(function(r){
-    return '<div class="row" onclick="openDet('+r.id+')" ontouchend="openDet('+r.id+')">'
+    var nextStatus='';
+    var nextLabel='';
+    var nextColor='';
+    if(r.status==='Neu'){nextStatus='In Bearbeitung';nextLabel='&#x25B6; Start';nextColor='#60a5fa';}
+    else if(r.status==='In Bearbeitung'){nextStatus='Fertig';nextLabel='&#x2713; Fertig';nextColor='#34d399';}
+    else if(r.status==='Fertig'){nextStatus='Abgeholt';nextLabel='&#x1F3E0; Abgeholt';nextColor='#6b7585';}
+    var qsBtn=nextStatus?'<button class="qs-btn" style="background:'+nextColor+'22;color:'+nextColor+';border-color:'+nextColor+'44" data-qid="'+r.id+'" data-qs="'+nextStatus+'">'+nextLabel+'</button>':'';
+    return '<div class="row" onclick="openDet('+r.id+')" ontouchend="openDet('+r.id+')" id="row-'+r.id+'">'
       +'<div class="nr">'+(r.nr||'\u2014')+'</div>'
       +'<div class="nm">'+(r.k_name||'\u2014')+'<span class="sub">'+(r.geraet_typ||'')+(r.modell?' \u00b7 '+r.modell:'')+'</span></div>'
-      +'<div class="dt">'+fmtD(r.datum)+'</div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="dt">'+fmtD(r.datum)+'</div>'+qsBtn+'</div>'
       +'<div>'+sbadge(r.status)+'</div>'
       +'</div>';
   }).join('');
@@ -1124,6 +1156,116 @@ document.addEventListener('keydown',function(e){
 // ==================== END GLOBAL SEARCH ====================
 
 
+
+// ==================== BİLDİRİM ====================
+function showNotif(msg, type, dur){
+  var bar=document.getElementById('notif-bar');
+  var el=document.createElement('div');
+  el.className='notif '+(type||'blue');
+  el.innerHTML='<span>'+msg+'</span><button class="close" onclick="dismissNotif(this)">&#x2715;</button>';
+  bar.appendChild(el);
+  setTimeout(function(){
+    el.classList.add('out');
+    setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},300);
+  }, dur||3500);
+}
+function dismissNotif(btn){
+  var el=btn.parentNode;
+  el.classList.add('out');
+  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},300);
+}
+
+// ==================== HIZLI DURUM ====================
+async function quickStatus(id, newStatus){
+  var rep=reps.find(function(r){return r.id===id;});
+  if(!rep) return;
+  var oldStatus=rep.status;
+  // Optimistik güncelle
+  rep.status=newStatus;
+  var row=document.getElementById('row-'+id);
+  if(row) row.classList.add('new-pulse');
+  renderStats(); renderList();
+  try{
+    var r=await fetch(W+'/api/reparatur/'+id,{
+      method:'PATCH',
+      headers:{Authorization:A,'Content-Type':'application/json'},
+      body:JSON.stringify({status:newStatus})
+    });
+    var j=await r.json();
+    if(j.ok){
+      // Bildirim göster
+      var icons={'In Bearbeitung':'&#x1F527;','Fertig':'&#x2705;','Abgeholt':'&#x1F3E0;'};
+      var colors={'In Bearbeitung':'blue','Fertig':'green','Abgeholt':''};
+      var icon=icons[newStatus]||'&#x2139;';
+      showNotif(icon+' <b>'+(rep.k_name||'Auftrag')+'</b> → '+newStatus, colors[newStatus]||'blue');
+      // Sesli bildirim
+      playBeep(newStatus);
+      if(cur&&cur.id===id) cur.status=newStatus;
+    } else {
+      rep.status=oldStatus; renderStats(); renderList();
+      showNotif('&#x26A0; Fehler beim Speichern','amber');
+    }
+  }catch(e){
+    rep.status=oldStatus; renderStats(); renderList();
+    showNotif('&#x26A0; '+e.message,'amber');
+  }
+}
+
+// ==================== SES ====================
+function playBeep(status){
+  try{
+    var ctx=new (window.AudioContext||window.webkitAudioContext)();
+    var osc=ctx.createOscillator();
+    var gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    if(status==='Fertig'){
+      // Güzel iki ton — tamamlandı
+      osc.frequency.setValueAtTime(523,ctx.currentTime);
+      osc.frequency.setValueAtTime(659,ctx.currentTime+0.15);
+      gain.gain.setValueAtTime(0.3,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.5);
+    } else {
+      // Kısa tek ton
+      osc.frequency.setValueAtTime(440,ctx.currentTime);
+      gain.gain.setValueAtTime(0.2,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.2);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.2);
+    }
+  }catch(e){}
+}
+
+// ==================== CANLI GÜNCELLEME ====================
+var _lastRepHash='';
+function hashReps(){
+  return reps.map(function(r){return r.id+':'+r.status;}).join('|');
+}
+async function livePoll(){
+  try{
+    var r=await fetch(W+'/api/reparatur',{headers:{Authorization:A}});
+    var newReps=await r.json();
+    if(!Array.isArray(newReps)) return;
+    var newHash=newReps.map(function(r){return r.id+':'+r.status;}).join('|');
+    if(newHash!==_lastRepHash && _lastRepHash!==''){
+      // Değişiklik var — ne değişti bul
+      newReps.forEach(function(nr){
+        var old=reps.find(function(x){return x.id===nr.id;});
+        if(old&&old.status!==nr.status){
+          var icons={'In Bearbeitung':'&#x1F527;','Fertig':'&#x2705;','Abgeholt':'&#x1F3E0;','Neu':'&#x1F4CB;'};
+          showNotif((icons[nr.status]||'&#x2139;')+' <b>'+(nr.k_name||'Auftrag')+'</b> ist jetzt: '+nr.status,'green',5000);
+          playBeep(nr.status);
+        }
+      });
+      reps=newReps;
+      renderStats(); renderList();
+      var active=document.querySelector('.pg.on');
+      if(active&&active.id==='pg-dash') loadDash();
+    }
+    _lastRepHash=newHash;
+  }catch(e){}
+}
+// ==================== END ====================
+
 // INIT
 window.addEventListener('load',function(){
   document.getElementById('f-dat').value=tod();
@@ -1162,10 +1304,14 @@ window.addEventListener('load',function(){
   loadDash();
   loadList();
   // Her 30 saniyede otomatik guncelle
+  // İlk hash al
+  loadList().then(function(){_lastRepHash=hashReps();});
+  // Her 10 saniyede canlı polling
+  setInterval(livePoll, 10000);
+  // Dashboard 30 saniyede bir
   setInterval(function(){
     var active=document.querySelector('.pg.on');
     if(active&&active.id==='pg-dash') loadDash();
-    loadList();
   }, 30000);
 });
 </script>
