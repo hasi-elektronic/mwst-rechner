@@ -545,7 +545,6 @@ function openDet(id){
   _openDetRender();
 }
 function _openDetRender(){
-  cur=reps.find(function(r){return r.id===id;});
   if(!cur) return;
   document.getElementById('det-title').textContent=(cur.nr||'')+' \u00b7 '+(cur.k_name||'');
   document.getElementById('det-status').value=cur.status||'Neu';
