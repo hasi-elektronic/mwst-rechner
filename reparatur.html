@@ -169,8 +169,8 @@ tbody tr:last-child td{border-bottom:none}
       <div class="kpi-grid">
         <div class="kpi" style="--kc:#33afe2"><div>&#x1F4CB;</div><div class="v" id="k-ges">0</div><div class="l">Gesamt</div></div>
         <div class="kpi" style="--kc:#0d9f6e"><div>&#x1F4B6;</div><div class="v" id="k-ums">0</div><div class="l">Umsatz Netto</div></div>
-        <div class="kpi" style="--kc:#d97706"><div>&#x1F527;</div><div class="v" id="k-off">0</div><div class="l">Offen</div></div>
-        <div class="kpi" style="--kc:#7c3aed"><div>&#x2705;</div><div class="v" id="k-don">0</div><div class="l">Abgeschlossen</div></div>
+        <div class="kpi" style="--kc:#d97706;cursor:pointer" onclick="flt='Neu';showPg('pg-list');renderList()"><div>&#x1F527;</div><div class="v" id="k-off">0</div><div class="l">Offen &#x2192;</div></div>
+        <div class="kpi" style="--kc:#7c3aed;cursor:pointer" onclick="flt='Fertig';showPg('pg-list');renderList()"><div>&#x2705;</div><div class="v" id="k-don">0</div><div class="l">Abgeschlossen &#x2192;</div></div>
       </div>
       <div class="charts-row">
         <div class="card"><div class="ct">Monatlicher Umsatz</div><canvas id="ch-m" height="200"></canvas></div>
@@ -534,6 +534,17 @@ document.querySelectorAll('.fbtn[data-f]').forEach(function(b){
 
 // DETAIL
 function openDet(id){
+  cur=reps.find(function(r){return r.id===id;});
+  if(!cur){
+    loadList().then(function(){
+      cur=reps.find(function(r){return r.id===id;});
+      if(cur) _openDetRender();
+    });
+    return;
+  }
+  _openDetRender();
+}
+function _openDetRender(){
   cur=reps.find(function(r){return r.id===id;});
   if(!cur) return;
   document.getElementById('det-title').textContent=(cur.nr||'')+' \u00b7 '+(cur.k_name||'');
