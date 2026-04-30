@@ -559,12 +559,13 @@ function getPdfStyles() {
   return `
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
+      @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,700;0,800;1,300&display=swap');
       body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #2C3E50; }
       .page { width: 210mm; min-height: 297mm; margin: 0 auto; padding: 18mm 15mm 25mm 15mm; position: relative; }
       /* HEADER */
       .hdr { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #4FC1E9; padding-bottom: 10px; margin-bottom: 18px; }
-      .hdr-left h1 { font-size: 22pt; font-weight: 700; color: #2C3E50; line-height: 1; }
-      .hdr-left h1 span { color: #4FC1E9; }
+      .hdr-left h1 { font-family: 'Raleway', Arial, sans-serif; font-size: 24pt; font-weight: 800; color: #2C3E50; line-height: 1; letter-spacing: 2px; }
+      .hdr-left h1 span { color: #4FC1E9; font-weight: 300; font-style: italic; letter-spacing: 1px; font-size: 20pt; }
       .hdr-left .sub { font-size: 8pt; color: #7F8C8D; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
       .hdr-right img { height: 48px; }
       /* ABSENDER */
@@ -647,7 +648,7 @@ function buildPdfHtml(type, rep, ab, taet, mat) {
     + getPdfStyles()
     + '</head><body><div class="page">'
     // HEADER
-    + '<div class="hdr"><div class="hdr-left"><h1>HASI <span>elektronic</span></h1><div class="sub">IT-Service &amp; Dienstleistungen</div></div>'
+    + '<div class="hdr"><div class="hdr-left"><h1>HASI <span style="font-weight:300;font-style:italic;letter-spacing:1px;font-size:20pt">elektronic</span></h1><div class="sub">IT-Service &amp; Dienstleistungen</div></div>'
     + '<div class="hdr-right"><img src="'+LOGO+'" alt="Hasi Elektronic"></div></div>'
     // ABSENDER
     + '<div class="absender">'+FIRMA.name+' · '+FIRMA.str+' · '+FIRMA.plz+'</div>'
@@ -701,8 +702,8 @@ document.getElementById('det-pdf').onclick = function(){
     + '<hr style="margin:10px 0">'
     + '<p style="font-size:10pt;line-height:1.7">Gerät: ' + (cur.geraet_typ||'') + (cur.modell?' – '+cur.modell:'') + '<br>Problem: ' + (cur.fehler||'—') + (cur.kostenlimit?'<br>Kostenlimit: '+cur.kostenlimit+' €':'') + '</p>';
   var FIRMA_L = {name:'Hasi Elektronic',str:'Grabenstraße 18',plz:'71665 Vaihingen an der Enz',tel:'07042 163914',mail:'info@hasi-elektronic.de',ust:'DE367591246',iban:'DE71 6045 0050 0030 2488 01'};
-  var full = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;padding:30mm 20mm;max-width:none}.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #4FC1E9;padding-bottom:10px;margin-bottom:16px}.hdr h1{font-size:22pt;font-weight:700;color:#2C3E50}.hdr h1 span{color:#4FC1E9}.hdr img{height:48px}.footer{position:fixed;bottom:0;left:0;right:0;border-top:1px solid #BDC3C7;text-align:center;font-size:7.5pt;color:#7F8C8D;padding:6px;background:white}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'
-    + '<div class="hdr"><h1>HASI <span>elektronic</span></h1><img src="' + window._LOGO + '" alt="Hasi"></div>'
+  var full = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;padding:30mm 20mm;max-width:none}.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #4FC1E9;padding-bottom:10px;margin-bottom:16px}.hdr h1{font-family:Arial,sans-serif;font-size:24pt;font-weight:800;color:#2C3E50;letter-spacing:2px}.hdr h1 span{color:#4FC1E9;font-weight:300;font-style:italic;font-size:20pt;letter-spacing:1px}.hdr img{height:48px}.footer{position:fixed;bottom:0;left:0;right:0;border-top:1px solid #BDC3C7;text-align:center;font-size:7.5pt;color:#7F8C8D;padding:6px;background:white}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'
+    + '<div class="hdr"><h1>HASI <span style="font-weight:300;font-style:italic;letter-spacing:1px;font-size:20pt">elektronic</span></h1><img src="' + window._LOGO + '" alt="Hasi"></div>'
     + h
     + '<div class="footer">' + FIRMA_L.name + ' · ' + FIRMA_L.str + ' · ' + FIRMA_L.plz + ' | Tel: ' + FIRMA_L.tel + ' | ' + FIRMA_L.mail + ' | USt: ' + FIRMA_L.ust + '</div>'
     + '</body></html>';
