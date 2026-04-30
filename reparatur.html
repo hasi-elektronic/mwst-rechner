@@ -98,6 +98,8 @@ label:first-child{margin-top:0}
 .tr.big{font-size:17px;font-weight:700;color:var(--t);border-top:2px solid var(--b2);margin-top:8px;padding-top:12px;border-bottom:none}
 .tr.big span:last-child{color:var(--hasi)}
 .btnrow{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+
+
 </style>
 </head>
 <body>
@@ -110,6 +112,7 @@ label:first-child{margin-top:0}
     <button class="tab" data-page="pg-form">&#xFF0B; Neuer Auftrag</button>
     <button class="tab" id="tab-detail" data-page="pg-detail" style="display:none">&#x1F527; Auftrag</button>
     <button class="tab" id="tab-ab" data-page="pg-ab" style="display:none">&#x1F4C4; Arbeitsbericht</button>
+    <button class="tab" data-page="pg-kalender">&#x1F4C5; Kalender</button>
   </div>
 </nav>
 
@@ -245,6 +248,7 @@ label:first-child{margin-top:0}
       <div class="btnrow">
         <button class="btn p" id="det-save">Speichern</button>
         <button class="btn" id="det-pdf">PDF Auftrag</button>
+        <button class="btn" id="det-zettel">&#x1F4C4; Auftragszettel</button>
         <button class="btn" id="det-new-ab">+ Arbeitsbericht</button>
       </div>
       <div class="save-msg" id="det-msg"></div>
@@ -290,6 +294,8 @@ label:first-child{margin-top:0}
     <div class="save-msg" id="ab-msg"></div>
   </div>
 </div>
+
+
 
 <script>
 var W = 'https://hasi-reparatur.hguencavdi.workers.dev';
@@ -555,174 +561,200 @@ document.getElementById('ab-save').onclick=async function(){
 };
 
 
-function getPdfStyles() {
-  return `
-    <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,700;0,800;1,300&display=swap');
-      body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #2C3E50; }
-      .page { width: 210mm; min-height: 297mm; margin: 0 auto; padding: 18mm 15mm 25mm 15mm; position: relative; }
-      /* HEADER */
-      .hdr { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #4FC1E9; padding-bottom: 10px; margin-bottom: 18px; }
-      .hdr-left h1 { font-family: 'Raleway', Arial, sans-serif; font-size: 24pt; font-weight: 800; color: #2C3E50; line-height: 1; letter-spacing: 2px; }
-      .hdr-left h1 span { color: #4FC1E9; font-weight: 300; font-style: italic; letter-spacing: 1px; font-size: 20pt; }
-      .hdr-left .sub { font-size: 8pt; color: #7F8C8D; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
-      .hdr-right img { height: 48px; }
-      /* ABSENDER */
-      .absender { font-size: 7.5pt; color: #7F8C8D; border-bottom: 1px solid #BDC3C7; padding-bottom: 3px; margin-bottom: 8px; }
-      /* ADRESS + META */
-      .addr-meta { display: flex; justify-content: space-between; margin-bottom: 18px; }
-      .addr { font-size: 10pt; line-height: 1.6; }
-      .addr b { font-size: 11pt; }
-      .meta { text-align: right; font-size: 9.5pt; line-height: 1.8; }
-      .meta .nr { font-size: 13pt; font-weight: 700; color: #4FC1E9; }
-      /* BETREFF */
-      .betreff { font-size: 11pt; font-weight: 700; margin-bottom: 6px; color: #2C3E50; }
-      .projekt-info { font-size: 9.5pt; color: #555; margin-bottom: 16px; line-height: 1.6; }
-      /* INTRO */
-      .intro { font-size: 9.5pt; margin-bottom: 12px; }
-      /* TABLE */
-      table.main { width: 100%; border-collapse: collapse; margin-bottom: 0; }
-      table.main thead tr { background: #4FC1E9; color: white; }
-      table.main thead th { padding: 7px 9px; text-align: left; font-size: 9.5pt; font-weight: 600; }
-      table.main thead th.r { text-align: right; }
-      table.main tbody tr:nth-child(even) { background: #F0F9FF; }
-      table.main tbody td { padding: 6px 9px; font-size: 9.5pt; border-bottom: 1px solid #E8F0F5; }
-      table.main tbody td.r { text-align: right; }
-      table.main tbody tr.section-hdr td { background: #E8F0F5; font-weight: 700; font-size: 9pt; color: #4FC1E9; padding: 5px 9px; }
-      /* SUMMEN */
-      .summen { margin-top: 0; border: 1.5px solid #BDC3C7; border-top: none; }
-      .sum-row { display: flex; justify-content: flex-end; }
-      .sum-tbl { width: 280px; }
-      .sum-tbl table { width: 100%; border-collapse: collapse; }
-      .sum-tbl td { padding: 5px 9px; font-size: 9.5pt; border-bottom: 1px solid #E8F0F5; }
-      .sum-tbl td.r { text-align: right; font-weight: 600; }
-      .sum-tbl tr.total { background: #4FC1E9; color: white; }
-      .sum-tbl tr.total td { font-size: 11pt; font-weight: 700; padding: 7px 9px; border-bottom: none; }
-      /* BEMERKUNG */
-      .bem { margin-top: 18px; background: #F0F9FF; border-left: 3px solid #4FC1E9; padding: 10px 12px; font-size: 9.5pt; line-height: 1.5; }
-      .bem b { display: block; margin-bottom: 4px; color: #2C3E50; }
-      /* ZAHLUNGSINFO (Rechnung) */
-      .zahlung { margin-top: 16px; font-size: 9.5pt; line-height: 1.6; }
-      .zahlung .iban { background: #F0F9FF; border: 1px solid #BDC3C7; border-radius: 6px; padding: 8px 12px; margin-top: 8px; font-size: 9pt; }
-      /* FOOTER */
-      .footer { position: fixed; bottom: 0; left: 0; right: 0; height: 22mm; background: white; border-top: 1px solid #BDC3C7; text-align: center; font-size: 7.5pt; color: #7F8C8D; padding-top: 6px; line-height: 1.6; }
-      @media print {
-        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .footer { position: fixed; bottom: 0; }
-      }
-    </style>
-  `;
-}
-
-function buildPdfHtml(type, rep, ab, taet, mat) {
-  var LOGO = window._LOGO;
-  var FIRMA = {name:'Hasi Elektronic', str:'Grabenstraße 18', plz:'71665 Vaihingen an der Enz', tel:'07042 163914', mail:'info@hasi-elektronic.de', web:'www.hasi-elektronic.de', ust:'DE367591246', iban:'DE71 6045 0050 0030 2488 01', inhaber:'Hamdi Güncavdi'};
+function buildPdf(type, rep, ab, taet, mat) {
   var SATZ = 84;
-
-  // Hesapla
-  var arbBet = taet.reduce(function(s,t){return s + (parseFloat(t.std)||0)*SATZ;}, 0);
-  var matBet = mat.reduce(function(s,m){return s + (parseFloat(m.preis)||0);}, 0);
-  var net = arbBet + matBet;
-  var mwst = net * 0.19;
-  var bru = net + mwst;
-
-  var isRec = type === 'rechnung';
+  var arb = taet.reduce(function(s,t){return s+(parseFloat(t.std)||0)*SATZ;},0);
+  var matT = mat.reduce(function(s,m){return s+(parseFloat(m.preis)||0);},0);
+  var net = arb+matT, mwst = net*0.19, bru = net+mwst;
+  var isRec = type==='rechnung';
   var titel = isRec ? 'Rechnung' : 'Arbeitsbericht';
-  var nr = isRec ? ('RE-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000)) : (ab && ab.ab_nr ? ab.ab_nr : ('AB-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000)));
-  var datum = ab && ab.datum ? ab.datum : new Date().toISOString().slice(0,10);
-  var datumDE = datum.split('-').reverse().join('.');
+  var nr = ab&&ab.ab_nr ? ab.ab_nr : (type==='rechnung'?'RE':'AB')+'-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
+  var datum = ab&&ab.datum ? ab.datum.split('-').reverse().join('.') : new Date().toLocaleDateString('de-DE');
 
-  // Tätigkeiten rows
+  var FIRMA = {name:'Hasi Elektronic',str:'Gra\u00dfenstra\u00dfe 18',plz:'71665 Vaihingen an der Enz',tel:'07042 163914',mail:'info@hasi-elektronic.de',ust:'DE367591246',iban:'DE71 6045 0050 0030 2488 01',inhaber:'Hamdi G\u00fcncavdi'};
+  var LOGO = window._LOGO;
+
   var taetRows = taet.map(function(t){
-    var bet = (parseFloat(t.std)||0)*SATZ;
-    return '<tr><td>'+(t.desc||'')+'</td><td class="r">'+(parseFloat(t.std)||0).toFixed(2).replace('.',',')+' Std.</td><td class="r">'+fmt(bet)+'</td></tr>';
+    return '<tr><td>'+(t.desc||'')+'</td><td style="text-align:right">'+((parseFloat(t.std)||0).toFixed(2).replace('.',','))+' Std.</td><td style="text-align:right">'+fmt((parseFloat(t.std)||0)*SATZ)+'</td></tr>';
   }).join('');
+  var matRows = mat.length ? ('<tr style="background:#E8F0F5"><td colspan="3" style="padding:5px 9px;font-weight:700;color:#4FC1E9;font-size:9pt">Material</td></tr>'
+    + mat.map(function(m){return '<tr><td>'+(m.desc||'')+'</td><td></td><td style="text-align:right">'+fmt(parseFloat(m.preis)||0)+'</td></tr>';}).join('')) : '';
 
-  // Material rows
-  var matRows = mat.length ? ('<tr class="section-hdr"><td colspan="3">Material</td></tr>' + mat.map(function(m){
-    return '<tr><td>'+(m.desc||'')+'</td><td></td><td class="r">'+fmt(parseFloat(m.preis)||0)+'</td></tr>';
-  }).join('')) : '';
-
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+titel+'</title>'
-    + getPdfStyles()
-    + '</head><body><div class="page">'
-    // HEADER
-    + '<div class="hdr"><div class="hdr-left"><h1>HASI <span style="font-weight:300;font-style:italic;letter-spacing:1px;font-size:20pt">Elektronic</span></h1><div class="sub">IT-Service &amp; Dienstleistungen</div></div>'
-    + '<div class="hdr-right"><img src="'+LOGO+'" alt="Hasi Elektronic"></div></div>'
-    // ABSENDER
-    + '<div class="absender">'+FIRMA.name+' · '+FIRMA.str+' · '+FIRMA.plz+'</div>'
-    // ADDR + META
-    + '<div class="addr-meta">'
-    + '<div class="addr"><b>'+(rep.k_name||'')+'</b><br>'+(rep.k_adresse||'')+(rep.k_plz_ort?'<br>'+rep.k_plz_ort:'')+'</div>'
-    + '<div class="meta"><div class="nr">'+nr+'</div><div>Datum: '+datumDE+'</div><div>Auftrag: '+(rep.nr||'')+'</div></div>'
-    + '</div>'
-    // BETREFF
-    + '<div class="betreff">'+titel+' &ndash; '+(rep.geraet_typ||'')+(rep.modell?' '+rep.modell:'')+'</div>'
-    + '<div class="projekt-info">Kunde: '+(rep.k_name||'')+(rep.k_telefon?' &nbsp;|&nbsp; Tel: '+rep.k_telefon:'')+'</div>'
-    + '<div class="intro">Folgende Tätigkeiten wurden durchgeführt:</div>'
-    // TABLE
-    + '<table class="main"><thead><tr><th>Beschreibung</th><th class="r">Std.</th><th class="r">Betrag netto</th></tr></thead>'
-    + '<tbody>'+taetRows+matRows+'</tbody></table>'
-    // SUMMEN
-    + '<div class="sum-row"><div class="sum-tbl"><table>'
-    + '<tr><td>Arbeitszeit netto</td><td class="r">'+fmt(arbBet)+'</td></tr>'
-    + (mat.length ? '<tr><td>Material netto</td><td class="r">'+fmt(matBet)+'</td></tr>' : '')
-    + '<tr><td>Zwischensumme netto</td><td class="r">'+fmt(net)+'</td></tr>'
-    + '<tr><td>MwSt. 19%</td><td class="r">'+fmt(mwst)+'</td></tr>'
-    + '<tr class="total"><td>Gesamt brutto</td><td class="r">'+fmt(bru)+'</td></tr>'
-    + '</table></div></div>'
-    // ZAHLUNG (nur Rechnung)
-    + (isRec ? '<div class="zahlung">Bitte überweisen Sie den Betrag innerhalb von 14 Tagen.<div class="iban"><b>Bankverbindung:</b><br>IBAN: '+FIRMA.iban+'<br>Empfänger: '+FIRMA.name+' &ndash; '+FIRMA.inhaber+'</div></div>' : '')
-    // FOOTER
-    + '<div class="footer">'
-    + FIRMA.name+' &nbsp;|&nbsp; '+FIRMA.str+' &nbsp;|&nbsp; '+FIRMA.plz+'<br>'
-    + 'Tel: '+FIRMA.tel+' &nbsp;|&nbsp; '+FIRMA.mail+' &nbsp;|&nbsp; '+FIRMA.web+'<br>'
-    + 'USt-IdNr: '+FIRMA.ust+' &nbsp;|&nbsp; IBAN: '+FIRMA.iban
-    + '</div>'
-    + '</div></body></html>';
-
-  return html;
+  var lines = [
+    '<!DOCTYPE html><html><head><meta charset="UTF-8">',
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,700;0,800;1,300&display=swap">',
+    '<style>',
+    '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}',
+    'body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;font-size:10pt;color:#2C3E50}',
+    '.page{width:210mm;min-height:297mm;margin:0 auto;padding:16mm 14mm 24mm;background:white;position:relative}',
+    '.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #4FC1E9;padding-bottom:10px;margin-bottom:16px}',
+    '.htitle .big{font-family:Raleway,Arial,sans-serif;font-size:22pt;font-weight:800;color:#2C3E50;letter-spacing:2px}',
+    '.htitle .sml{font-family:Raleway,Arial,sans-serif;font-size:18pt;font-weight:300;font-style:italic;color:#4FC1E9;letter-spacing:1px}',
+    '.htitle .sub{font-size:8pt;color:#7F8C8D;letter-spacing:1px;text-transform:uppercase;margin-top:2px}',
+    '.hdr img{height:50px}',
+    'table{width:100%;border-collapse:collapse}',
+    'thead th{background:#4FC1E9;color:white;padding:7px 9px;text-align:left;font-size:9.5pt;font-weight:600}',
+    'thead th.r{text-align:right}',
+    'tbody tr:nth-child(even){background:#F0F9FF}',
+    'tbody td{padding:6px 9px;border-bottom:1px solid #E8F0F5;font-size:9.5pt}',
+    '.sum-wrap{display:flex;justify-content:flex-end;margin-top:4px}',
+    '.sum-tbl{width:280px}',
+    '.sum-tbl table{width:100%;border:1.5px solid #BDC3C7}',
+    '.sum-tbl td{padding:5px 9px;font-size:9.5pt;border-bottom:1px solid #E8F0F5}',
+    '.sum-tbl td.r{text-align:right;font-weight:600}',
+    '.sum-total{background:#4FC1E9;color:white;font-size:11pt;font-weight:700}',
+    '.sum-total td{border-bottom:none;padding:7px 9px}',
+    '.addr-row{display:flex;justify-content:space-between;margin-bottom:16px}',
+    '.meta{text-align:right;font-size:9.5pt;line-height:1.8}',
+    '.meta .nr{font-size:13pt;font-weight:700;color:#4FC1E9}',
+    '.absender{font-size:7.5pt;color:#7F8C8D;border-bottom:1px solid #BDC3C7;padding-bottom:3px;margin-bottom:8px}',
+    '.zahlung{margin-top:16px;font-size:9.5pt;line-height:1.6;background:#F0F9FF;border-left:3px solid #4FC1E9;padding:10px 12px}',
+    '.footer{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #BDC3C7;text-align:center;font-size:7pt;color:#7F8C8D;padding:5px;line-height:1.6}',
+    '</style></head><body><div class="page">',
+    '<div class="hdr">',
+    '<div class="htitle"><div><span class="big">HASI</span> <span class="sml">Elektronic</span></div><div class="sub">IT-Service &amp; Dienstleistungen</div></div>',
+    '<img src="'+LOGO+'" alt="Hasi Elektronic">',
+    '</div>',
+    '<div class="absender">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+'</div>',
+    '<div class="addr-row">',
+    '<div style="font-size:10pt;line-height:1.7"><b>'+(rep.k_name||'')+'</b><br>'+(rep.k_adresse||'')+(rep.k_plz_ort?'<br>'+rep.k_plz_ort:'')+(rep.k_telefon?'<br>Tel: '+rep.k_telefon:'')+'</div>',
+    '<div class="meta"><div class="nr">'+nr+'</div><div>'+titel+'</div><div>Datum: '+datum+'</div><div>Auftrag: '+(rep.nr||'')+'</div></div>',
+    '</div>',
+    '<p style="font-size:9.5pt;margin-bottom:12px">Folgende T\u00e4tigkeiten wurden durchgef\u00fchrt:</p>',
+    '<table><thead><tr><th>Beschreibung</th><th class="r">Std.</th><th class="r">Betrag netto</th></tr></thead><tbody>',
+    taetRows, matRows,
+    '</tbody></table>',
+    '<div class="sum-wrap"><div class="sum-tbl"><table><tbody>',
+    '<tr><td>Arbeitszeit netto</td><td class="r">'+fmt(arb)+'</td></tr>',
+    mat.length ? '<tr><td>Material netto</td><td class="r">'+fmt(matT)+'</td></tr>' : '',
+    '<tr><td>Zwischensumme netto</td><td class="r">'+fmt(net)+'</td></tr>',
+    '<tr><td>MwSt. 19%</td><td class="r">'+fmt(mwst)+'</td></tr>',
+    '<tr class="sum-total"><td>Gesamt brutto</td><td class="r">'+fmt(bru)+'</td></tr>',
+    '</tbody></table></div></div>',
+    isRec ? '<div class="zahlung"><b>Zahlungsinformationen</b><br>Bitte \u00fcberweisen Sie den Betrag innerhalb von 14 Tagen.<br><br>Empf\u00e4nger: '+FIRMA.inhaber+'<br>IBAN: '+FIRMA.iban+'</div>' : '',
+    '<div class="footer">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+' | Tel: '+FIRMA.tel+' | '+FIRMA.mail+' | USt: '+FIRMA.ust+'</div>',
+    '</div></body></html>'
+  ];
+  return lines.join('\n');
 }
 
 function openPdfWindow(html) {
-  var w = window.open('','_blank','width=900,height=700');
+  var w = window.open('', '_blank', 'width=900,height=700');
   w.document.write(html);
   w.document.close();
-  setTimeout(function(){w.print();}, 800);
+  setTimeout(function(){ w.print(); }, 800);
 }
 
-// PDF butonları
-document.getElementById('det-pdf').onclick = function(){
+
+
+document.getElementById('det-zettel').onclick = function(){
   if(!cur) return;
-  var h = '<h2 style="color:#2C3E50">Reparaturauftrag ' + cur.nr + '</h2>'
-    + '<p style="margin:8px 0;font-size:10pt">Datum: ' + fmtD(cur.datum) + '</p>'
-    + '<hr style="border-color:#4FC1E9;margin:10px 0">'
-    + '<p style="font-size:10pt;line-height:1.7"><b>' + cur.k_name + '</b><br>' + (cur.k_adresse||'') + (cur.k_plz_ort?'<br>'+cur.k_plz_ort:'') + '</p>'
-    + '<hr style="margin:10px 0">'
-    + '<p style="font-size:10pt;line-height:1.7">Gerät: ' + (cur.geraet_typ||'') + (cur.modell?' – '+cur.modell:'') + '<br>Problem: ' + (cur.fehler||'—') + (cur.kostenlimit?'<br>Kostenlimit: '+cur.kostenlimit+' €':'') + '</p>';
-  var FIRMA_L = {name:'Hasi Elektronic',str:'Grabenstraße 18',plz:'71665 Vaihingen an der Enz',tel:'07042 163914',mail:'info@hasi-elektronic.de',ust:'DE367591246',iban:'DE71 6045 0050 0030 2488 01'};
-  var full = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;padding:30mm 20mm;max-width:none}.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #4FC1E9;padding-bottom:10px;margin-bottom:16px}.hdr h1{font-family:Arial,sans-serif;font-size:24pt;font-weight:800;color:#2C3E50;letter-spacing:2px}.hdr h1 span{color:#4FC1E9;font-weight:300;font-style:italic;font-size:20pt;letter-spacing:1px}.hdr img{height:48px}.footer{position:fixed;bottom:0;left:0;right:0;border-top:1px solid #BDC3C7;text-align:center;font-size:7.5pt;color:#7F8C8D;padding:6px;background:white}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'
-    + '<div class="hdr"><h1>HASI <span style="font-weight:300;font-style:italic;letter-spacing:1px;font-size:20pt">Elektronic</span></h1><img src="' + window._LOGO + '" alt="Hasi"></div>'
-    + h
-    + '<div class="footer">' + FIRMA_L.name + ' · ' + FIRMA_L.str + ' · ' + FIRMA_L.plz + ' | Tel: ' + FIRMA_L.tel + ' | ' + FIRMA_L.mail + ' | USt: ' + FIRMA_L.ust + '</div>'
-    + '</body></html>';
-  var w=window.open('','_blank','width=900,height=700');
-  w.document.write(full); w.document.close();
-  setTimeout(function(){w.print();},800);
+  var LOGO = window._LOGO;
+  var FIRMA = {name:'Hasi Elektronic',str:'Grabenstra\u00dfe 18',plz:'71665 Vaihingen an der Enz',tel:'07042 163914',mail:'info@hasi-elektronic.de',ust:'DE367591246'};
+  var datum = fmtD(cur.datum);
+  var status = cur.status || 'Neu';
+  var statusColor = {'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'}[status]||'#33afe2';
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,700;0,800;1,300&display=swap">'
+    + '<style>'
+    + '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none}}'
+    + 'body{font-family:Arial,sans-serif;margin:0;padding:0;background:#f5f5f5}'
+    + '.page{width:210mm;min-height:297mm;margin:0 auto;background:white;padding:16mm 14mm 20mm}'
+    + '.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #4FC1E9;padding-bottom:10px;margin-bottom:16px}'
+    + '.hdr-title{font-family:"Raleway",Arial,sans-serif}'
+    + '.hdr-title .big{font-size:22pt;font-weight:800;color:#2C3E50;letter-spacing:2px}'
+    + '.hdr-title .small{font-size:18pt;font-weight:300;font-style:italic;color:#4FC1E9;letter-spacing:1px}'
+    + '.hdr-title .sub{font-size:8pt;color:#7F8C8D;letter-spacing:1px;text-transform:uppercase;margin-top:2px}'
+    + '.hdr img{height:50px}'
+    + '.doc-title{font-size:16pt;font-weight:700;color:#2C3E50;margin-bottom:4px}'
+    + '.doc-nr{font-size:11pt;color:#4FC1E9;font-weight:700;font-family:"Courier New",monospace}'
+    + '.status-badge{display:inline-block;padding:4px 14px;border-radius:100px;font-size:10pt;font-weight:700;color:white;margin-left:12px}'
+    + '.section{border:1.5px solid #E0E8F0;border-radius:10px;margin-bottom:14px;overflow:hidden}'
+    + '.section-hdr{background:#4FC1E9;color:white;padding:7px 14px;font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:1px}'
+    + '.section-body{padding:12px 14px}'
+    + '.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px}'
+    + '.field .lbl{font-size:7.5pt;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:2px}'
+    + '.field .val{font-size:10pt;color:#2C3E50;font-weight:500;min-height:16px}'
+    + '.field .val.mono{font-family:"Courier New",monospace;font-size:9.5pt}'
+    + '.fehler-box{background:#FFF8F0;border:1.5px solid #FBD38D;border-radius:8px;padding:10px 12px;font-size:10pt;line-height:1.6;color:#744210}'
+    + '.sig-section{margin-top:20px;border-top:1.5px dashed #BDC3C7;padding-top:16px}'
+    + '.sig-row{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:8px}'
+    + '.sig-box .sig-line{border-bottom:1.5px solid #2C3E50;height:40px;margin-bottom:6px}'
+    + '.sig-box .sig-lbl{font-size:8pt;color:#7F8C8D;text-align:center}'
+    + '.notice{background:#F0F9FF;border-left:3px solid #4FC1E9;padding:8px 12px;font-size:8.5pt;color:#2C3E50;line-height:1.5;margin-top:12px}'
+    + '.footer{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #BDC3C7;text-align:center;font-size:7pt;color:#7F8C8D;padding:5px}'
+    + '</style></head><body>'
+    + '<div class="page">'
+
+    // HEADER
+    + '<div class="hdr">'
+    + '<div class="hdr-title"><div><span class="big">HASI</span> <span class="small">Elektronic</span></div><div class="sub">IT-Service &amp; Dienstleistungen</div></div>'
+    + '<img src="' + LOGO + '" alt="Hasi Elektronic">'
+    + '</div>'
+
+    // TITEL + NR + STATUS
+    + '<div style="display:flex;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">'
+    + '<div><div class="doc-title">Reparaturauftrag</div><div class="doc-nr">' + cur.nr + '</div></div>'
+    + '<span class="status-badge" style="background:' + statusColor + '">' + status + '</span>'
+    + '<span style="margin-left:auto;font-size:9.5pt;color:#7F8C8D">Datum: ' + datum + '</span>'
+    + '</div>'
+
+    // KUNDE
+    + '<div class="section">'
+    + '<div class="section-hdr">&#x1F464; Kundendaten</div>'
+    + '<div class="section-body"><div class="grid2">'
+    + '<div class="field"><div class="lbl">Name</div><div class="val">' + (cur.k_name||'\u2014') + '</div></div>'
+    + '<div class="field"><div class="lbl">Telefon</div><div class="val">' + (cur.k_telefon||'\u2014') + '</div></div>'
+    + '<div class="field"><div class="lbl">Adresse</div><div class="val">' + (cur.k_adresse||'\u2014') + '</div></div>'
+    + '<div class="field"><div class="lbl">PLZ / Ort</div><div class="val">' + (cur.k_plz_ort||'\u2014') + '</div></div>'
+    + '<div class="field"><div class="lbl">E-Mail</div><div class="val">' + (cur.k_email||'\u2014') + '</div></div>'
+    + '</div></div></div>'
+
+    // GERÄT
+    + '<div class="section">'
+    + '<div class="section-hdr">&#x1F4BB; Ger\u00e4teinformationen</div>'
+    + '<div class="section-body"><div class="grid2">'
+    + '<div class="field"><div class="lbl">Ger\u00e4te-Typ</div><div class="val">' + (cur.geraet_typ||'\u2014') + '</div></div>'
+    + '<div class="field"><div class="lbl">Modell</div><div class="val">' + (cur.modell||'\u2014') + '</div></div>'
+    + (cur.kostenlimit ? '<div class="field"><div class="lbl">Kostenlimit</div><div class="val">' + cur.kostenlimit + ' \u20ac</div></div>' : '')
+    + (cur.schaeden ? '<div class="field"><div class="lbl">Sichtbare Sch\u00e4den</div><div class="val">' + cur.schaeden + '</div></div>' : '')
+    + (cur.zubehoer ? '<div class="field"><div class="lbl">Zubeh\u00f6r</div><div class="val">' + cur.zubehoer + '</div></div>' : '')
+    + '</div></div></div>'
+
+    // FEHLER
+    + '<div class="section">'
+    + '<div class="section-hdr">&#x26A0;&#xFE0F; Fehlerbeschreibung</div>'
+    + '<div class="section-body"><div class="fehler-box">' + (cur.fehler||cur.beschreibung||'Keine Beschreibung angegeben.') + '</div></div>'
+    + '</div>'
+
+    // UNTERSCHRIFTEN
+    + '<div class="sig-section">'
+    + '<div style="font-size:9pt;font-weight:700;color:#2C3E50;margin-bottom:12px">Best\u00e4tigung der Ger\u00e4te\u00fcbergabe</div>'
+    + '<div class="sig-row">'
+    + '<div class="sig-box"><div class="sig-line"></div><div class="sig-lbl">Unterschrift Kunde</div></div>'
+    + '<div class="sig-box"><div class="sig-line"></div><div class="sig-lbl">Unterschrift Hasi Elektronic</div></div>'
+    + '</div>'
+    + '<div class="notice">Mit meiner Unterschrift best\u00e4tige ich die \u00dcbergabe des oben genannten Ger\u00e4ts zur Reparatur. Ich akzeptiere die AGB der Hasi Elektronic. Alle Preise verstehen sich zzgl. 19% MwSt.</div>'
+    + '</div>'
+
+    // FOOTER
+    + '<div class="footer">' + FIRMA.name + ' \u00b7 ' + FIRMA.str + ' \u00b7 ' + FIRMA.plz + ' | Tel: ' + FIRMA.tel + ' | ' + FIRMA.mail + ' | USt: ' + FIRMA.ust + '</div>'
+    + '</div>'
+  openPdfWindow(html);
 };
 
 document.getElementById('ab-pdf').onclick = function(){
   var taet=[], mat=[];
   document.querySelectorAll('#taet-rows .ab-row').forEach(function(r){var ins=r.querySelectorAll('input');if(ins[0].value.trim())taet.push({desc:ins[0].value,std:parseFloat(ins[1].value)||0});});
   document.querySelectorAll('#mat-rows .ab-row').forEach(function(r){var ins=r.querySelectorAll('input');if(ins[0].value.trim())mat.push({desc:ins[0].value,preis:parseFloat(ins[1].value)||0});});
-  openPdfWindow(buildPdfHtml('arbeitsbericht', cur, curAb, taet, mat));
+  openPdfWindow(buildPdf('arbeitsbericht', cur, curAb, taet, mat));
 };
 document.getElementById('ab-rec').onclick = function(){
   var taet=[], mat=[];
   document.querySelectorAll('#taet-rows .ab-row').forEach(function(r){var ins=r.querySelectorAll('input');if(ins[0].value.trim())taet.push({desc:ins[0].value,std:parseFloat(ins[1].value)||0});});
   document.querySelectorAll('#mat-rows .ab-row').forEach(function(r){var ins=r.querySelectorAll('input');if(ins[0].value.trim())mat.push({desc:ins[0].value,preis:parseFloat(ins[1].value)||0});});
-  openPdfWindow(buildPdfHtml('rechnung', cur, curAb, taet, mat));
+  openPdfWindow(buildPdf('rechnung', cur, curAb, taet, mat));
 };
 
 // LOGO
@@ -732,6 +764,138 @@ if(logoB64&&logoB64!='PLACEHOLDER_LOGO'){
   document.getElementById('nav-logo').src=logoB64;
 }
 
+
+var kalYear = new Date().getFullYear();
+var kalMonth = new Date().getMonth();
+var kalSelected = null;
+
+function renderKalender() {
+  var now = new Date();
+  var firstDay = new Date(kalYear, kalMonth, 1);
+  var lastDay  = new Date(kalYear, kalMonth + 1, 0);
+  var startDow = (firstDay.getDay() + 6) % 7; // Mo=0
+  var monate = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  document.getElementById('kal-title').textContent = monate[kalMonth] + ' ' + kalYear;
+
+  // Header
+  var days = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  document.getElementById('kal-header').innerHTML = days.map(d =>
+    '<div class="kal-hdr-cell">' + d + '</div>'
+  ).join('');
+
+  // Aufträge bu ay
+  var todayStr = now.toISOString().slice(0,10);
+  var auftragByDay = {};
+  reps.forEach(function(r) {
+    var d = (r.datum||r.created_at||'').slice(0,10);
+    if (!auftragByDay[d]) auftragByDay[d] = [];
+    auftragByDay[d].push(r);
+  });
+
+  // Alarm: 7+ gün offen
+  var alarmReps = reps.filter(function(r) {
+    if (r.status === 'Fertig' || r.status === 'Abgeholt' || r.status === 'Abgelehnt') return false;
+    var d = new Date((r.datum||r.created_at||'').slice(0,10));
+    var diff = (now - d) / (1000*60*60*24);
+    return diff >= 7;
+  });
+  var alarmBox = document.getElementById('alarm-box');
+  if (alarmReps.length) {
+    alarmBox.style.display = 'block';
+    document.getElementById('alarm-list').innerHTML = alarmReps.map(function(r) {
+      var d = new Date((r.datum||r.created_at||'').slice(0,10));
+      var diff = Math.floor((now - d) / (1000*60*60*24));
+      return '<div style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="openDet('+r.id+')">'
+        + '<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--hasi)">' + (r.nr||'') + '</span>'
+        + '<span style="font-size:13px;font-weight:600">' + r.k_name + '</span>'
+        + '<span style="font-size:11px;color:var(--m)">' + (r.geraet_typ||'') + '</span>'
+        + '<span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--red)">' + diff + ' Tage offen</span>'
+        + '</div>';
+    }).join('');
+  } else {
+    alarmBox.style.display = 'none';
+  }
+
+  // Grid
+  var cells = [];
+  // Önceki ay
+  var prevLast = new Date(kalYear, kalMonth, 0).getDate();
+  for (var i = startDow - 1; i >= 0; i--) {
+    cells.push({ day: prevLast - i, curr: false, dateStr: null });
+  }
+  // Bu ay
+  for (var d = 1; d <= lastDay.getDate(); d++) {
+    var ds = kalYear + '-' + String(kalMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    cells.push({ day: d, curr: true, dateStr: ds });
+  }
+  // Sonraki ay
+  var remaining = (7 - cells.length % 7) % 7;
+  for (var d = 1; d <= remaining; d++) {
+    cells.push({ day: d, curr: false, dateStr: null });
+  }
+
+  document.getElementById('kal-grid').innerHTML = cells.map(function(c) {
+    var isToday = c.dateStr === todayStr;
+    var isSel   = c.dateStr === kalSelected;
+    var cls = 'kal-day' + (isToday?' today':'') + (!c.curr?' other-month':'') + (isSel?' selected':'');
+    var dots = '';
+    if (c.dateStr && auftragByDay[c.dateStr]) {
+      dots = auftragByDay[c.dateStr].slice(0,3).map(function(r) {
+        var sc = r.status==='Fertig'||r.status==='Abgeholt' ? 'fertig' :
+                 r.status==='Neu' ? 'neu' : 'offen';
+        var dayDiff = (now - new Date(c.dateStr)) / (1000*60*60*24);
+        if (sc !== 'fertig' && dayDiff >= 7) sc = 'alarm';
+        return '<div class="kal-dot status-' + sc + '" title="' + r.k_name + '">' + (r.k_name||r.nr||'') + '</div>';
+      }).join('');
+      if (auftragByDay[c.dateStr].length > 3) {
+        dots += '<div style="font-size:8px;color:var(--m)">+' + (auftragByDay[c.dateStr].length - 3) + ' mehr</div>';
+      }
+    }
+    var onclick = c.dateStr ? 'onclick="kalSelectDay(\'' + c.dateStr + '\')"' : '';
+    return '<div class="' + cls + '" ' + onclick + '>'
+      + '<div class="kal-day-nr">' + c.day + '</div>'
+      + dots
+      + '</div>';
+  }).join('');
+}
+
+function kalSelectDay(dateStr) {
+  kalSelected = dateStr;
+  renderKalender();
+  var dayReps = reps.filter(function(r) { return (r.datum||r.created_at||'').slice(0,10) === dateStr; });
+  var detEl = document.getElementById('kal-detail');
+  var parts = dateStr.split('-');
+  document.getElementById('kal-detail-title').textContent = parts[2] + '.' + parts[1] + '.' + parts[0] + ' — ' + dayReps.length + ' Auftrag' + (dayReps.length!==1?'e':'');
+  if (!dayReps.length) {
+    document.getElementById('kal-detail-list').innerHTML = '<div style="color:var(--m);font-size:13px">Keine Aufträge an diesem Tag.</div>';
+  } else {
+    document.getElementById('kal-detail-list').innerHTML = dayReps.map(function(r) {
+      var c={'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'}[r.status]||'#33afe2';
+      return '<div class="row" onclick="openDet('+r.id+')" style="grid-template-columns:160px 1fr 100px">'
+        + '<div class="nr">' + (r.nr||'') + '</div>'
+        + '<div class="nm">' + r.k_name + '<span class="sub">' + (r.geraet_typ||'') + (r.modell?' · '+r.modell:'') + '</span></div>'
+        + '<div><span class="badge" style="background:'+c+'22;border:1px solid '+c+'44;color:'+c+'">' + r.status + '</span></div>'
+        + '</div>';
+    }).join('');
+  }
+  detEl.style.display = 'block';
+}
+
+document.getElementById('kal-prev').onclick = function() {
+  kalMonth--; if(kalMonth < 0){kalMonth=11;kalYear--;} renderKalender();
+};
+document.getElementById('kal-next').onclick = function() {
+  kalMonth++; if(kalMonth > 11){kalMonth=0;kalYear++;} renderKalender();
+};
+document.getElementById('kal-today').onclick = function() {
+  var n=new Date(); kalYear=n.getFullYear(); kalMonth=n.getMonth(); renderKalender();
+};
+
+// Kalender sayfası açılınca render et
+document.querySelector('[data-page="pg-kalender"]').addEventListener('click', function() {
+  setTimeout(renderKalender, 50);
+});
+
 // INIT
 window.addEventListener('load',function(){
   document.getElementById('f-dat').value=tod();
@@ -739,5 +903,35 @@ window.addEventListener('load',function(){
   loadList();
 });
 </script>
+
+<!-- KALENDER -->
+<div id="pg-kalender" class="page">
+  <div class="wrap">
+    <div class="topbar">
+      <h1>Kalender <span>Ansicht</span></h1>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+        <button class="btn" id="kal-prev">&#x2039;</button>
+        <span id="kal-title" style="font-size:15px;font-weight:700;min-width:160px;text-align:center"></span>
+        <button class="btn" id="kal-next">&#x203a;</button>
+        <button class="btn" id="kal-today" style="margin-left:8px">Heute</button>
+      </div>
+    </div>
+    <!-- Alarm: 7+ gün açık -->
+    <div id="alarm-box" style="display:none;background:rgba(220,38,38,0.08);border:1.5px solid rgba(220,38,38,0.3);border-radius:12px;padding:12px 16px;margin-bottom:16px">
+      <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--red);font-weight:700;margin-bottom:8px">&#x26A0; SEIT 7+ TAGEN OFFEN</div>
+      <div id="alarm-list" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+    <!-- Kalender Grid -->
+    <div style="background:#fff;border:1.5px solid var(--b);border-radius:16px;overflow:hidden">
+      <div id="kal-header" style="display:grid;grid-template-columns:repeat(7,1fr);background:#f0f7fd;border-bottom:1.5px solid var(--b)"></div>
+      <div id="kal-grid" style="display:grid;grid-template-columns:repeat(7,1fr)"></div>
+    </div>
+    <!-- Seçilen gün detayı -->
+    <div id="kal-detail" style="display:none;margin-top:16px;background:#fff;border:1.5px solid var(--b);border-radius:16px;padding:20px">
+      <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--hasi);font-weight:700;margin-bottom:12px" id="kal-detail-title"></div>
+      <div id="kal-detail-list"></div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
