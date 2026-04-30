@@ -381,11 +381,8 @@ tbody tr:last-child td{border-bottom:none}
 <!-- ===== NEUER AUFTRAG ===== -->
 <div id="tab-form" class="tab-page">
   <div class="page-inner">
-    <!-- Passwort-Schutz -->
+<!-- Passwort-Schutz -->
 
-      </div>
-    </div>
-  </div>
 
   <!-- Gerät + Kostenlimit -->
   <div class="section">
@@ -528,7 +525,6 @@ tbody tr:last-child td{border-bottom:none}
     <button class="btn-submit" id="btn-submit">Drucken / PDF</button>
     <button class="btn-submit" id="btn-send" style="background:#16a34a;">Absenden ✓</button>
   </div>
-</div>
 
 <!-- Success -->
 <div id="success-screen" class="page">
@@ -539,74 +535,6 @@ tbody tr:last-child td{border-bottom:none}
   <br><br>
   <button class="btn-submit" onclick="location.reload()">Neuer Auftrag</button>
 </div>
-
-<script>
-const WORKER = 'https://hasi-reparatur.hguencavdi.workers.dev';
-let starVal = 0;
-
-// ── ŞİFRE ─────────────────────────────────────────────────────────
-function showForm() {
-  document.getElementById('pw-overlay').style.display = 'none';
-  document.getElementById('form-page').style.removeProperty('display'); // CSS default
-}
-
-// Sayfa açılışında session kontrolü
-if (sessionStorage.getItem('hasi-reparatur-auth') === '1') showForm();
-
-document.getElementById('auth-btn') && document.getElementById('auth-btn').addEventListener('click', doAuth);
-document.getElementById('pw-input') && document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
-
-// pw-overlay içindeki inline onclick checkPw() çağırıyor, onu da tanımla
-function checkPw() { doAuth(); }
-
-function doAuth() {
-  const v = (document.getElementById('pw-input') || {value:''}).value.trim();
-  if (v === '71665') {
-    sessionStorage.setItem('hasi-reparatur-auth', '1');
-    showForm();
-  } else {
-    const err = document.getElementById('pw-err');
-    if (err) { err.textContent = 'Falsches Passwort'; document.getElementById('pw-input').value = ''; setTimeout(() => err.textContent = '', 2000); }
-  }
-}
-
-// ── DATUM ──────────────────────────────────────────────────────────
-document.getElementById('f-datum').value = new Date().toISOString().split('T')[0];
-
-// ── STARS ──────────────────────────────────────────────────────────
-document.querySelectorAll('.star').forEach(s => {
-  s.addEventListener('click', () => {
-    starVal = parseInt(s.dataset.v);
-    document.querySelectorAll('.star').forEach(x => x.classList.toggle('active', parseInt(x.dataset.v) <= starVal));
-    const labels = ['','Sehr schlecht','Schlecht','Mittel','Gut','Sehr gut'];
-    const lbl = document.getElementById('star-label');
-    if (lbl) lbl.textContent = labels[starVal] || '';
-  });
-});
-
-// ── CHECKBOX HELPER ────────────────────────────────────────────────
-function getChecked(gridId) {
-  return Array.from(document.querySelectorAll('#' + gridId + ' input[type=checkbox]:checked'))
-    .map(c => c.value || c.nextElementSibling?.textContent || '').filter(Boolean).join(', ');
-}
-
-// ── RESET ──────────────────────────────────────────────────────────
-const btnReset = document.getElementById('btn-reset');
-if (btnReset) btnReset.addEventListener('click', () => {
-  document.querySelectorAll('#form-page input[type=text], #form-page input[type=email], #form-page input[type=date], #form-page textarea, #form-page select').forEach(el => el.value = '');
-  document.querySelectorAll('#form-page input[type=checkbox]').forEach(el => el.checked = false);
-  document.getElementById('f-datum').value = new Date().toISOString().split('T')[0];
-  starVal = 0;
-  document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
-  const lbl = document.getElementById('star-label');
-  if (lbl) lbl.textContent = '— bitte bewerten';
-});
-
-// ── PDF DRUCKEN ────────────────────────────────────────────────────
-document.getElementById('btn-submit').addEventListener('click', () => {
-  const style = Array.from(document.querySelectorAll('style')).map(s => s.outerHTML).join('');
-  const body  = document.getElementById('form-page').innerHTML;
-  const html  = `<!DOCTYPE html><html><head><meta charset="UTF-8">${style}</head><body><div class="page">${body}</div><script>window.onload=()=>window.print()<\/script>
   </div>
 </div>
 
@@ -1611,7 +1539,7 @@ function buildRechnungPDF(ab, r) {
 
 // ── FORM JS ───────────────────────────────────────────────────────
 
-const WORKER = 'https://hasi-reparatur.hguencavdi.workers.dev';
+
 let starVal = 0;
 
 // ── ŞİFRE ─────────────────────────────────────────────────────────
