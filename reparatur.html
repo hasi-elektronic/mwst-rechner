@@ -734,22 +734,15 @@ function buildPdf(type,rep,ab,taet,mat){
 }
 
 function openPdfWin(htmlContent,repData){
-  // iPad/Teams uyumlu: print.html'e yonlendir
-  var base='https://tools.hasi-elektronic.de/print.html';
-  if(repData){
-    // Veriyi URL param olarak gec
-    var enc=encodeURIComponent(JSON.stringify(repData));
-    if(enc.length<8000){
-      window.open(base+'?data='+enc,'_blank');
-      return;
-    }
-  }
-  // ID varsa ID ile ac
-  if(repData&&repData.id){
-    window.open(base+'?id='+repData.id,'_blank');
+  // Her zaman yeni sekme aç — iPad ve Teams uyumlu
+  var w=window.open('about:blank','_blank');
+  if(w){
+    w.document.open();
+    w.document.write(htmlContent);
+    w.document.close();
     return;
   }
-  // Fallback: eski modal
+  // Popup bloklu — modal fallback
   var ex=document.getElementById('pdf-modal');
   if(ex) ex.remove();
   var modal=document.createElement('div');
@@ -757,17 +750,20 @@ function openPdfWin(htmlContent,repData){
   modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;flex-direction:column';
   var bar=document.createElement('div');
   bar.style.cssText='background:#1a2a3a;padding:10px 16px;display:flex;gap:12px;flex-shrink:0';
+  var pb=document.createElement('button');
+  pb.textContent='Drucken';
+  pb.style.cssText='background:#33afe2;color:#fff;border:none;padding:9px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer';
+  pb.onclick=function(){var fr=document.getElementById('pdf-frame');if(fr&&fr.contentWindow)try{fr.contentWindow.print();}catch(e){}};
   var cb2=document.createElement('button');
   cb2.textContent='× Schließen';
   cb2.style.cssText='margin-left:auto;background:rgba(255,255,255,.2);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px';
   cb2.onclick=function(){modal.remove();};
-  bar.appendChild(cb2);
+  bar.appendChild(pb); bar.appendChild(cb2);
   var frame=document.createElement('iframe');
   frame.id='pdf-frame';
   frame.style.cssText='flex:1;border:none;background:#fff';
   frame.srcdoc=htmlContent;
-  modal.appendChild(bar);
-  modal.appendChild(frame);
+  modal.appendChild(bar); modal.appendChild(frame);
   document.body.appendChild(modal);
 }
 
@@ -805,11 +801,11 @@ document.getElementById('det-zettel').onclick=function(){
 
 document.getElementById('ab-pdf').onclick=function(){
   var tm=getTaetMat();
-  openPdfWin(buildPdf('arbeitsbericht',cur,curAb,tm.taet,tm.mat));
+  openPdfWin(buildPdf('arbeitsbericht',cur,curAb,tm.taet,tm.mat),cur);
 };
 document.getElementById('ab-rec').onclick=function(){
   var tm=getTaetMat();
-  openPdfWin(buildPdf('rechnung',cur,curAb,tm.taet,tm.mat));
+  openPdfWin(buildPdf('rechnung',cur,curAb,tm.taet,tm.mat),cur);
 };
 
 // KALENDER
