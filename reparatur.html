@@ -1281,7 +1281,7 @@ function detStatusChanged(){
 document.getElementById('det-wa').onclick=function(){
   if(!cur) return;
   var tel=(cur.k_telefon||'').replace(/[^0-9+]/g,'');
-  if(!tel){alert('Keine Telefonnummer vorhanden!');return;}
+  if(!tel){showNotif('&#x26A0; Keine Telefonnummer vorhanden!','amber');return;}
   // Alman numarasını uluslararası formata çevir
   if(tel.startsWith('0')) tel='+49'+tel.slice(1);
   var waText='Hallo '+(cur.k_name||'')+','
@@ -1290,7 +1290,10 @@ document.getElementById('det-wa').onclick=function(){
     +'\nHasi Elektronic · Graßenstraße 18 · 71665 Vaihingen/Enz'
     +'\n\nMit freundlichen Grüßen\nHasi Elektronic';
   var msg=encodeURIComponent(waText);
-  window.open('https://wa.me/'+tel+'?text='+msg,'_blank');
+  var waUrl='https://wa.me/'+tel+'?text='+msg;
+  // Teams uyumlu — önce yeni sekme, olmadıysa location
+  var w=window.open(waUrl,'_blank');
+  if(!w) window.location.href=waUrl;
 };
 
 // ==================== BEZAHLT TOGGLE ====================
