@@ -210,6 +210,15 @@ tbody tr:last-child td{border-bottom:none}
     </div>
     <div id="dash-loading" style="text-align:center;padding:60px;color:var(--m);font-family:'DM Mono',monospace;font-size:13px">Lade...</div>
     <div id="dash-content" style="display:none">
+      <!-- JASMIN & SABINE BÖLÜMÜ -->
+      <div id="abholbereit-wrap" style="margin-bottom:24px;display:none">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="font-size:18px;font-weight:700">&#x1F4CB; Abholbereit</div>
+          <div id="abholbereit-count" style="background:var(--red);color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div>
+          <div style="font-size:12px;color:var(--m);margin-left:4px">Fertig &amp; Arbeitsbericht vorhanden &mdash; bitte abholen lassen</div>
+        </div>
+        <div id="abholbereit-list" class="lw"></div>
+      </div>
       <div class="kpi-grid">
         <div class="kpi" style="--kc:#33afe2"><div>&#x1F4CB;</div><div class="v" id="k-ges">0</div><div class="l">Gesamt</div></div>
         <div class="kpi" style="--kc:#0d9f6e"><div>&#x1F4B6;</div><div class="v" id="k-ums">0</div><div class="l">Umsatz Netto</div></div>
@@ -529,10 +538,98 @@ async function loadDash(){
     var mx=d.geraete[0]?d.geraete[0].anzahl:1;
     document.getElementById('geraete-bars').innerHTML=d.geraete.map(function(g){return '<div class="bar-item"><div class="bar-lbl">'+g.geraet_typ+'</div><div class="bar-track"><div class="bar-fill" style="width:'+(g.anzahl/mx*100)+'%"></div></div><div class="bar-num">'+g.anzahl+'</div></div>';}).join('');
     renderDashTbl(d.history,'');
+    // Abholbereit listesi — fertig + AB var
+    renderAbholbereit();
     document.getElementById('dash-loading').style.display='none';
     document.getElementById('dash-content').style.display='block';
   }catch(e){
     document.getElementById('dash-loading').innerHTML='<div style="color:red">Fehler: '+e.message+'</div>';
+  }
+}
+
+async function renderAbholbereit(){
+  // Fertig olan ve AB'si olan auftragler
+  var fertig=reps.filter(function(r){return r.status==='Fertig';});
+  if(!fertig.length){
+    document.getElementById('abholbereit-wrap').style.display='none';
+    return;
+  }
+  // AB kontrolü — her fertig auftrag için AB var mı
+  var mitAB=[];
+  await Promise.all(fertig.map(async function(r){
+    try{
+      var res=await fetch(W+'/api/arbeitsbericht?reparatur_id='+r.id,{headers:{Authorization:A}});
+      var abs=await res.json();
+      if(Array.isArray(abs)&&abs.length>0) mitAB.push({rep:r,ab:abs[0]});
+    }catch(e){}
+  }));
+  if(!mitAB.length){
+    document.getElementById('abholbereit-wrap').style.display='none';
+    return;
+  }
+  document.getElementById('abholbereit-wrap').style.display='block';
+  document.getElementById('abholbereit-count').textContent=mitAB.length;
+  var listEl=document.getElementById('abholbereit-list');
+  listEl.onclick=function(e){
+    var btn=e.target.closest('[data-abhol-id]');
+    if(btn) abholungBestaetigen(parseInt(btn.dataset.abholId),btn.dataset.abholNr,btn.dataset.abholName);
+  };
+  listEl.innerHTML=mitAB.map(function(item){
+    var r=item.rep;
+    var ab=item.ab;
+    return '<div class="row" style="grid-template-columns:160px 1fr 180px 140px" id="abrow-'+r.id+'">'
+      +'<div class="nr">'+(r.nr||'')+'</div>'
+      +'<div class="nm">'+(r.k_name||'')
+        +'<span class="sub">'+(r.geraet_typ||'')+(r.modell?' &middot; '+r.modell:'')
+        +(r.k_telefon?' &middot; &#x1F4DE; '+r.k_telefon:'')+'</span></div>'
+      +'<div style="text-align:right;font-size:13px;color:var(--green);font-weight:700">'
+        +'<div>'+(ab.ab_nr||'')+'</div>'
+        +'<div style="font-size:11px;color:var(--m)">'+(ab.total_netto?Number(ab.total_netto).toFixed(2).replace('.',',')+' € netto':'')+'</div>'
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">'
+        +'<button class="btn p" style="font-size:12px;padding:7px 14px;background:#0d9f6e;border-color:#0d9f6e" '
+          +'&#x2713; Abgeholt</button>'
+        +'<button class="btn" style="font-size:11px;padding:5px 10px" onclick="openDet('+r.id+')">'
+          +'Details</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+async function abholungBestaetigen(id, nr, name){
+  var btn=document.querySelector('#abrow-'+id+' .btn.p');
+  if(btn){btn.disabled=true;btn.textContent='...';}
+  try{
+    var r=await fetch(W+'/api/reparatur/'+id,{
+      method:'PATCH',
+      headers:{Authorization:A,'Content-Type':'application/json'},
+      body:JSON.stringify({status:'Abgeholt'})
+    });
+    var j=await r.json();
+    if(j.ok){
+      // Listeden kaldır
+      var row=document.getElementById('abrow-'+id);
+      if(row){row.style.opacity='0';row.style.transition='opacity .3s';setTimeout(function(){row.remove();},300);}
+      // reps güncelle
+      var rep=reps.find(function(x){return x.id===id;});
+      if(rep) rep.status='Abgeholt';
+      renderStats(); renderList();
+      showNotif('&#x2705; <b>'+(name||nr)+'</b> abgeholt &amp; erledigt!','green',5000);
+      playBeep('Fertig');
+      // Sayacı güncelle
+      var remaining=document.querySelectorAll('#abholbereit-list .row').length-1;
+      if(remaining<=0){
+        setTimeout(function(){document.getElementById('abholbereit-wrap').style.display='none';},400);
+      } else {
+        document.getElementById('abholbereit-count').textContent=remaining;
+      }
+    } else {
+      if(btn){btn.disabled=false;btn.textContent='&#x2713; Abgeholt';}
+      showNotif('&#x26A0; Fehler','amber');
+    }
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent='&#x2713; Abgeholt';}
+    showNotif('&#x26A0; '+e.message,'amber');
   }
 }
 function renderDashTbl(data,q){
