@@ -270,6 +270,13 @@ tbody tr:last-child td{border-bottom:none}
 <div id="pg-form" class="pg">
   <div class="wrap" style="padding-top:20px;padding-bottom:60px;-webkit-overflow-scrolling:touch">
     <div class="vl">
+      <!-- FORM TOGGLE -->
+      <div style="display:flex;border-bottom:2px solid var(--b);background:#f8fbfd">
+        <button id="ftab-auftrag" onclick="switchFormTab('auftrag')" style="flex:1;padding:14px;border:none;background:none;font-size:14px;font-weight:700;cursor:pointer;border-bottom:3px solid var(--hasi);color:var(--hasi);font-family:inherit">&#x1F4CB; Neuer Auftrag</button>
+        <button id="ftab-ab" onclick="switchFormTab('ab')" style="flex:1;padding:14px;border:none;background:none;font-size:14px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:var(--m);font-family:inherit">&#x1F4C4; Neuer Arbeitsbericht</button>
+      </div>
+      <!-- AUFTRAG FORM -->
+      <div id="ftab-auftrag-content">
       <div class="vl-header">
         <img class="vl-logo" id="vl-logo-img" src="" alt="Hasi">
         <div class="vl-title">
@@ -368,6 +375,43 @@ tbody tr:last-child td{border-bottom:none}
         <button class="btn" id="f-send" style="background:#0d9f6e;color:#fff;border-color:#0d9f6e">&#x2713; Absenden &amp; Speichern</button>
         <span id="f-msg" style="font-size:13px;font-weight:600;margin-left:8px"></span>
       </div>
+      </div><!-- /ftab-auftrag-content -->
+
+      <!-- ARBEITSBERICHT FORM -->
+      <div id="ftab-ab-content" style="display:none">
+        <div class="vl-body">
+          <div class="vl-sec">
+            <div class="vl-sec-title">Auftrag ausw&auml;hlen</div>
+            <span class="vl-lbl">Auftrag</span>
+            <select class="vl-inp" id="fab-auftrag">
+              <option value="">-- Auftrag w&auml;hlen --</option>
+            </select>
+          </div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="ct">T&auml;tigkeiten</div>
+            <div class="rh rht"><span>Beschreibung</span><span>Std</span><span>Betrag</span><span></span></div>
+            <div id="fab-taet-rows"></div>
+            <button class="add-btn" id="fab-add-taet">+ T&auml;tigkeit</button>
+          </div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="ct">Material</div>
+            <div class="rh rhm"><span>Beschreibung</span><span>Preis</span><span></span></div>
+            <div id="fab-mat-rows"></div>
+            <button class="add-btn" id="fab-add-mat">+ Material</button>
+          </div>
+          <div class="totals">
+            <div class="tr"><span>Arbeitszeit netto</span><span id="fab-tot-arb">0,00 €</span></div>
+            <div class="tr"><span>Material netto</span><span id="fab-tot-mat">0,00 €</span></div>
+            <div class="tr big"><span>Gesamt netto</span><span id="fab-tot-net">0,00 €</span></div>
+            <div class="tr"><span>MwSt. 19%</span><span id="fab-tot-mwst">0,00 €</span></div>
+            <div class="tr big"><span>Gesamt brutto</span><span id="fab-tot-bru">0,00 €</span></div>
+          </div>
+        </div>
+        <div class="vl-actions">
+          <button class="btn p" id="fab-save" style="background:#0d9f6e;color:#fff;border-color:#0d9f6e">&#x1F4BE; Speichern</button>
+          <span id="fab-msg" style="font-size:13px;font-weight:600;margin-left:8px"></span>
+        </div>
+      </div><!-- /ftab-ab-content -->
     </div>
   </div>
 </div>
@@ -1408,6 +1452,125 @@ async function livePoll(){
 }
 // ==================== END ====================
 
+
+// ==================== FORM TAB ====================
+var fabAbId=0;
+
+function switchFormTab(tab){
+  var isAuftrag=tab==='auftrag';
+  document.getElementById('ftab-auftrag-content').style.display=isAuftrag?'':'none';
+  document.getElementById('ftab-ab-content').style.display=isAuftrag?'none':'';
+  document.getElementById('ftab-auftrag').style.borderBottomColor=isAuftrag?'var(--hasi)':'transparent';
+  document.getElementById('ftab-auftrag').style.color=isAuftrag?'var(--hasi)':'var(--m)';
+  document.getElementById('ftab-ab').style.borderBottomColor=isAuftrag?'transparent':'var(--hasi)';
+  document.getElementById('ftab-ab').style.color=isAuftrag?'var(--m)':'var(--hasi)';
+  if(!isAuftrag) fabRefreshAuftragList();
+}
+
+function fabRefreshAuftragList(){
+  var sel=document.getElementById('fab-auftrag');
+  sel.innerHTML='<option value="">-- Auftrag wählen --</option>';
+  var active=reps.filter(function(r){return r.status!=='Abgeholt'&&r.status!=='Abgelehnt';});
+  active.forEach(function(r){
+    var opt=document.createElement('option');
+    opt.value=r.id;
+    opt.textContent=(r.nr||'')+' — '+(r.k_name||'')+' ('+(r.geraet_typ||'')+')';
+    sel.appendChild(opt);
+  });
+}
+
+function fabAddTaet(desc,std){
+  fabAbId++;
+  var id='fbt'+fabAbId;
+  var div=document.createElement('div');
+  div.className='ar art';
+  div.id=id;
+  var d=document.createElement('input'); d.placeholder='Tätigkeit...'; d.value=desc||''; d.oninput=fabCalcTots;
+  var s=document.createElement('input'); s.type='number'; s.step='0.5'; s.min='0'; s.placeholder='0'; s.value=std||''; s.oninput=fabCalcTots;
+  var b=document.createElement('input'); b.type='number'; b.readOnly=true; b.style.background='var(--bg)';
+  var x=document.createElement('button'); x.className='del'; x.textContent='×';
+  x.onclick=function(){div.remove();fabCalcTots();};
+  div.appendChild(d); div.appendChild(s); div.appendChild(b); div.appendChild(x);
+  document.getElementById('fab-taet-rows').appendChild(div);
+}
+
+function fabAddMat(desc,preis){
+  fabAbId++;
+  var id='fbm'+fabAbId;
+  var div=document.createElement('div');
+  div.className='ar arm';
+  div.id=id;
+  var d=document.createElement('input'); d.placeholder='Material...'; d.value=desc||''; d.oninput=fabCalcTots;
+  var p=document.createElement('input'); p.type='number'; p.step='0.01'; p.min='0'; p.placeholder='0'; p.value=preis||''; p.oninput=fabCalcTots;
+  var x=document.createElement('button'); x.className='del'; x.textContent='×';
+  x.onclick=function(){div.remove();fabCalcTots();};
+  div.appendChild(d); div.appendChild(p); div.appendChild(x);
+  document.getElementById('fab-mat-rows').appendChild(div);
+}
+
+function fabCalcTots(){
+  var arb=0,mat=0;
+  document.querySelectorAll('#fab-taet-rows .ar').forEach(function(r){
+    var ins=r.querySelectorAll('input');
+    var std=parseFloat(ins[1].value)||0;
+    var bet=std*SATZ;
+    ins[2].value=bet.toFixed(2);
+    arb+=bet;
+  });
+  document.querySelectorAll('#fab-mat-rows .ar').forEach(function(r){
+    mat+=parseFloat(r.querySelectorAll('input')[1].value)||0;
+  });
+  var net=arb+mat, mwst=net*0.19, bru=net+mwst;
+  document.getElementById('fab-tot-arb').textContent=fmt(arb);
+  document.getElementById('fab-tot-mat').textContent=fmt(mat);
+  document.getElementById('fab-tot-net').textContent=fmt(net);
+  document.getElementById('fab-tot-mwst').textContent=fmt(mwst);
+  document.getElementById('fab-tot-bru').textContent=fmt(bru);
+}
+
+document.getElementById('fab-taet-rows').addEventListener('click',function(e){var b=e.target.closest('[data-del]');if(b){document.getElementById(b.dataset.del).remove();fabCalcTots();}});
+document.getElementById('fab-mat-rows').addEventListener('click',function(e){var b=e.target.closest('[data-del]');if(b){document.getElementById(b.dataset.del).remove();fabCalcTots();}});
+document.getElementById('fab-add-taet').onclick=function(){fabAddTaet();};
+document.getElementById('fab-add-mat').onclick=function(){fabAddMat();};
+
+document.getElementById('fab-save').onclick=async function(){
+  var repId=document.getElementById('fab-auftrag').value;
+  if(!repId){msg('fab-msg','Bitte Auftrag auswählen!',true);return;}
+  var taet=[],mat=[];
+  document.querySelectorAll('#fab-taet-rows .ar').forEach(function(r){
+    var ins=r.querySelectorAll('input');
+    if(ins[0].value.trim()) taet.push({desc:ins[0].value,std:parseFloat(ins[1].value)||0});
+  });
+  document.querySelectorAll('#fab-mat-rows .ar').forEach(function(r){
+    var ins=r.querySelectorAll('input');
+    if(ins[0].value.trim()) mat.push({desc:ins[0].value,preis:parseFloat(ins[1].value)||0});
+  });
+  if(!taet.length){msg('fab-msg','Mindestens eine Tätigkeit eingeben!',true);return;}
+  var net=parseFloat(document.getElementById('fab-tot-net').textContent.replace(/[^\d,]/g,'').replace(',','.'))||0;
+  var btn=this; btn.disabled=true;
+  try{
+    var body={reparatur_id:parseInt(repId),taetigkeiten:JSON.stringify(taet),material:JSON.stringify(mat),total_netto:net,stundensatz:SATZ};
+    var r=await fetch(W+'/api/arbeitsbericht',{method:'POST',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var j=await r.json();
+    if(j.ok||j.id){
+      msg('fab-msg','✓ Arbeitsbericht gespeichert!');
+      showNotif('&#x1F4C4; Arbeitsbericht gespeichert','green');
+      // Formu temizle
+      document.getElementById('fab-taet-rows').innerHTML='';
+      document.getElementById('fab-mat-rows').innerHTML='';
+      document.getElementById('fab-auftrag').value='';
+      fabCalcTots();
+      fabAbId=0;
+      // AB print aç
+      if(j.id){
+        window.open('https://tools.hasi-elektronic.de/ab-print.html?rep='+repId+'&ab='+j.id+'&type=arbeitsbericht','_blank');
+      }
+    } else msg('fab-msg','Fehler!',true);
+  }catch(e){msg('fab-msg',e.message,true);}
+  btn.disabled=false;
+};
+// ==================== END FORM TAB ====================
+
 // INIT
 window.addEventListener('load',function(){
   document.getElementById('f-dat').value=tod();
@@ -1443,6 +1606,8 @@ window.addEventListener('load',function(){
     window._vlNr=nr2;
     msg('f-msg','');
   };
+  // AB form başlangıç satırı
+  fabAddTaet();
   loadDash();
   loadList();
   // Her 30 saniyede otomatik guncelle
