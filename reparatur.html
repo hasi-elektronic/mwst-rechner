@@ -382,10 +382,14 @@ tbody tr:last-child td{border-bottom:none}
         <div class="vl-body">
           <div class="vl-sec">
             <div class="vl-sec-title">Auftrag ausw&auml;hlen</div>
-            <span class="vl-lbl">Auftrag</span>
-            <select class="vl-inp" id="fab-auftrag">
-              <option value="">-- Auftrag w&auml;hlen --</option>
+            <span class="vl-lbl">Auftrag (optional)</span>
+            <select class="vl-inp" id="fab-auftrag" onchange="fabAuftragChanged()">
+              <option value="">-- Ohne Auftrag --</option>
             </select>
+            <div id="fab-kunde-wrap">
+              <span class="vl-lbl">Kundenname (optional)</span>
+              <input class="vl-inp" id="fab-kunde" placeholder="z.B. Max Mustermann">
+            </div>
           </div>
           <div class="card" style="margin-bottom:14px">
             <div class="ct">T&auml;tigkeiten</div>
@@ -1467,6 +1471,11 @@ function switchFormTab(tab){
   if(!isAuftrag) fabRefreshAuftragList();
 }
 
+function fabAuftragChanged(){
+  var val=document.getElementById('fab-auftrag').value;
+  document.getElementById('fab-kunde-wrap').style.display=val?'none':'';
+}
+
 function fabRefreshAuftragList(){
   var sel=document.getElementById('fab-auftrag');
   sel.innerHTML='<option value="">-- Auftrag wählen --</option>';
@@ -1535,7 +1544,7 @@ document.getElementById('fab-add-mat').onclick=function(){fabAddMat();};
 
 document.getElementById('fab-save').onclick=async function(){
   var repId=document.getElementById('fab-auftrag').value;
-  if(!repId){msg('fab-msg','Bitte Auftrag auswählen!',true);return;}
+  var kundeOhneAuftrag=document.getElementById('fab-kunde').value.trim();
   var taet=[],mat=[];
   document.querySelectorAll('#fab-taet-rows .ar').forEach(function(r){
     var ins=r.querySelectorAll('input');
@@ -1549,7 +1558,9 @@ document.getElementById('fab-save').onclick=async function(){
   var net=parseFloat(document.getElementById('fab-tot-net').textContent.replace(/[^\d,]/g,'').replace(',','.'))||0;
   var btn=this; btn.disabled=true;
   try{
-    var body={reparatur_id:parseInt(repId),taetigkeiten:JSON.stringify(taet),material:JSON.stringify(mat),total_netto:net,stundensatz:SATZ};
+    var body={taetigkeiten:JSON.stringify(taet),material:JSON.stringify(mat),total_netto:net,stundensatz:SATZ};
+    if(repId) body.reparatur_id=parseInt(repId);
+    if(!repId&&kundeOhneAuftrag) body.k_name=kundeOhneAuftrag;
     var r=await fetch(W+'/api/arbeitsbericht',{method:'POST',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify(body)});
     var j=await r.json();
     if(j.ok||j.id){
@@ -1559,11 +1570,15 @@ document.getElementById('fab-save').onclick=async function(){
       document.getElementById('fab-taet-rows').innerHTML='';
       document.getElementById('fab-mat-rows').innerHTML='';
       document.getElementById('fab-auftrag').value='';
+      document.getElementById('fab-kunde').value='';
+      document.getElementById('fab-kunde-wrap').style.display='';
       fabCalcTots();
       fabAbId=0;
       // AB print aç
       if(j.id){
-        window.open('https://tools.hasi-elektronic.de/ab-print.html?rep='+repId+'&ab='+j.id+'&type=arbeitsbericht','_blank');
+        var printUrl='https://tools.hasi-elektronic.de/ab-print.html?ab='+j.id+'&type=arbeitsbericht';
+        if(repId) printUrl+='&rep='+repId;
+        window.open(printUrl,'_blank');
       }
     } else msg('fab-msg','Fehler!',true);
   }catch(e){msg('fab-msg',e.message,true);}
