@@ -108,6 +108,18 @@ tbody tr:last-child td{border-bottom:none}
 .kal-dot.s-off{background:#d9770622;color:#d97706;border:1px solid #d9770644}
 .kal-dot.s-fer{background:#0d9f6e22;color:#0d9f6e;border:1px solid #0d9f6e44}
 .kal-dot.s-alarm{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+/* WHATSAPP */
+.wa-btn{background:#25d366;color:#fff;border:none;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:inherit}
+.wa-btn:hover{background:#1ebe57}
+/* BEZAHLT */
+.bez-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:'DM Mono',monospace;padding:3px 10px;border-radius:100px;font-weight:600;cursor:pointer}
+.bez-offen{background:rgba(220,38,38,.1);color:var(--red);border:1.5px solid rgba(220,38,38,.3)}
+.bez-bezahlt{background:rgba(13,159,110,.1);color:var(--green);border:1.5px solid rgba(13,159,110,.3)}
+/* GARANTIE */
+.gar-badge{display:inline-flex;font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:100px;font-weight:600}
+.gar-ok{background:#0d9f6e22;color:#0d9f6e;border:1px solid #0d9f6e44}
+.gar-warn{background:#d9770622;color:#d97706;border:1px solid #d9770644}
+.gar-exp{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
 /* HIZLI DURUM */
 .qs-btn{font-size:10px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:6px;cursor:pointer;border:1.5px solid transparent;font-weight:600;white-space:nowrap;transition:all .15s}
 .qs-btn:hover{opacity:.8;transform:scale(1.05)}
@@ -210,6 +222,22 @@ tbody tr:last-child td{border-bottom:none}
     </div>
     <div id="dash-loading" style="text-align:center;padding:60px;color:var(--m);font-family:'DM Mono',monospace;font-size:13px">Lade...</div>
     <div id="dash-content" style="display:none">
+      <!-- OFFENE RECHNUNGEN -->
+      <div id="offen-rek-wrap" style="margin-bottom:24px;display:none">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="font-size:18px;font-weight:700">&#x1F4B8; Offene Rechnungen</div>
+          <div id="offen-rek-count" style="background:var(--red);color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div>
+        </div>
+        <div id="offen-rek-list" class="lw"></div>
+      </div>
+      <!-- GARANTİ UYARISI -->
+      <div id="garantie-wrap" style="margin-bottom:24px;display:none">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="font-size:18px;font-weight:700">&#x1F6E1; Garantie-Ablauf</div>
+          <div id="garantie-count" style="background:var(--amber);color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div>
+        </div>
+        <div id="garantie-list" class="lw"></div>
+      </div>
       <!-- JASMIN & SABINE BÖLÜMÜ -->
       <div id="abholbereit-wrap" style="margin-bottom:24px;display:none">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
@@ -434,9 +462,20 @@ tbody tr:last-child td{border-bottom:none}
     <div class="card">
       <div class="ct">Status &amp; Notizen</div>
       <label>Status</label>
-      <select class="inp" id="det-status">
+      <select class="inp" id="det-status" onchange="detStatusChanged()">
         <option>Neu</option><option>In Bearbeitung</option><option>Teile bestellt</option>
         <option>Warten auf Kunde</option><option>Fertig</option><option>Abgeholt</option><option>Abgelehnt</option>
+      </select>
+      <div id="wa-wrap" style="display:none;margin-top:10px">
+        <button class="wa-btn" id="det-wa">&#x1F4F1; WhatsApp: Ger&auml;t fertig</button>
+      </div>
+      <label>Garantie</label>
+      <select class="inp" id="det-garantie">
+        <option value="">Keine Garantie</option>
+        <option value="3">3 Monate</option>
+        <option value="6">6 Monate</option>
+        <option value="12">12 Monate</option>
+        <option value="24">24 Monate</option>
       </select>
       <label>Interne Notizen</label>
       <textarea class="inp" id="det-notiz" rows="3"></textarea>
@@ -588,6 +627,10 @@ async function loadDash(){
     renderDashTbl(d.history,'');
     // Abholbereit listesi — fertig + AB var
     renderAbholbereit();
+    // Offene Rechnungen
+    renderOffeneRechnungen();
+    // Garantie
+    renderGarantie();
     document.getElementById('dash-loading').style.display='none';
     document.getElementById('dash-content').style.display='block';
   }catch(e){
@@ -768,6 +811,12 @@ function _openDetRender(){
   document.getElementById('det-status').value=cur.status||'Neu';
   document.getElementById('det-notiz').value=cur.notizen||'';
   document.getElementById('det-msg').textContent='';
+  // Garantie
+  var garEl=document.getElementById('det-garantie');
+  if(garEl) garEl.value=cur.garantie_monate||'';
+  // WhatsApp butonu
+  var waWrap=document.getElementById('wa-wrap');
+  if(waWrap) waWrap.style.display=(cur.status==='Fertig'||cur.status==='Abgeholt')?'':'none';
   var fields=[['Kunde',cur.k_name],['Telefon',cur.k_telefon],['Adresse',[cur.k_adresse,cur.k_plz_ort].filter(Boolean).join(', ')],['Ger\u00e4t',cur.geraet_typ],['Modell',cur.modell],['Fehler',cur.fehler],['Win-PW',cur.win_passwort],['Limit',cur.kostenlimit?cur.kostenlimit+' \u20ac':'']];
   document.getElementById('det-info').innerHTML=fields.filter(function(x){return x[1];}).map(function(x){return '<div class="ifield"><div class="il">'+x[0]+'</div><div class="iv">'+x[1]+'</div></div>';}).join('');
   loadAbList();
@@ -783,8 +832,17 @@ async function loadAbList(){
     var abs=await r.json();
     if(!Array.isArray(abs)||!abs.length){wrap.innerHTML='<div style="color:var(--m);font-size:13px">Keine Arbeitsberichte.</div>';return;}
     wrap._abs=abs;
+    wrap._abs=abs;
     wrap.innerHTML=abs.map(function(ab){
-      return '<div class="ab-item" data-ab-id="'+ab.id+'"><div><div style="font-family:DM Mono,monospace;font-size:12px;color:var(--hasi)">'+(ab.ab_nr||'\u2014')+'</div><div style="font-size:12px;color:var(--m)">'+(ab.datum||'')+'</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--green)">'+fmt(ab.total_netto||0)+'</div></div></div>';
+      var bezahlt=ab.bezahlt||ab.payment_status==='bezahlt';
+      return '<div class="ab-item" data-ab-id="'+ab.id+'">'
+        +'<div><div style="font-family:DM Mono,monospace;font-size:12px;color:var(--hasi)">'+(ab.ab_nr||'\u2014')+'</div>'
+        +'<div style="font-size:12px;color:var(--m)">'+(ab.datum||'')+'</div></div>'
+        +'<div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px">'
+        +'<div style="font-size:14px;font-weight:600;color:var(--green)">'+fmt(ab.total_netto||0)+'</div>'
+        +'<button class="bez-badge '+(bezahlt?'bez-bezahlt':'bez-offen')+'" data-bez-id="'+ab.id+'" data-bez-status="'+(bezahlt?'bezahlt':'offen')+'">'
+        +(bezahlt?'&#x2705; Bezahlt':'&#x23F3; Offen')+'</button>'
+        +'</div></div>';
     }).join('');
     document.querySelectorAll('.ab-item').forEach(function(el){
       el.onclick=el.ontouchend=function(e){
@@ -799,7 +857,7 @@ document.getElementById('det-save').onclick=async function(){
   var btn=this; btn.disabled=true;
   if(!cur) return;
   try{
-    var r=await fetch(W+'/api/reparatur/'+cur.id,{method:'PATCH',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify({status:document.getElementById('det-status').value,notizen:document.getElementById('det-notiz').value})});
+    var r=await fetch(W+'/api/reparatur/'+cur.id,{method:'PATCH',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify({status:document.getElementById('det-status').value,notizen:document.getElementById('det-notiz').value,garantie_monate:document.getElementById('det-garantie').value||null})});
     var j=await r.json();
     if(j.ok){cur.status=document.getElementById('det-status').value;var x=reps.find(function(r){return r.id===cur.id;});if(x)x.status=cur.status;renderStats();renderList();msg('det-msg','\u2713 Gespeichert');}
     else msg('det-msg','Fehler!',true);
@@ -1211,6 +1269,121 @@ function buildVorlagePdf(r){
 }
 
 
+
+
+// ==================== WHATSAPP ====================
+function detStatusChanged(){
+  var status=document.getElementById('det-status').value;
+  var wrap=document.getElementById('wa-wrap');
+  wrap.style.display=(status==='Fertig'||status==='Abgeholt')?'':'none';
+}
+
+document.getElementById('det-wa').onclick=function(){
+  if(!cur) return;
+  var tel=(cur.k_telefon||'').replace(/[^0-9+]/g,'');
+  if(!tel){alert('Keine Telefonnummer vorhanden!');return;}
+  // Alman numarasını uluslararası formata çevir
+  if(tel.startsWith('0')) tel='+49'+tel.slice(1);
+  var waText='Hallo '+(cur.k_name||'')+','
+    +'\n\nIhr Gerät ('+(cur.geraet_typ||'')+(cur.modell?' '+cur.modell:'')+') ist repariert und abholbereit.'
+    +'\n\nBitte kommen Sie zu unseren Öffnungszeiten vorbei:'
+    +'\nHasi Elektronic · Graßenstraße 18 · 71665 Vaihingen/Enz'
+    +'\n\nMit freundlichen Grüßen\nHasi Elektronic';
+  var msg=encodeURIComponent(waText);
+  window.open('https://wa.me/'+tel+'?text='+msg,'_blank');
+};
+
+// ==================== BEZAHLT TOGGLE ====================
+document.getElementById('ab-list-wrap').addEventListener('click',function(e){
+  var btn=e.target.closest('[data-bez-id]');
+  if(btn) toggleBezahlt(parseInt(btn.dataset.bezId), btn.dataset.bezStatus, btn);
+});
+
+async function toggleBezahlt(abId, currentStatus, btn){
+  var newStatus=currentStatus==='bezahlt'?'offen':'bezahlt';
+  btn.disabled=true;
+  try{
+    var r=await fetch(W+'/api/arbeitsbericht/bezahlt',{
+      method:'POST',
+      headers:{Authorization:A,'Content-Type':'application/json'},
+      body:JSON.stringify({id:abId,status:newStatus})
+    });
+    var j=await r.json();
+    if(j.ok){
+      btn.dataset.bezStatus=newStatus;
+      var isBez=newStatus==='bezahlt';
+      btn.className='bez-badge '+(isBez?'bez-bezahlt':'bez-offen');
+      btn.innerHTML=isBez?'&#x2705; Bezahlt':'&#x23F3; Offen';
+      showNotif(isBez?'&#x2705; Bezahlt markiert':'&#x23F3; Als offen markiert', isBez?'green':'amber');
+      // Offene Rechnungen listesini güncelle
+      renderOffeneRechnungen();
+    }
+  }catch(e){showNotif('&#x26A0; '+e.message,'amber');}
+  btn.disabled=false;
+}
+
+// ==================== OFFENE RECHNUNGEN ====================
+async function renderOffeneRechnungen(){
+  try{
+    var r=await fetch(W+'/api/arbeitsbericht/offene',{headers:{Authorization:A}});
+    var abs=await r.json();
+    if(!Array.isArray(abs)||!abs.length){
+      document.getElementById('offen-rek-wrap').style.display='none';
+      return;
+    }
+    document.getElementById('offen-rek-wrap').style.display='block';
+    document.getElementById('offen-rek-count').textContent=abs.length;
+    var ofList=document.getElementById('offen-rek-list');
+    ofList.onclick=function(e){
+      var btn=e.target.closest('[data-offen-btn]');
+      if(btn){e.stopPropagation();toggleBezahlt(parseInt(btn.dataset.bezId),btn.dataset.bezStatus,btn);}
+      else{var row=e.target.closest('.row');if(row&&row.dataset.repId)openDet(parseInt(row.dataset.repId));}
+    };
+    ofList.innerHTML=abs.map(function(ab){
+      return '<div class="row" style="grid-template-columns:140px 1fr 120px 140px" data-rep-id="'+(ab.reparatur_id||'')+'">'
+        +'<div class="nr">'+(ab.ab_nr||'')+'</div>'
+        +'<div class="nm">'+(ab.k_name||ab.k_name_override||'Ohne Auftrag')
+          +'<span class="sub">'+(ab.geraet_typ||'')+(ab.datum?' &middot; '+fmtD(ab.datum):'')+'</span></div>'
+        +'<div style="font-weight:700;color:var(--red);text-align:right">'+fmt(ab.total_netto||0)+'</div>'
+        +'<div style="text-align:right"><button class="bez-badge bez-offen" data-bez-id="'+ab.id+'" data-bez-status="offen" data-offen-btn="1">⏳ Offen</button></div>'
+        +'</div>';
+    }).join('');
+  }catch(e){}
+}
+
+// ==================== GARANTİE ====================
+function renderGarantie(){
+  var now=new Date();
+  var warningReps=[];
+  reps.forEach(function(r){
+    if(!r.garantie_monate||!r.garantie_start) return;
+    var start=new Date(r.garantie_start);
+    var endDate=new Date(start);
+    endDate.setMonth(endDate.getMonth()+parseInt(r.garantie_monate));
+    var daysLeft=Math.ceil((endDate-now)/(1000*60*60*24));
+    if(daysLeft<=60) warningReps.push({r:r,daysLeft:daysLeft,endDate:endDate});
+  });
+  if(!warningReps.length){
+    document.getElementById('garantie-wrap').style.display='none';
+    return;
+  }
+  warningReps.sort(function(a,b){return a.daysLeft-b.daysLeft;});
+  document.getElementById('garantie-wrap').style.display='block';
+  document.getElementById('garantie-count').textContent=warningReps.length;
+  document.getElementById('garantie-list').innerHTML=warningReps.map(function(item){
+    var r=item.r; var dl=item.daysLeft;
+    var cls=dl<0?'gar-exp':dl<=30?'gar-warn':'gar-ok';
+    var lbl=dl<0?'Abgelaufen':(dl===0?'Heute':dl+' Tage');
+    return '<div class="row" style="grid-template-columns:160px 1fr 100px 120px" onclick="openDet('+r.id+')">'
+      +'<div class="nr">'+(r.nr||'')+'</div>'
+      +'<div class="nm">'+(r.k_name||'')+'<span class="sub">'+(r.geraet_typ||'')+'</span></div>'
+      +'<div style="text-align:right;font-size:12px;color:var(--m)">'+fmtD((item.endDate.toISOString().slice(0,10)))+'</div>'
+      +'<div style="text-align:right"><span class="gar-badge '+cls+'">'+lbl+'</span></div>'
+      +'</div>';
+  }).join('');
+}
+
+// ==================== END ====================
 
 // ==================== GLOBAL SEARCH ====================
 var gsSelIdx=0;
