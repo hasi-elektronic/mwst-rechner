@@ -101,6 +101,23 @@ tbody tr:last-child td{border-bottom:none}
 .kal-day.today{background:rgba(51,175,226,.08)}
 .kal-day.other{opacity:.35}
 .kal-day.sel{background:var(--hasi-soft);outline:2px solid var(--hasi)}
+/* KUNDEN KARTEI */
+.kunden-card{background:#fff;border:1.5px solid var(--b);border-radius:16px;padding:18px;cursor:pointer;transition:all .15s}
+.kunden-card:hover{border-color:var(--hasi);box-shadow:0 4px 16px rgba(51,175,226,.12);transform:translateY(-1px)}
+.kunden-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--hasi),#5bc8f0);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0}
+.kunden-name{font-size:15px;font-weight:700;margin-bottom:3px}
+.kunden-meta{font-size:11px;color:var(--m);font-family:'DM Mono',monospace}
+.kunden-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.kunden-stat{background:var(--bg);border-radius:8px;padding:8px;text-align:center}
+.kunden-stat .v{font-size:16px;font-weight:700}
+.kunden-stat .l{font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;margin-top:2px}
+/* KUNDEN DETAIL MODAL */
+#kunden-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:9999;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+#kunden-modal.on{display:flex}
+#kunden-modal-box{background:#fff;border-radius:20px;width:700px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.km-header{padding:20px 24px;border-bottom:1.5px solid var(--b);display:flex;align-items:center;gap:14px}
+.km-body{padding:20px 24px}
+.km-close{margin-left:auto;background:var(--bg);border:1.5px solid var(--b2);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:inherit;font-size:13px}
 .kal-nr{font-size:11px;font-weight:700;margin-bottom:3px;color:var(--m)}
 .kal-day.today .kal-nr{color:var(--hasi)}
 .kal-dot{font-size:9px;border-radius:4px;padding:1px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
@@ -200,6 +217,7 @@ tbody tr:last-child td{border-bottom:none}
 </head>
 <body>
 <div id="notif-bar"></div>
+<div id="kunden-modal"><div id="kunden-modal-box"></div></div>
 <nav>
   <div class="ni">
     <img id="logo-img" src="" alt="Hasi">
@@ -209,6 +227,7 @@ tbody tr:last-child td{border-bottom:none}
     <button class="tab" id="btn-det" data-pg="pg-det" style="display:none">&#x1F527; Auftrag</button>
     <button class="tab" id="btn-ab" data-pg="pg-ab" style="display:none">&#x1F4C4; Arbeitsbericht</button>
     <button class="tab" data-pg="pg-kal">&#x1F4C5; Kalender</button>
+    <button class="tab" data-pg="pg-kunden">&#x1F465; Kunden</button>
     <button class="gs-btn" id="gs-open-btn" style="margin-left:auto;flex-shrink:0" title="Suchen (Strg+K)">&#x1F50D; Suchen <span class="gs-kbd">Strg+K</span></button>
   </div>
 </nav>
@@ -530,6 +549,17 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- KUNDEN -->
+<div id="pg-kunden" class="pg">
+  <div class="wrap">
+    <div class="topbar">
+      <h1>Kunden <span>Kartei</span></h1>
+      <input class="inp" id="kunden-q" placeholder="&#x1F50D; Kunde suchen..." style="max-width:320px;margin-left:auto">
+    </div>
+    <div id="kunden-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
+  </div>
+</div>
+
 <!-- KALENDER -->
 <div id="pg-kal" class="pg">
   <div class="wrap">
@@ -601,6 +631,7 @@ document.querySelectorAll('.tab[data-pg]').forEach(function(b){
     var pid=b.dataset.pg;
     showPg(pid);
     if(pid==='pg-kal') renderKal();
+    if(pid==='pg-kunden') renderKunden('');
   });
 });
 
@@ -1388,6 +1419,147 @@ function renderGarantie(){
 
 // ==================== END ====================
 
+
+// ==================== KUNDEN KARTEI ====================
+function buildKundenKartei(){
+  // Müşterileri reps'ten topla
+  var kundenMap={};
+  reps.forEach(function(r){
+    var key=(r.k_name||'').trim().toLowerCase();
+    if(!key) return;
+    if(!kundenMap[key]){
+      kundenMap[key]={
+        name:r.k_name,
+        telefon:r.k_telefon||'',
+        email:r.k_email||'',
+        adresse:r.k_adresse||'',
+        plz_ort:r.k_plz_ort||'',
+        auftraege:[],
+        gesamt_netto:0,
+        letzter_besuch:null,
+        offene:0,
+        bezahlt:0
+      };
+    }
+    var k=kundenMap[key];
+    k.auftraege.push(r);
+    if(!k.telefon&&r.k_telefon) k.telefon=r.k_telefon;
+    if(!k.email&&r.k_email) k.email=r.k_email;
+    if(!k.adresse&&r.k_adresse) k.adresse=r.k_adresse;
+    if(!k.plz_ort&&r.k_plz_ort) k.plz_ort=r.k_plz_ort;
+    if(!k.letzter_besuch||r.datum>k.letzter_besuch) k.letzter_besuch=r.datum;
+    if(r.status!=='Abgeholt'&&r.status!=='Abgelehnt') k.offene++;
+    if(r.umsatz_netto) k.gesamt_netto+=parseFloat(r.umsatz_netto)||0;
+  });
+
+  var kunden=Object.values(kundenMap);
+  kunden.sort(function(a,b){return b.auftraege.length-a.auftraege.length;});
+  return kunden;
+}
+
+function renderKunden(q){
+  var kunden=buildKundenKartei();
+  q=(q||'').toLowerCase().trim();
+  if(q) kunden=kunden.filter(function(k){
+    return [k.name,k.telefon,k.email,k.adresse].join(' ').toLowerCase().indexOf(q)>=0;
+  });
+
+  if(!kunden.length){
+    document.getElementById('kunden-list').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--m)">Keine Kunden gefunden.</div>';
+    return;
+  }
+
+  document.getElementById('kunden-list').innerHTML=kunden.map(function(k,idx){
+    var initial=(k.name||'?')[0].toUpperCase();
+    var colors=['#33afe2','#0d9f6e','#7c3aed','#d97706','#dc2626','#60a5fa'];
+    var col=colors[idx%colors.length];
+    return '<div class="kunden-card" data-kunden-idx="'+idx+'">'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+        +'<div class="kunden-avatar" style="background:linear-gradient(135deg,'+col+','+col+'99)">'+initial+'</div>'
+        +'<div>'
+          +'<div class="kunden-name">'+k.name+'</div>'
+          +'<div class="kunden-meta">'+(k.telefon||k.email||k.plz_ort||'&mdash;')+'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div class="kunden-stats">'
+        +'<div class="kunden-stat"><div class="v" style="color:var(--hasi)">'+k.auftraege.length+'</div><div class="l">Auftr&auml;ge</div></div>'
+        +'<div class="kunden-stat"><div class="v" style="color:var(--amber)">'+k.offene+'</div><div class="l">Offen</div></div>'
+        +'<div class="kunden-stat"><div class="v" style="color:var(--green);font-size:13px">'+fmt(k.gesamt_netto)+'</div><div class="l">Umsatz</div></div>'
+      +'</div>'
+      +'<div style="margin-top:10px;font-size:11px;color:var(--m)">Letzter Besuch: '+fmtD(k.letzter_besuch)+'</div>'
+      +'</div>';
+  }).join('');
+
+  // Click handler
+  document.getElementById('kunden-list').querySelectorAll('.kunden-card').forEach(function(card){
+    card.onclick=function(){
+      var idx=parseInt(card.dataset.kundenIdx);
+      openKundenDetail(kunden[idx]);
+    };
+  });
+}
+
+function openKundenDetail(k){
+  var modal=document.getElementById('kunden-modal');
+  var box=document.getElementById('kunden-modal-box');
+  var initial=(k.name||'?')[0].toUpperCase();
+
+  var auftraegeRows=k.auftraege.map(function(r){
+    var sc={'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'};
+    var col=sc[r.status||'Neu']||'#33afe2';
+    return '<tr onclick="openDet('+r.id+');kundenModalClose()" style="cursor:pointer">'
+      +'<td style="padding:8px 12px;font-family:DM Mono,monospace;font-size:11px;color:var(--hasi)">'+(r.nr||'')+'</td>'
+      +'<td style="padding:8px 12px;font-size:13px">'+fmtD(r.datum)+'</td>'
+      +'<td style="padding:8px 12px;font-size:13px">'+(r.geraet_typ||'')+(r.modell?' &middot; '+r.modell:'')+'</td>'
+      +'<td style="padding:8px 12px"><span class="badge" style="background:'+col+'22;border:1px solid '+col+'44;color:'+col+'">'+r.status+'</span></td>'
+      +'<td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--green)">'+fmt(r.umsatz_netto||0)+'</td>'
+      +'</tr>';
+  }).join('');
+
+  box.innerHTML='<div class="km-header">'
+    +'<div class="kunden-avatar" style="width:52px;height:52px;font-size:22px">'+initial+'</div>'
+    +'<div>'
+      +'<div style="font-size:18px;font-weight:700">'+k.name+'</div>'
+      +'<div style="font-size:12px;color:var(--m);margin-top:3px">'
+        +(k.telefon?'&#x1F4DE; '+k.telefon+'&nbsp;&nbsp;':'')
+        +(k.email?'&#x2709; '+k.email+'&nbsp;&nbsp;':'')
+        +(k.adresse?'&#x1F4CD; '+k.adresse+(k.plz_ort?' &middot; '+k.plz_ort:''):'')
+      +'</div>'
+    +'</div>'
+    +'<button class="km-close" onclick="kundenModalClose()">&times; Schlie&szlig;en</button>'
+    +'</div>'
+    +'<div class="km-body">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:18px">'
+        +'<div class="kunden-stat"><div class="v" style="color:var(--hasi)">'+k.auftraege.length+'</div><div class="l">Gesamt</div></div>'
+        +'<div class="kunden-stat"><div class="v" style="color:var(--amber)">'+k.offene+'</div><div class="l">Offen</div></div>'
+        +'<div class="kunden-stat"><div class="v" style="color:var(--green);font-size:13px">'+fmt(k.gesamt_netto)+'</div><div class="l">Umsatz</div></div>'
+        +'<div class="kunden-stat"><div class="v" style="font-size:13px">'+fmtD(k.letzter_besuch)+'</div><div class="l">Letzter Besuch</div></div>'
+      +'</div>'
+      +(k.telefon?'<a href="https://wa.me/'+k.telefon.replace(/[^0-9+]/g,'').replace(/^0/,'+49')+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#25d366;color:#fff;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:14px">&#x1F4F1; WhatsApp</a>':'')
+      +'<div style="font-size:11px;font-family:DM Mono,monospace;color:var(--hasi);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Auftrags-Historie</div>'
+      +'<div style="border:1.5px solid var(--b);border-radius:12px;overflow:hidden">'
+        +'<table style="width:100%;border-collapse:collapse">'
+          +'<thead><tr style="background:#f0f7fd">'
+            +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-family:DM Mono,monospace;color:var(--m)">Nr.</th>'
+            +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-family:DM Mono,monospace;color:var(--m)">Datum</th>'
+            +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-family:DM Mono,monospace;color:var(--m)">Gerät</th>'
+            +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-family:DM Mono,monospace;color:var(--m)">Status</th>'
+            +'<th style="padding:8px 12px;text-align:right;font-size:10px;font-family:DM Mono,monospace;color:var(--m)">Netto</th>'
+          +'</tr></thead>'
+          +'<tbody>'+auftraegeRows+'</tbody>'
+        +'</table>'
+      +'</div>'
+    +'</div>';
+
+  modal.classList.add('on');
+  modal.onclick=function(e){if(e.target===modal)kundenModalClose();};
+}
+
+function kundenModalClose(){
+  document.getElementById('kunden-modal').classList.remove('on');
+}
+// ==================== END KUNDEN ====================
+
 // ==================== GLOBAL SEARCH ====================
 var gsSelIdx=0;
 
@@ -1799,6 +1971,7 @@ window.addEventListener('load',function(){
   };
   // AB form başlangıç satırı
   fabAddTaet();
+  document.getElementById('kunden-q').oninput=function(){renderKunden(this.value);};
   loadDash();
   loadList();
   // Her 30 saniyede otomatik guncelle
