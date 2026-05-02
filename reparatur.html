@@ -388,6 +388,7 @@ tbody tr:last-child td{border-bottom:none}
         <button class="btn" id="det-pdf">PDF Auftrag</button>
         <button class="btn" id="det-zettel">&#x1F4C4; Auftragszettel</button>
         <button class="btn" id="det-new-ab">+ Arbeitsbericht</button>
+        <button class="btn" id="det-del" style="background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3);color:var(--red);margin-left:auto">&#x1F5D1; L&ouml;schen</button>
       </div>
       <div class="save-msg" id="det-msg"></div>
     </div>
@@ -661,6 +662,30 @@ document.getElementById('det-save').onclick=async function(){
   btn.disabled=false;
 };
 document.getElementById('det-new-ab').onclick=function(){openAbForm(null);};
+document.getElementById('det-del').onclick=async function(){
+  if(!cur) return;
+  var ok=confirm('Auftrag '+( cur.nr||'')+ ' von '+(cur.k_name||'')+ ' wirklich l\u00f6schen?\nDieser Vorgang kann nicht r\u00fcckg\u00e4ngig gemacht werden!');
+  if(!ok) return;
+  var btn=this; btn.disabled=true;
+  try{
+    var r=await fetch(W+'/api/reparatur/'+cur.id,{method:'DELETE',headers:{Authorization:A}});
+    var j=await r.json();
+    if(j.ok){
+      showNotif('&#x1F5D1; Auftrag '+(cur.nr||'')+' gel\u00f6scht','amber',4000);
+      reps=reps.filter(function(x){return x.id!==cur.id;});
+      cur=null;
+      renderStats(); renderList();
+      document.getElementById('btn-det').style.display='none';
+      showPg('pg-list');
+    } else {
+      showNotif('&#x26A0; Fehler beim L\u00f6schen','amber');
+      btn.disabled=false;
+    }
+  }catch(e){
+    showNotif('&#x26A0; '+e.message,'amber');
+    btn.disabled=false;
+  }
+};
 
 // FORM
 document.getElementById('f-send').onclick=async function(){
