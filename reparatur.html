@@ -1380,14 +1380,14 @@ function playBeep(status){
 // ==================== CANLI GÜNCELLEME ====================
 var _lastRepHash='';
 function hashReps(){
-  return reps.map(function(r){return r.id+':'+r.status;}).join('|');
+  return reps.length+'|'+reps.map(function(r){return r.id+':'+r.status;}).join('|');
 }
 async function livePoll(){
   try{
     var r=await fetch(W+'/api/reparatur',{headers:{Authorization:A}});
     var newReps=await r.json();
     if(!Array.isArray(newReps)) return;
-    var newHash=newReps.map(function(r){return r.id+':'+r.status;}).join('|');
+    var newHash=newReps.length+'|'+newReps.map(function(r){return r.id+':'+r.status;}).join('|');
     if(newHash!==_lastRepHash && _lastRepHash!==''){
       // Değişiklik var — ne değişti bul
       newReps.forEach(function(nr){
