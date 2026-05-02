@@ -556,7 +556,7 @@ tbody tr:last-child td{border-bottom:none}
       <h1>Kunden <span>Kartei</span></h1>
       <input class="inp" id="kunden-q" placeholder="&#x1F50D; Kunde suchen..." style="max-width:320px;margin-left:auto">
     </div>
-    <div id="kunden-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
+    <div id="kunden-list" class="lw"></div>
   </div>
 </div>
 
@@ -1473,30 +1473,21 @@ function renderKunden(q){
     var initial=(k.name||'?')[0].toUpperCase();
     var colors=['#33afe2','#0d9f6e','#7c3aed','#d97706','#dc2626','#60a5fa'];
     var col=colors[idx%colors.length];
-    return '<div class="kunden-card" data-kunden-idx="'+idx+'">'
-      +'<div style="display:flex;align-items:center;gap:12px">'
-        +'<div class="kunden-avatar" style="background:linear-gradient(135deg,'+col+','+col+'99)">'+initial+'</div>'
-        +'<div>'
-          +'<div class="kunden-name">'+k.name+'</div>'
-          +'<div class="kunden-meta">'+(k.telefon||k.email||k.plz_ort||'&mdash;')+'</div>'
-        +'</div>'
-      +'</div>'
-      +'<div class="kunden-stats">'
-        +'<div class="kunden-stat"><div class="v" style="color:var(--hasi)">'+k.auftraege.length+'</div><div class="l">Auftr&auml;ge</div></div>'
-        +'<div class="kunden-stat"><div class="v" style="color:var(--amber)">'+k.offene+'</div><div class="l">Offen</div></div>'
-        +'<div class="kunden-stat"><div class="v" style="color:var(--green);font-size:13px">'+fmt(k.gesamt_netto)+'</div><div class="l">Umsatz</div></div>'
-      +'</div>'
-      +'<div style="margin-top:10px;font-size:11px;color:var(--m)">Letzter Besuch: '+fmtD(k.letzter_besuch)+'</div>'
+    return '<div class="row" style="grid-template-columns:44px 1fr 90px 90px 120px 120px" data-kunden-idx="'+idx+'">'
+      +'<div><div class="kunden-avatar" style="width:36px;height:36px;font-size:14px;background:linear-gradient(135deg,'+col+','+col+'99)">'+initial+'</div></div>'
+      +'<div class="nm">'+k.name+'<span class="sub">'+(k.telefon||k.email||k.plz_ort||'&mdash;')+'</span></div>'
+      +'<div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--hasi)">'+k.auftraege.length+'</div><div style="font-size:9px;font-family:DM Mono,monospace;color:var(--m)">AUFTRÄGE</div></div>'
+      +'<div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--amber)">'+k.offene+'</div><div style="font-size:9px;font-family:DM Mono,monospace;color:var(--m)">OFFEN</div></div>'
+      +'<div style="text-align:right"><div style="font-size:13px;font-weight:700;color:var(--green)">'+fmt(k.gesamt_netto)+'</div><div style="font-size:9px;font-family:DM Mono,monospace;color:var(--m)">UMSATZ</div></div>'
+      +'<div style="text-align:right;font-size:11px;color:var(--m)">'+fmtD(k.letzter_besuch)+'</div>'
       +'</div>';
   }).join('');
 
   // Click handler
-  document.getElementById('kunden-list').querySelectorAll('.kunden-card').forEach(function(card){
-    card.onclick=function(){
-      var idx=parseInt(card.dataset.kundenIdx);
-      openKundenDetail(kunden[idx]);
-    };
-  });
+  document.getElementById('kunden-list').onclick=function(e){
+    var row=e.target.closest('.row[data-kunden-idx]');
+    if(row) openKundenDetail(kunden[parseInt(row.dataset.kundenIdx)]);
+  };
 }
 
 function openKundenDetail(k){
