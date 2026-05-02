@@ -662,30 +662,50 @@ document.getElementById('det-save').onclick=async function(){
   btn.disabled=false;
 };
 document.getElementById('det-new-ab').onclick=function(){openAbForm(null);};
-document.getElementById('det-del').onclick=async function(){
+document.getElementById('det-del').onclick=function(){
   if(!cur) return;
-  var ok=confirm('Auftrag '+( cur.nr||'')+ ' von '+(cur.k_name||'')+ ' wirklich l\u00f6schen?\nDieser Vorgang kann nicht r\u00fcckg\u00e4ngig gemacht werden!');
-  if(!ok) return;
-  var btn=this; btn.disabled=true;
-  try{
-    var r=await fetch(W+'/api/reparatur/'+cur.id,{method:'DELETE',headers:{Authorization:A}});
-    var j=await r.json();
-    if(j.ok){
-      showNotif('&#x1F5D1; Auftrag '+(cur.nr||'')+' gel\u00f6scht','amber',4000);
-      reps=reps.filter(function(x){return x.id!==cur.id;});
-      cur=null;
-      renderStats(); renderList();
-      document.getElementById('btn-det').style.display='none';
-      showPg('pg-list');
-    } else {
-      showNotif('&#x26A0; Fehler beim L\u00f6schen','amber');
-      btn.disabled=false;
-    }
-  }catch(e){
-    showNotif('&#x26A0; '+e.message,'amber');
-    btn.disabled=false;
-  }
+  showDeleteConfirm(cur);
 };
+function showDeleteConfirm(rep){
+  var ex=document.getElementById('del-modal');
+  if(ex) ex.remove();
+  var modal=document.createElement('div');
+  modal.id='del-modal';
+  modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML='<div style="background:#fff;border-radius:16px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
+    +'<div style="font-size:32px;text-align:center;margin-bottom:12px">&#x1F5D1;</div>'
+    +'<div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:8px">Auftrag l\u00f6schen?</div>'
+    +'<div style="font-size:13px;color:#5a7a90;text-align:center;margin-bottom:20px"><b>'+(rep.nr||'')+'</b> &middot; '+(rep.k_name||'')+'<br><span style="color:#dc2626">Alle Arbeitsberichte werden ebenfalls gel\u00f6scht!</span></div>'
+    +'<div style="display:flex;gap:10px">'
+    +'<button id="del-cancel" style="flex:1;padding:11px;border:1.5px solid #d6e4f0;border-radius:10px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit">Abbrechen</button>'
+    +'<button id="del-confirm" style="flex:1;padding:11px;border:none;border-radius:10px;background:#dc2626;color:#fff;cursor:pointer;font-size:14px;font-weight:700;font-family:inherit">Ja, l\u00f6schen</button>'
+    +'</div></div>';
+  document.body.appendChild(modal);
+  document.getElementById('del-cancel').onclick=function(){modal.remove();};
+  modal.onclick=function(e){if(e.target===modal)modal.remove();};
+  document.getElementById('del-confirm').onclick=async function(){
+    var btn=this; btn.disabled=true; btn.textContent='...';
+    try{
+      var r=await fetch(W+'/api/reparatur/'+rep.id,{method:'DELETE',headers:{Authorization:A}});
+      var j=await r.json();
+      if(j.ok){
+        modal.remove();
+        showNotif('&#x1F5D1; Auftrag '+(rep.nr||'')+' gel\u00f6scht','amber',4000);
+        reps=reps.filter(function(x){return x.id!==rep.id;});
+        cur=null;
+        renderStats(); renderList();
+        document.getElementById('btn-det').style.display='none';
+        showPg('pg-list');
+      } else {
+        showNotif('&#x26A0; Fehler','amber');
+        btn.disabled=false; btn.textContent='Ja, l\u00f6schen';
+      }
+    }catch(e){
+      showNotif('&#x26A0; '+e.message,'amber');
+      btn.disabled=false; btn.textContent='Ja, l\u00f6schen';
+    }
+  };
+}
 
 // FORM
 document.getElementById('f-send').onclick=async function(){
