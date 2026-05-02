@@ -273,7 +273,7 @@ tbody tr:last-child td{border-bottom:none}
         <div class="kpi" style="--kc:#7c3aed;cursor:pointer" onclick="flt='Fertig';showPg('pg-list');renderList()"><div>&#x2705;</div><div class="v" id="k-don">0</div><div class="l">Abgeschlossen &#x2192;</div></div>
       </div>
       <div class="charts-row">
-        <div class="card"><div class="ct">Monatlicher Umsatz</div><canvas id="ch-m" height="200"></canvas></div>
+        <div class="card"><div class="ct">Monatliche Auftr&auml;ge</div><canvas id="ch-m" height="200"></canvas></div>
         <div class="card"><div class="ct">Status</div><canvas id="ch-s" height="160"></canvas><div id="ch-leg" style="margin-top:8px"></div></div>
       </div>
       <div class="card"><div class="ct">Ger&auml;tetypen</div><div id="geraete-bars" class="bar-list"></div></div>
@@ -648,7 +648,7 @@ async function loadDash(){
     document.getElementById('k-off').textContent=d.kpi.offen||0;
     document.getElementById('k-don').textContent=d.kpi.abgeschlossen||0;
     if(chM){chM.destroy();}
-    chM=new Chart(document.getElementById('ch-m').getContext('2d'),{type:'bar',data:{labels:d.monthly.map(function(m){return m.monat;}),datasets:[{data:d.monthly.map(function(m){return m.umsatz_netto;}),backgroundColor:'rgba(51,175,226,0.7)',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+    chM=new Chart(document.getElementById('ch-m').getContext('2d'),{type:'bar',data:{labels:d.monthly.map(function(m){return m.monat;}),datasets:[{data:d.monthly.map(function(m){return m.auftraege||0;}),backgroundColor:'rgba(51,175,226,0.7)',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
     if(chS){chS.destroy();}
     var sc=['#33afe2','#60a5fa','#fb923c','#a78bfa','#34d399','#6b7585','#f87171'];
     chS=new Chart(document.getElementById('ch-s').getContext('2d'),{type:'doughnut',data:{labels:d.status.map(function(s){return s.status;}),datasets:[{data:d.status.map(function(s){return s.anzahl;}),backgroundColor:sc}]},options:{plugins:{legend:{display:false}},cutout:'65%'}});
