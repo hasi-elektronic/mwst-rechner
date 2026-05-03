@@ -146,6 +146,7 @@ function render(rep,ab,type){
     +'<tr><td>MwSt. 19%</td><td class="r">'+fmt(mwst)+'</td></tr>'
     +'<tr class="sum-total"><td>Gesamt brutto</td><td class="r">'+fmt(bru)+'</td></tr>'
     +'</table></div></div>'
+    +(ab.notizen?'<div style="margin-top:5mm;background:#F0F9FF;border-left:3px solid #4FC1E9;padding:8px 10px;font-size:9pt;line-height:1.6"><b>Bemerkungen:</b><br>'+ab.notizen+'</div>':'')
     +(isRec?'<div class="zahlung"><b>Zahlungsinformationen</b><br>Bitte \u00fcberweisen Sie den Betrag innerhalb von 14 Tagen nach Rechnungserhalt.<br><br>Empf\u00e4nger: '+FIRMA.inhaber+'<br>IBAN: '+FIRMA.iban+'<br>Verwendungszweck: '+nr+'</div>':'')
     +'</div>'
     +'<div class="footer">'
