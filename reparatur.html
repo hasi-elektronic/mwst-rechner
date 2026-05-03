@@ -104,6 +104,7 @@ tbody tr:last-child td{border-bottom:none}
 .ber-row{display:grid;grid-template-columns:150px 1fr 100px 120px 130px;gap:12px;align-items:center;padding:12px 16px;border-bottom:1.5px solid var(--b);cursor:pointer}
 .ber-row:hover{background:var(--hasi-soft)}
 .ber-row:last-child{border-bottom:none}
+.tl-item:hover{background:var(--hasi-soft)}
 /* KUNDEN KARTEI */
 .kunden-card{background:#fff;border:1.5px solid var(--b);border-radius:16px;padding:18px;cursor:pointer;transition:all .15s}
 .kunden-card:hover{border-color:var(--hasi);box-shadow:0 4px 16px rgba(51,175,226,.12);transform:translateY(-1px)}
@@ -483,33 +484,34 @@ tbody tr:last-child td{border-bottom:none}
 
 <!-- DETAIL -->
 <div id="pg-det" class="pg">
-  <div class="wrap" style="max-width:900px">
+  <div class="wrap" style="max-width:860px;padding-bottom:60px">
 
-    <!-- BACK + TITLE -->
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-      <button class="btn" onclick="cur=null;showPg('pg-list')" style="flex-shrink:0">&larr; Zur&uuml;ck</button>
-      <div>
-        <div id="fa-nr" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--hasi)"></div>
-        <div id="fa-name" style="font-size:20px;font-weight:700;color:var(--t)"></div>
+    <!-- HEADER BAR -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+      <button class="btn" onclick="cur=null;showPg('pg-list')" style="flex-shrink:0;gap:6px">&#x2190; Zur&uuml;ck</button>
+      <div style="flex:1;min-width:0">
+        <div id="fa-nr" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--hasi);letter-spacing:.5px"></div>
+        <div id="fa-name" style="font-size:22px;font-weight:800;color:var(--t);letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
       </div>
-      <div id="fa-status-badge" style="margin-left:auto"></div>
+      <div id="fa-status-badge" style="flex-shrink:0"></div>
     </div>
 
-    <!-- GRID: Sol müşteri/cihaz, Sağ durum/actions -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <!-- TOP GRID: Kunde + Aktionen -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
 
-      <!-- MÜŞTERİ BİLGİLERİ -->
-      <div class="card" style="padding:20px">
-        <div class="ct">Kunde</div>
-        <div id="fa-kunde" style="font-size:14px;line-height:2"></div>
-        <div id="fa-geraet" style="margin-top:12px;padding-top:12px;border-top:1.5px solid var(--b);font-size:13px;line-height:1.8"></div>
+      <!-- KUNDE -->
+      <div class="card" style="padding:18px 20px">
+        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--hasi);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Kunde &amp; Ger&auml;t</div>
+        <div id="fa-kunde" style="font-size:13px;line-height:2;margin-bottom:10px"></div>
+        <div style="height:1px;background:var(--b);margin-bottom:10px"></div>
+        <div id="fa-geraet" style="font-size:13px;line-height:1.7"></div>
       </div>
 
-      <!-- DURUM + ACTIONS -->
-      <div class="card" style="padding:20px">
-        <div class="ct">Status &amp; Aktionen</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-          <select class="inp" id="fa-status" style="flex:1;min-width:160px" onchange="detStatusChanged()">
+      <!-- AKTIONEN -->
+      <div class="card" style="padding:18px 20px">
+        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--hasi);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Status &amp; Aktionen</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <select class="inp" id="fa-status" style="flex:1" onchange="detStatusChanged()">
             <option>Neu</option>
             <option>In Bearbeitung</option>
             <option>Teile bestellt</option>
@@ -518,15 +520,15 @@ tbody tr:last-child td{border-bottom:none}
             <option>Abgeholt</option>
             <option>Abgelehnt</option>
           </select>
-          <button class="btn p" id="fa-save-status" style="white-space:nowrap">&#x2713; Speichern</button>
+          <button class="btn p" id="fa-save-status" style="white-space:nowrap;flex-shrink:0">&#x2713; Speichern</button>
         </div>
         <div id="wa-wrap" style="display:none;margin-bottom:10px">
-          <button class="wa-btn" id="det-wa" style="width:100%">&#x1F4F1; WhatsApp: Ger&auml;t fertig</button>
+          <button class="wa-btn" id="det-wa" style="width:100%;justify-content:center">&#x1F4F1; WhatsApp: Ger&auml;t fertig</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
           <div>
-            <div style="font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;margin-bottom:4px">Garantie</div>
-            <select class="inp" id="fa-garantie" style="font-size:12px;padding:7px 10px">
+            <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Garantie</div>
+            <select class="inp" id="fa-garantie" style="font-size:12px;padding:6px 10px">
               <option value="">Keine</option>
               <option value="3">3 Monate</option>
               <option value="6">6 Monate</option>
@@ -535,84 +537,76 @@ tbody tr:last-child td{border-bottom:none}
             </select>
           </div>
           <div>
-            <div style="font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;margin-bottom:4px">Kostenlimit</div>
-            <div id="fa-limit" style="font-size:13px;padding:7px 0;color:var(--t)"></div>
+            <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Kostenlimit</div>
+            <div id="fa-limit" style="font-size:13px;padding:7px 0;color:var(--t);font-weight:600"></div>
           </div>
         </div>
-        <div style="font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;margin-bottom:4px">Interne Notizen</div>
-        <textarea class="inp" id="fa-notiz" rows="2" style="font-size:13px"></textarea>
-        <div class="save-msg" id="fa-msg"></div>
+        <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Interne Notizen</div>
+        <textarea class="inp" id="fa-notiz" rows="2" style="font-size:12px;resize:none" placeholder="Nur intern sichtbar..."></textarea>
+        <div id="fa-msg" style="font-size:12px;font-weight:600;margin-top:6px;min-height:16px"></div>
       </div>
     </div>
 
-    <!-- FEHLERBESCHREIBUNG -->
-    <div id="fa-fehler-wrap" class="card" style="padding:16px 20px;margin-bottom:16px;display:none">
-      <div class="ct">Fehlerbeschreibung</div>
-      <div id="fa-fehler" style="font-size:13px;line-height:1.7;color:var(--t)"></div>
+    <!-- VERLAUF TIMELINE -->
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1.5px solid var(--b)">
+        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--hasi);font-weight:700;text-transform:uppercase;letter-spacing:1px">&#x1F4CB; Verlauf</div>
+        <button class="btn p" id="fa-new-ab" style="font-size:12px;padding:6px 14px">+ Neuer Bericht</button>
+      </div>
+      <div id="fa-timeline" style="padding:8px 0"></div>
     </div>
 
-    <!-- ARBEITSBERICHTE TIMELINE -->
-    <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1.5px solid var(--b)">
-        <div style="font-size:15px;font-weight:700">&#x1F4CB; Arbeitsberichte</div>
-        <button class="btn p" id="fa-new-ab" style="margin-left:auto;font-size:12px;padding:7px 14px">+ Neuer Bericht</button>
+    <!-- INLINE AB FORM -->
+    <div id="fa-ab-form" style="display:none;border:2px solid var(--hasi);border-radius:16px;overflow:hidden;margin-bottom:14px">
+      <div style="background:var(--hasi);padding:13px 20px;display:flex;align-items:center;gap:10px">
+        <span style="color:#fff;font-size:13px;font-weight:700">&#x1F4C4; Arbeitsbericht</span>
+        <span id="fa-ab-title" style="color:rgba(255,255,255,.7);font-size:11px;font-family:'DM Mono',monospace"></span>
+        <button onclick="document.getElementById('fa-ab-form').style.display='none'" style="margin-left:auto;background:rgba(0,0,0,.2);border:none;color:#fff;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:13px">&#x2715;</button>
       </div>
-      <div id="fa-ab-list" style="padding:12px 20px 4px">
-        <div style="color:var(--m);font-size:13px;padding:16px 0">Keine Arbeitsberichte vorhanden.</div>
-      </div>
-    </div>
-
-    <!-- NEUER AB INLINE FORM -->
-    <div id="fa-ab-form" style="display:none;border:2px solid var(--hasi);border-radius:16px;overflow:hidden;margin-bottom:16px">
-      <div style="background:var(--hasi);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px">
-        <span style="font-size:14px;font-weight:700">&#x1F4C4; Arbeitsbericht</span>
-        <span id="fa-ab-title" style="font-size:12px;opacity:.8"></span>
-        <button onclick="document.getElementById('fa-ab-form').style.display='none'" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;padding:5px 12px;border-radius:8px;cursor:pointer;font-size:13px">&#x2715;</button>
-      </div>
-      <div style="padding:20px">
-        <div class="card" style="margin-bottom:12px">
+      <div style="padding:16px 20px">
+        <div class="card" style="margin-bottom:10px">
           <div class="ct">T&auml;tigkeiten</div>
           <div class="rh rht"><span>Beschreibung</span><span>Std</span><span>Betrag</span><span></span></div>
           <div id="fa-taet-rows"></div>
           <button class="add-btn" id="fa-add-taet">+ T&auml;tigkeit</button>
         </div>
-        <div class="card" style="margin-bottom:12px">
+        <div class="card" style="margin-bottom:10px">
           <div class="ct">Material</div>
           <div class="rh rhm"><span>Beschreibung</span><span>Preis</span><span></span></div>
           <div id="fa-mat-rows"></div>
           <button class="add-btn" id="fa-add-mat">+ Material</button>
         </div>
-        <div class="totals">
+        <div class="totals" style="margin-bottom:10px">
           <div class="tr"><span>Arbeitszeit netto</span><span id="fa-tot-arb">0,00 €</span></div>
           <div class="tr"><span>Material netto</span><span id="fa-tot-mat">0,00 €</span></div>
           <div class="tr big"><span>Gesamt netto</span><span id="fa-tot-net">0,00 €</span></div>
           <div class="tr"><span>MwSt. 19%</span><span id="fa-tot-mwst">0,00 €</span></div>
           <div class="tr big"><span>Gesamt brutto</span><span id="fa-tot-bru">0,00 €</span></div>
         </div>
-        <div style="margin-top:12px">
-          <div style="font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;margin-bottom:4px">Bemerkungen</div>
-          <textarea class="inp" id="fa-bemerkung" rows="2" placeholder="Notiz für Jasmin &amp; Sabine..."></textarea>
+        <div style="margin-bottom:10px">
+          <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Bemerkungen f&uuml;r Jasmin &amp; Sabine</div>
+          <textarea class="inp" id="fa-bemerkung" rows="2" style="font-size:12px;resize:none" placeholder="Interne Notiz..."></textarea>
         </div>
-        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn p" id="fa-ab-save" style="background:#0d9f6e;border-color:#0d9f6e">&#x1F4BE; Speichern</button>
-          <button class="btn" id="fa-ab-pdf">&#x1F5A8; Arbeitsbericht drucken</button>
-          <button class="btn" id="fa-ab-rec">&#x1F4B6; Rechnung drucken</button>
-          <span id="fa-ab-msg" style="font-size:13px;font-weight:600;align-self:center"></span>
+          <button class="btn" id="fa-ab-pdf">&#x1F5A8; Arbeitsbericht</button>
+          <button class="btn" id="fa-ab-rec">&#x1F4B6; Rechnung</button>
+          <span id="fa-ab-msg" style="font-size:12px;font-weight:600;align-self:center"></span>
         </div>
       </div>
     </div>
 
     <!-- ALT BUTONLAR -->
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:40px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn" id="fa-print-auftrag">&#x1F5A8; Auftragszettel</button>
-      <button class="btn" id="fa-print-vorlage">&#x1F4CB; Vorlage drucken</button>
-      <button class="btn" id="fa-del" style="background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3);color:var(--red);margin-left:auto">&#x1F5D1; L&ouml;schen</button>
+      <button class="btn" id="fa-print-vorlage">&#x1F4CB; Vorlage</button>
+      <button class="btn" id="fa-del" style="background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.25);color:var(--red);margin-left:auto">&#x1F5D1; L&ouml;schen</button>
     </div>
 
   </div>
 </div>
 
-</div>
+
 
 <!-- BERICHTE -->
 <div id="pg-berichte" class="pg">
@@ -1111,6 +1105,91 @@ function buildVorlagePdf(r){
 
 
 
+
+function renderTimeline(abs){
+  var tl=document.getElementById('fa-timeline');
+  if(!tl) return;
+  var items=[];
+  // Auftrag oluşturma
+  items.push({
+    date:cur.datum,
+    icon:'&#x1F4CB;',
+    color:'var(--hasi)',
+    title:'Auftrag erstellt',
+    body:'<span style="color:var(--m);font-size:12px">'+(cur.geraet_typ||'')+(cur.modell?' &middot; '+cur.modell:'')+(cur.fehler?'<br>'+cur.fehler:'')+'</span>'
+  });
+  // AB'ler
+  abs.forEach(function(ab){
+    var bezahlt=ab.payment_status==='bezahlt';
+    var taet=safeParseFa(ab.taetigkeiten);
+    var taetStr=taet.map(function(t){
+      var isFest=t.festpreis||false;
+      var val=parseFloat(t.std)||0;
+      var bet=isFest?val:val*SATZ;
+      var bs2=bet?('<b style="color:#0d9f6e;font-size:10px"> '+fmt(bet)+'</b>'):'';return '<span style="display:inline-flex;align-items:center;gap:3px;background:var(--bg);border:1px solid var(--b);border-radius:5px;padding:2px 8px;font-size:11px;margin:2px">'+(t.desc||t.beschreibung||'')+bs2+'</span>';
+    }).join('');
+    items.push({
+      id:ab.id,
+      date:ab.datum,
+      icon:'&#x1F527;',
+      color:'#0d9f6e',
+      title:'<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--hasi);font-weight:700">'+(ab.ab_nr||'')+'</span>',
+      badge:'<span class="bez-badge '+(bezahlt?'bez-bezahlt':'bez-offen')+'" data-bez-id="'+ab.id+'" data-bez-status="'+(bezahlt?'bezahlt':'offen')+'" style="cursor:pointer">'+(bezahlt?'✅ Bezahlt':'⏳ Offen')+'</span>',
+      amount:fmt(ab.total_netto||0),
+      body:'<div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px">'+taetStr+'</div>'
+        +(ab.notizen?'<div style="margin-top:6px;font-size:11px;color:var(--m);background:var(--hasi-soft);border-radius:5px;padding:4px 8px;display:flex;align-items:center;gap:5px">&#x1F4DD; '+ab.notizen+'</div>':''),
+      printRep:cur.id,
+      ab:ab
+    });
+  });
+  // Status (Fertig değilse göster)
+  if(cur.status!=='Neu'){
+    var sc={'In Bearbeitung':'&#x1F527;','Teile bestellt':'&#x1F4E6;','Warten auf Kunde':'&#x1F4DE;','Fertig':'&#x2705;','Abgeholt':'&#x1F3E0;','Abgelehnt':'&#x274C;'};
+    items.push({
+      date:cur.updated_at||cur.datum,
+      icon:sc[cur.status]||'&#x2139;',
+      color:cur.status==='Fertig'?'#0d9f6e':cur.status==='Abgeholt'?'#6b7585':'var(--amber)',
+      title:'Status: '+cur.status,
+      body:cur.notizen?'<span style="font-size:12px;color:var(--m)">'+cur.notizen+'</span>':''
+    });
+  }
+  tl.innerHTML=items.map(function(item,idx){
+    return '<div class="tl-item" data-tl-idx="'+idx+'" '+(item.id?'data-ab-id="'+item.id+'"':'')
+      +' style="display:flex;gap:0;padding:0;position:relative;cursor:'+(item.id?'pointer':'default')+'">'
+      // Sol çizgi + ikon
+      +'<div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0">'
+        +'<div style="width:32px;height:32px;border-radius:50%;background:'+item.color+'22;border:2px solid '+item.color+';display:flex;align-items:center;justify-content:center;font-size:14px;z-index:1;margin-top:16px">'+item.icon+'</div>'
+        +(idx<items.length-1?'<div style="width:2px;flex:1;background:var(--b);margin-top:4px;margin-bottom:0;min-height:20px"></div>':'')
+      +'</div>'
+      // İçerik
+      +'<div style="flex:1;padding:14px 16px 14px 8px;min-width:0">'
+        +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
+          +'<span style="font-size:11px;color:var(--m);font-family:DM Mono,monospace">'+fmtD(item.date)+'</span>'
+          +'<span style="font-size:13px;font-weight:600">'+item.title+'</span>'
+          +(item.badge?item.badge:'')
+          +(item.amount?'<span style="margin-left:auto;font-size:14px;font-weight:700;color:var(--green)">'+item.amount+'</span>':'')
+          +(item.id?'<button class="btn" style="font-size:10px;padding:3px 8px" data-pab="'+item.id+'" data-prep="'+(item.printRep||'')+'">&#x1F5A8;</button>':'')
+        +'</div>'
+        +item.body
+      +'</div>'
+      +'</div>';
+  }).join('');
+  // Events
+  tl.onclick=function(e){
+    var bz=e.target.closest('[data-bez-id]');
+    if(bz){e.stopPropagation();toggleBezahlt(parseInt(bz.dataset.bezId),bz.dataset.bezStatus,bz);return;}
+    var pb=e.target.closest('[data-pab]');
+    if(pb){e.stopPropagation();window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+pb.dataset.pab+(pb.dataset.prep?'&rep='+pb.dataset.prep:'')+'&type=arbeitsbericht','_blank');return;}
+    var row=e.target.closest('[data-ab-id]');
+    if(row){
+      var abId=parseInt(row.dataset.abId);
+      var allItems=items.filter(function(x){return x.id;});
+      var found=allItems.find(function(x){return x.id===abId;});
+      if(found) openFaAbForm(found.ab);
+    }
+  };
+}
+
 // ==================== FALL-AKTE ====================
 var faAbId=0;
 var faCurAb=null;
@@ -1130,100 +1209,46 @@ function openDet(id){
 function renderFallAkte(){
   if(!cur) return;
   faCurAb=null;
-
-  // Nr + Name
   document.getElementById('fa-nr').textContent=cur.nr||'';
   document.getElementById('fa-name').textContent=cur.k_name||'';
   document.getElementById('fa-status-badge').innerHTML=sbadge(cur.status);
-
   // Müşteri
   var k='';
-  if(cur.k_telefon) k+='<div>&#x1F4DE; <b>'+cur.k_telefon+'</b></div>';
-  if(cur.k_email) k+='<div>&#x2709; '+cur.k_email+'</div>';
-  if(cur.k_adresse) k+='<div>&#x1F4CD; '+cur.k_adresse+(cur.k_plz_ort?' &middot; '+cur.k_plz_ort:'')+'</div>';
-  document.getElementById('fa-kunde').innerHTML=k||'<span style="color:var(--m)">Keine Kontaktdaten</span>';
-
+  if(cur.k_telefon) k+='<div style="display:flex;align-items:center;gap:6px"><span style="color:var(--m)">&#x1F4DE;</span><b>'+cur.k_telefon+'</b></div>';
+  if(cur.k_email) k+='<div style="display:flex;align-items:center;gap:6px"><span style="color:var(--m)">&#x2709;</span>'+cur.k_email+'</div>';
+  if(cur.k_adresse) k+='<div style="display:flex;align-items:center;gap:6px"><span style="color:var(--m)">&#x1F4CD;</span>'+cur.k_adresse+(cur.k_plz_ort?' &middot; '+cur.k_plz_ort:'')+'</div>';
+  document.getElementById('fa-kunde').innerHTML=k||'<span style="color:var(--m);font-size:12px">Keine Kontaktdaten</span>';
   // Cihaz
-  var g='<div><b>&#x1F5A5; '+(cur.geraet_typ||'')+(cur.modell?' &mdash; '+cur.modell:'')+'</b></div>';
-  if(cur.fehler) g+='<div style="color:var(--m);font-size:12px">'+cur.fehler+'</div>';
-  if(cur.schaeden) g+='<div style="color:var(--amber);font-size:12px">Schäden: '+cur.schaeden+'</div>';
+  var g='<div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">&#x1F5A5;</span><div>';
+  g+='<div style="font-weight:700;font-size:14px">'+(cur.geraet_typ||'')+(cur.modell?' <span style="color:var(--m);font-weight:400">&mdash; '+cur.modell+'</span>':'')+'</div>';
+  if(cur.fehler) g+='<div style="font-size:12px;color:var(--m)">'+(cur.fehler||'')+'</div>';
+  g+='</div></div>';
+  if(cur.schaeden) g+='<div style="margin-top:6px;font-size:11px;background:#fff8ed;border:1px solid #f6cc7a;border-radius:6px;padding:4px 8px;color:#8a5a00">&#x26A0; Schäden: '+cur.schaeden+'</div>';
   document.getElementById('fa-geraet').innerHTML=g;
-
-  // Fehlerbeschreibung
-  var fwrap=document.getElementById('fa-fehler-wrap');
-  if(cur.fehler||cur.beschreibung){
-    fwrap.style.display='';
-    document.getElementById('fa-fehler').textContent=cur.fehler||cur.beschreibung||'';
-  } else fwrap.style.display='none';
-
   // Status
   document.getElementById('fa-status').value=cur.status||'Neu';
   document.getElementById('fa-notiz').value=cur.notizen||'';
   document.getElementById('fa-garantie').value=cur.garantie_monate||'';
   document.getElementById('fa-limit').textContent=cur.kostenlimit?cur.kostenlimit+' €':'—';
   document.getElementById('fa-msg').textContent='';
-
-  // WhatsApp
   var waWrap=document.getElementById('wa-wrap');
   waWrap.style.display=(cur.status==='Fertig'||cur.status==='Abgeholt')?'':'none';
-
-  // AB listesini yükle
+  // Timeline
+  renderTimeline([]);
   loadFaAbList();
-
+  // AB form gizle
+  document.getElementById('fa-ab-form').style.display='none';
   showPg('pg-det');
 }
 
 async function loadFaAbList(){
   if(!cur) return;
-  var wrap=document.getElementById('fa-ab-list');
-  wrap.innerHTML='<div style="color:var(--m);font-size:13px;padding:8px 0">Lade...</div>';
   try{
     var r=await fetch(W+'/api/arbeitsbericht?reparatur_id='+cur.id,{headers:{Authorization:A}});
     var abs=await r.json();
-    wrap._abs=Array.isArray(abs)?abs:[];
-    if(!wrap._abs.length){
-      wrap.innerHTML='<div style="color:var(--m);font-size:13px;padding:16px 0">Keine Arbeitsberichte vorhanden.</div>';
-      return;
-    }
-    wrap.innerHTML=wrap._abs.map(function(ab){
-      var bezahlt=ab.payment_status==='bezahlt';
-      var taet=safeParseFa(ab.taetigkeiten);
-      var taetStr=taet.map(function(t){
-        var isFest=t.festpreis||false;
-        var val=parseFloat(t.std)||0;
-        var bet=isFest?val:val*SATZ;
-        return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--b);border-radius:6px;padding:2px 8px;font-size:11px;margin:2px">'
-          +(t.desc||t.beschreibung||'')
-          +'<b style="color:var(--hasi);margin-left:4px">'+fmt(bet)+'</b></span>';
-      }).join('');
-      return '<div style="border:1.5px solid var(--b);border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all .15s" '
-        +'class="ab-item" data-ab-id="'+ab.id+'">'
-        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
-          +'<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--hasi);font-weight:600">'+(ab.ab_nr||'')+'</span>'
-          +'<span style="font-size:11px;color:var(--m)">'+fmtD(ab.datum)+'</span>'
-          +'<span style="margin-left:auto;font-size:15px;font-weight:700;color:var(--green)">'+fmt(ab.total_netto||0)+'</span>'
-          +'<button class="bez-badge '+(bezahlt?'bez-bezahlt':'bez-offen')+'" data-bez-id="'+ab.id+'" data-bez-status="'+(bezahlt?'bezahlt':'offen')+'" style="pointer-events:all">'
-            +(bezahlt?'✅ Bezahlt':'⏳ Offen')+'</button>'
-          +'<button class="btn" style="font-size:11px;padding:4px 10px" data-pab="'+ab.id+'" data-prep="'+(ab.reparatur_id||'')+'">&#x1F5A8;</button>'
-        +'</div>'
-        +(taetStr?'<div style="display:flex;flex-wrap:wrap;gap:2px">'+taetStr+'</div>':'')
-        +(ab.notizen?'<div style="margin-top:8px;font-size:11px;color:var(--m);background:var(--hasi-soft);border-radius:6px;padding:5px 8px">&#x1F4DD; '+ab.notizen+'</div>':'')
-        +'</div>';
-    }).join('');
-
-    // Events
-    wrap.querySelectorAll('.ab-item').forEach(function(el){
-      el.onclick=function(e){
-        var bz=e.target.closest('[data-bez-id]');
-        if(bz){e.stopPropagation();toggleBezahlt(parseInt(bz.dataset.bezId),bz.dataset.bezStatus,bz);return;}
-        var pb=e.target.closest('[data-pab]');
-        if(pb){e.stopPropagation();window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+pb.dataset.pab+(pb.dataset.prep?'&rep='+pb.dataset.prep:'')+'&type=arbeitsbericht','_blank');return;}
-        // AB form aç
-        var ab=wrap._abs.find(function(a){return a.id===parseInt(el.dataset.abId);});
-        if(ab) openFaAbForm(ab);
-      };
-    });
-  }catch(e){wrap.innerHTML='<div style="color:red">'+e.message+'</div>';}
+    var list=Array.isArray(abs)?abs:[];
+    renderTimeline(list);
+  }catch(e){console.error(e);}
 }
 
 function safeParseFa(s){
