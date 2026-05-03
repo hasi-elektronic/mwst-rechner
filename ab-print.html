@@ -3,42 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Arbeitsbericht / Rechnung</title>
+<title>Arbeitsbericht</title>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,700;0,800;1,300&display=swap" rel="stylesheet">
 <style>
-@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;margin:0;padding:0;background:white}.no-print{display:none}.page{width:100%;box-shadow:none;margin:0;padding:10mm 12mm 20mm}}@page{size:A4 portrait;margin:0}
 *{box-sizing:border-box}
-body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:16px;color:#2C3E50;font-size:10pt;background:#dce8f5;-webkit-print-color-adjust:exact}
+@media print{
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact;margin:0;padding:0;background:white}
+  .no-print{display:none!important}
+  .page{box-shadow:none!important;margin:0!important}
+  @page{size:A4 portrait;margin:0}
+}
+body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:20px;background:#eef4fb;color:#2C3E50;font-size:10pt}
 .no-print{position:fixed;bottom:20px;right:20px;display:flex;gap:10px;z-index:999}
 .no-print button{padding:12px 22px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
-.btn-print{background:#0090c4;color:#fff;box-shadow:0 4px 12px rgba(0,144,196,.4)}
-.btn-close{background:#fff;color:#333;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.loading{text-align:center;padding:80px;font-size:16px;color:#555;font-family:monospace}
-.page{width:210mm;margin:0 auto;background:white;box-shadow:0 4px 24px rgba(0,0,0,.2);padding:16mm 14mm 24mm}
-.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #4FC1E9;padding-bottom:10px;margin-bottom:16px}
-.htitle .big{font-family:Raleway,Arial,sans-serif;font-size:22pt;font-weight:800;color:#2C3E50;letter-spacing:2px}
-.htitle .sml{font-family:Raleway,Arial,sans-serif;font-size:18pt;font-weight:300;font-style:italic;color:#4FC1E9}
-.htitle .sub{font-size:8pt;color:#7F8C8D;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
-.hdr img{height:50px}
-.absender{font-size:7.5pt;color:#7F8C8D;border-bottom:1px solid #BDC3C7;padding-bottom:3px;margin-bottom:8px}
-.addr-row{display:flex;justify-content:space-between;margin-bottom:16px}
-.meta{text-align:right;font-size:9.5pt;line-height:1.8}
-.meta .nr{font-size:13pt;font-weight:700;color:#4FC1E9}
-table{width:100%;border-collapse:collapse}
-thead th{background:#4FC1E9;color:white;padding:7px 9px;text-align:left;font-size:9.5pt;font-weight:600}
-thead th.r{text-align:right}
-tbody tr:nth-child(even){background:#F0F9FF}
-tbody td{padding:6px 9px;border-bottom:1px solid #E8F0F5;font-size:9.5pt}
-.sum-wrap{display:flex;justify-content:flex-end;margin-top:4px}
-.sum-tbl{width:280px}
-.sum-tbl table{width:100%;border:1.5px solid #BDC3C7}
-.sum-tbl td{padding:5px 9px;font-size:9.5pt;border-bottom:1px solid #E8F0F5}
-.sum-tbl td.r{text-align:right;font-weight:600}
-.sum-total{background:#4FC1E9;color:white;font-size:11pt;font-weight:700}
-.sum-total td{border-bottom:none;padding:7px 9px}
-.zahlung{margin-top:16px;font-size:9.5pt;line-height:1.6;background:#F0F9FF;border-left:3px solid #4FC1E9;padding:10px 12px}
-.footer{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #BDC3C7;text-align:center;font-size:7pt;color:#7F8C8D;padding:5px}
-@media(max-width:600px){.page{width:100%;padding:10px}}
+.btn-print{background:#4FC1E9;color:#fff;box-shadow:0 4px 12px rgba(79,193,233,.4)}
+.btn-close{background:#fff;color:#333;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.loading{text-align:center;padding:80px;font-size:16px;color:#555}
+/* PAGE */
+.page{width:210mm;min-height:297mm;margin:0 auto 20px;background:white;box-shadow:0 4px 24px rgba(0,0,0,.15);display:flex;flex-direction:column}
+.page-inner{padding:16mm 14mm 28mm;flex:1}
+/* HEADER */
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6mm}
+.hdr-left .company{font-family:Raleway,Arial,sans-serif}
+.hdr-left .company .big{font-size:20pt;font-weight:800;color:#2C3E50;letter-spacing:2px}
+.hdr-left .company .sml{font-size:16pt;font-weight:300;font-style:italic;color:#4FC1E9;letter-spacing:1px}
+.hdr-left .sub{font-size:7pt;color:#7F8C8D;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.hdr-right img{height:48px}
+.hdr-divider{border:none;border-top:2.5px solid #4FC1E9;margin:4mm 0}
+/* ABSENDER */
+.absender{font-size:7pt;color:#7F8C8D;margin-bottom:6mm;padding-bottom:2mm;border-bottom:0.5px solid #E0E0E0}
+/* ADDRESS BLOCK */
+.addr-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8mm}
+.kunde-block{font-size:10pt;line-height:1.7}
+.kunde-block .name{font-weight:700;font-size:11pt}
+.meta-block{text-align:right;font-size:9.5pt;line-height:1.8}
+.meta-block .nr{font-size:13pt;font-weight:700;color:#4FC1E9;font-family:'Courier New',monospace}
+.meta-block .type{font-size:9pt;color:#7F8C8D;text-transform:uppercase;letter-spacing:1px}
+/* TABLE */
+.intro{font-size:9.5pt;margin-bottom:4mm;color:#2C3E50}
+table.main{width:100%;border-collapse:collapse;margin-bottom:4mm}
+table.main thead th{background:#4FC1E9;color:white;padding:6px 8px;text-align:left;font-size:9pt;font-weight:600}
+table.main thead th.r{text-align:right}
+table.main tbody tr:nth-child(even){background:#F0F9FF}
+table.main tbody td{padding:5px 8px;border-bottom:0.5px solid #E8F0F5;font-size:9pt;vertical-align:top}
+table.main tbody td.r{text-align:right}
+.mat-header td{background:#E8F0F5;padding:4px 8px;font-size:8.5pt;font-weight:700;color:#4FC1E9;text-transform:uppercase;letter-spacing:0.5px}
+/* SUMMEN */
+.sum-wrap{display:flex;justify-content:flex-end;margin-top:3mm}
+.sum-table{width:72mm}
+.sum-table table{width:100%;border-collapse:collapse;border:1px solid #BDC3C7}
+.sum-table td{padding:4px 8px;font-size:9.5pt;border-bottom:0.5px solid #E8F0F5}
+.sum-table td.r{text-align:right;font-weight:600}
+.sum-total{background:#4FC1E9!important;color:white!important;font-size:10.5pt;font-weight:700}
+.sum-total td{border-bottom:none!important;padding:6px 8px!important;color:white!important}
+/* ZAHLUNG */
+.zahlung{margin-top:6mm;background:#F0F9FF;border-left:3px solid #4FC1E9;padding:8px 10px;font-size:9pt;line-height:1.6}
+/* FOOTER */
+.footer{border-top:0.5px solid #BDC3C7;padding:4mm 14mm;text-align:center;font-size:7pt;color:#7F8C8D;line-height:1.7;background:white}
+@media(max-width:600px){.page{width:100%}.page-inner{padding:8mm}}
 </style>
 </head>
 <body>
@@ -46,97 +68,127 @@ tbody td{padding:6px 9px;border-bottom:1px solid #E8F0F5;font-size:9.5pt}
   <button class="btn-close" onclick="window.close()">&#x2715; Schlie&szlig;en</button>
   <button class="btn-print" onclick="window.print()">&#x1F5A8; Drucken</button>
 </div>
-<div id="root"><div class="loading">Lade...</div></div>
+<div id="root"><div class="loading">Lade Arbeitsbericht...</div></div>
 
 <script>
 var W='https://hasi-reparatur.hguencavdi.workers.dev';
 var A='Bearer 71665';
 var SATZ=96;
-var FIRMA={name:'Hasi Elektronic',str:'Gra\u00dfenstra\u00dfe 18',plz:'71665 Vaihingen an der Enz',tel:'07042 163914',mail:'info@hasi-elektronic.de',ust:'DE367591246',iban:'DE71 6045 0050 0030 2488 01',inhaber:'Hamdi G\u00fcncavdi'};
+var FIRMA={name:'Hasi Elektronic',str:'Gra\u00dfenstra\u00dfe 18',plz:'71665 Vaihingen an der Enz',tel:'07042 163914',mail:'info@hasi-elektronic.de',web:'www.hasi-elektronic.de',ust:'DE367591246',iban:'DE71 6045 0050 0030 2488 01',inhaber:'Hamdi G\u00fcncavdi'};
+var LOGO_URL='https://tools.hasi-elektronic.de/logo.jpg';
 
-function fmt(n){return Number(n||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' \u20ac';}
-function fmtD(s){if(!s)return '\u2014';var p=s.slice(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
+function fmt(n){return Number(n||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'\u00a0\u20ac';}
+function fmtStd(n){return Number(n||0).toFixed(2).replace('.',',')+'\u00a0Std.';}
+function fmtD(s){if(!s)return '';var p=(s||'').slice(0,10).split('-');return p.length===3?p[2]+'.'+p[1]+'.'+p[0]:s;}
 
-function render(rep, ab, type){
-  // Double-encoded JSON fix
-  function safeParse(s){
-    if(!s) return [];
-    try{
-      var r=JSON.parse(s);
-      if(typeof r==='string') r=JSON.parse(r);
-      return Array.isArray(r)?r:[];
-    }catch(e){return [];}
-  }
+function safeParse(s){
+  if(!s) return [];
+  try{var r=JSON.parse(s);if(typeof r==='string')r=JSON.parse(r);return Array.isArray(r)?r:[];}
+  catch(e){return [];}
+}
+
+function render(rep,ab,type){
   var taet=safeParse(ab.taetigkeiten);
   var mat=safeParse(ab.material);
   var isRec=type==='rechnung';
   var arb=taet.reduce(function(s,t){return s+(parseFloat(t.std)||0)*SATZ;},0);
   var matT=mat.reduce(function(s,m){return s+(parseFloat(m.preis)||0);},0);
-  var net=arb+matT, mwst=net*0.19, bru=net+mwst;
+  var net=arb+matT,mwst=net*0.19,bru=net+mwst;
   var nr=ab.ab_nr||(isRec?'RE':'AB')+'-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
   var datum=ab.datum?fmtD(ab.datum):new Date().toLocaleDateString('de-DE');
+  document.title=(isRec?'Rechnung ':'Arbeitsbericht ')+nr;
 
   var taetRows=taet.map(function(t){
-    return '<tr><td>'+(t.desc||'')+'</td><td style="text-align:right">'+((parseFloat(t.std)||0).toFixed(2).replace('.',','))+' Std.</td><td style="text-align:right">'+fmt((parseFloat(t.std)||0)*SATZ)+'</td></tr>';
+    var bet=(parseFloat(t.std)||0)*SATZ;
+    return '<tr><td>'+(t.desc||t.beschreibung||'')+'</td><td class="r">'+fmtStd(parseFloat(t.std)||0)+'</td><td class="r">'+fmt(bet)+'</td></tr>';
   }).join('');
 
-  var matRows=mat.length?
-    '<tr style="background:#E8F0F5"><td colspan="3" style="padding:5px 9px;font-weight:700;color:#4FC1E9;font-size:9pt">Material</td></tr>'+
-    mat.map(function(m){return '<tr><td>'+(m.desc||'')+'</td><td></td><td style="text-align:right">'+fmt(parseFloat(m.preis)||0)+'</td></tr>';}).join('')
+  var matRows=mat.length
+    ?'<tr class="mat-header"><td colspan="3">Material</td></tr>'
+      +mat.map(function(m){return '<tr><td>'+(m.desc||m.beschreibung||'')+'</td><td></td><td class="r">'+fmt(parseFloat(m.preis)||0)+'</td></tr>';}).join('')
     :'';
 
-  document.title=(isRec?'Rechnung':'Arbeitsbericht')+' '+nr;
+  // Müşteri bilgileri
+  var kName=rep?rep.k_name:ab.k_name_override||'';
+  var kAdr=rep?[rep.k_adresse,rep.k_plz_ort].filter(Boolean).join('<br>'):'';
+  var kTel=rep&&rep.k_telefon?'<br>Tel: '+rep.k_telefon:'';
+  var auftrNr=rep?rep.nr||'':(ab.rep_nr||'');
 
-  document.getElementById('root').innerHTML=[
-    '<div class="page">',
-    '<div class="hdr">',
-    '<div class="htitle"><div><span class="big">HASI</span> <span class="sml">Elektronic</span></div><div class="sub">IT-Service &amp; Dienstleistungen</div></div>',
-    '<img src="https://tools.hasi-elektronic.de/logo.jpg" alt="Hasi" onerror="this.style.display=\'none\'">',
-    '</div>',
-    '<div class="absender">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+'</div>',
-    '<div class="addr-row">',
-    '<div style="font-size:10pt;line-height:1.7"><b>'+(rep.k_name||'')+'</b><br>'+(rep.k_adresse||'')+(rep.k_plz_ort?'<br>'+rep.k_plz_ort:'')+(rep.k_telefon?'<br>Tel: '+rep.k_telefon:'')+'</div>',
-    '<div class="meta"><div class="nr">'+nr+'</div><div>'+(isRec?'Rechnung':'Arbeitsbericht')+'</div><div>Datum: '+datum+'</div><div>Auftrag: '+(rep.nr||'')+'</div></div>',
-    '</div>',
-    '<p style="font-size:9.5pt;margin-bottom:12px">Folgende T\u00e4tigkeiten wurden durchgef\u00fchrt:</p>',
-    '<table><thead><tr><th>Beschreibung</th><th class="r">Std.</th><th class="r">Betrag netto</th></tr></thead><tbody>'+taetRows+matRows+'</tbody></table>',
-    '<div class="sum-wrap"><div class="sum-tbl"><table><tbody>',
-    '<tr><td>Arbeitszeit netto</td><td class="r">'+fmt(arb)+'</td></tr>',
-    mat.length?'<tr><td>Material netto</td><td class="r">'+fmt(matT)+'</td></tr>':'',
-    '<tr><td>Zwischensumme netto</td><td class="r">'+fmt(net)+'</td></tr>',
-    '<tr><td>MwSt. 19%</td><td class="r">'+fmt(mwst)+'</td></tr>',
-    '<tr class="sum-total"><td>Gesamt brutto</td><td class="r">'+fmt(bru)+'</td></tr>',
-    '</tbody></table></div></div>',
-    isRec?'<div class="zahlung"><b>Zahlungsinformationen</b><br>Bitte \u00fcberweisen Sie den Betrag innerhalb von 14 Tagen.<br><br>Empf\u00e4nger: '+FIRMA.inhaber+'<br>IBAN: '+FIRMA.iban+'</div>':'',
-    '<div class="footer">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+' | Tel: '+FIRMA.tel+' | '+FIRMA.mail+' | USt: '+FIRMA.ust+'</div>',
-    '</div>'
-  ].join('');
+  document.getElementById('root').innerHTML=
+    '<div class="page">'
+    +'<div class="page-inner">'
+    +'<div class="hdr">'
+      +'<div class="hdr-left"><div class="company"><span class="big">HASI</span> <span class="sml">Elektronic</span></div><div class="sub">IT-Service &amp; Dienstleistungen</div></div>'
+      +'<div class="hdr-right"><img src="'+LOGO_URL+'" alt="Hasi Elektronic" onerror="this.style.display=\'none\'"></div>'
+    +'</div>'
+    +'<hr class="hdr-divider">'
+    +'<div class="absender">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+'</div>'
+    +'<div class="addr-row">'
+      +'<div class="kunde-block">'
+        +(kName?'<div class="name">'+kName+'</div>':'<div class="name" style="color:#BDC3C7">Kein Kunde</div>')
+        +(kAdr?'<div>'+kAdr+'</div>':'')
+        +(kTel?'<div>'+kTel+'</div>':'')
+      +'</div>'
+      +'<div class="meta-block">'
+        +'<div class="nr">'+nr+'</div>'
+        +'<div class="type">'+(isRec?'Rechnung':'Arbeitsbericht')+'</div>'
+        +'<div>Datum: '+datum+'</div>'
+        +(auftrNr?'<div>Auftrag: <b>'+auftrNr+'</b></div>':'')
+      +'</div>'
+    +'</div>'
+    +'<p class="intro">Folgende T\u00e4tigkeiten wurden durchgef\u00fchrt:</p>'
+    +'<table class="main"><thead><tr><th>Beschreibung</th><th class="r">Std.</th><th class="r">Betrag netto</th></tr></thead>'
+    +'<tbody>'+taetRows+matRows+'</tbody></table>'
+    +'<div class="sum-wrap"><div class="sum-table"><table>'
+    +'<tr><td>Arbeitszeit netto</td><td class="r">'+fmt(arb)+'</td></tr>'
+    +(mat.length?'<tr><td>Material netto</td><td class="r">'+fmt(matT)+'</td></tr>':'')
+    +'<tr><td>Zwischensumme netto</td><td class="r">'+fmt(net)+'</td></tr>'
+    +'<tr><td>MwSt. 19%</td><td class="r">'+fmt(mwst)+'</td></tr>'
+    +'<tr class="sum-total"><td>Gesamt brutto</td><td class="r">'+fmt(bru)+'</td></tr>'
+    +'</table></div></div>'
+    +(isRec?'<div class="zahlung"><b>Zahlungsinformationen</b><br>Bitte \u00fcberweisen Sie den Betrag innerhalb von 14 Tagen nach Rechnungserhalt.<br><br>Empf\u00e4nger: '+FIRMA.inhaber+'<br>IBAN: '+FIRMA.iban+'<br>Verwendungszweck: '+nr+'</div>':'')
+    +'</div>'
+    +'<div class="footer">'
+    +FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+'<br>'
+    +'Tel: '+FIRMA.tel+' \u00b7 '+FIRMA.mail+' \u00b7 '+FIRMA.web+'<br>'
+    +'USt-IdNr: '+FIRMA.ust+' \u00b7 IBAN: '+FIRMA.iban
+    +'</div></div>';
 }
 
-// URL params
 var params=new URLSearchParams(window.location.search);
 var repId=params.get('rep');
 var abId=params.get('ab');
 var type=params.get('type')||'arbeitsbericht';
 
-if(repId&&abId){
-  Promise.all([
-    fetch(W+'/api/reparatur/'+repId,{headers:{Authorization:A}}).then(function(r){return r.json();}),
-    fetch(W+'/api/arbeitsbericht?reparatur_id='+repId,{headers:{Authorization:A}}).then(function(r){return r.json();})
-  ]).then(function(results){
-    var rep=results[0];
-    var abs=results[1];
-    var ab=Array.isArray(abs)?abs.find(function(x){return String(x.id)===String(abId);}):null;
-    if(!ab){
-      document.getElementById('root').innerHTML='<div class="loading" style="color:red">Arbeitsbericht nicht gefunden.</div>';
+if(abId){
+  var fetches=[
+    fetch(W+'/api/arbeitsbericht?reparatur_id='+(repId||0),{headers:{Authorization:A}}).then(function(r){return r.json();})
+  ];
+  if(repId){
+    fetches.push(fetch(W+'/api/reparatur/'+repId,{headers:{Authorization:A}}).then(function(r){return r.json();}));
+  }
+  Promise.all(fetches).then(function(results){
+    var abs=results[0];
+    var rep=results[1]||null;
+    // repId yoksa tüm AB'leri getir
+    if(!repId){
+      fetch(W+'/api/arbeitsbericht',{headers:{Authorization:A}})
+        .then(function(r){return r.json();})
+        .then(function(allAbs){
+          var ab=Array.isArray(allAbs)?allAbs.find(function(x){return String(x.id)===String(abId);}):null;
+          if(!ab) document.getElementById('root').innerHTML='<div class="loading" style="color:red">Arbeitsbericht nicht gefunden.</div>';
+          else render(null,ab,type);
+        });
       return;
     }
+    var ab=Array.isArray(abs)?abs.find(function(x){return String(x.id)===String(abId);}):null;
+    if(!ab){document.getElementById('root').innerHTML='<div class="loading" style="color:red">Arbeitsbericht nicht gefunden.</div>';return;}
     render(rep,ab,type);
   }).catch(function(e){
     document.getElementById('root').innerHTML='<div class="loading" style="color:red">Fehler: '+e.message+'</div>';
   });
 } else {
-  document.getElementById('root').innerHTML='<div class="loading" style="color:red">Fehlende Parameter (rep, ab).</div>';
+  document.getElementById('root').innerHTML='<div class="loading" style="color:red">Kein AB angegeben.</div>';
 }
 </script>
 </body>
