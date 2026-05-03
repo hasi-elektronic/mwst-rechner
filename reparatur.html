@@ -1305,17 +1305,29 @@ document.getElementById('kal-next').onclick=function(){kalM++;if(kalM>11){kalM=0
 
 
 document.getElementById('f-print').onclick=function(){
-  var r=lastSaved;
-  if(!r){
-    var FM={'cb-keine':'Keine Reaktion','cb-wupdate':'Windows Update','cb-akku2':'Akku tausch','cb-display':'Display tausch','cb-boot':'Probleme b. Booten','cb-sw':'Softwareprobleme','cb-absturz':'Windows Absturz','cb-viren':'Viren & Trojaner','cb-daten':'Datenrettung','cb-sonst2':'Sonstiges'};
-    var ZM={'cb-akku':'Akku','cb-netzteil':'Netzteil','cb-tasche':'Tasche/Rucksack','cb-hdd':'Festplatte/SSD'};
-    var fa=Object.keys(FM).filter(function(id){var el=document.getElementById(id);return el&&el.checked;}).map(function(id){return FM[id];});
-    var bd=document.getElementById('f-fehler').value.trim(); if(bd) fa.push(bd);
-    var za=Object.keys(ZM).filter(function(id){var el=document.getElementById(id);return el&&el.checked;}).map(function(id){return ZM[id];});
-    var sz=document.getElementById('f-zubehoer').value.trim(); if(sz) za.push(sz);
-    r={k_name:document.getElementById('f-name').value,k_telefon:document.getElementById('f-tel').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,geraet_typ:document.getElementById('f-typ').value,modell:document.getElementById('f-mod').value,fehler:fa.join(', '),schaeden:document.getElementById('f-schaeden').value,zubehoer:za.join(', '),kostenlimit:document.getElementById('f-limit').value,win_passwort:document.getElementById('f-pw').value,datum:document.getElementById('f-dat').value,nr:window._vlNr||'',status:'Neu',zustand:window._starVal||0};
+  // Formu direkt yazdır — ayrı sayfa açma
+  // Print CSS ekle
+  var style=document.getElementById('vl-print-style');
+  if(!style){
+    style=document.createElement('style');
+    style.id='vl-print-style';
+    style.textContent='@media print{'
+      +'.pg{display:none!important}'
+      +'#pg-form{display:block!important}'
+      +'.vl-actions{display:none!important}'
+      +'.ni{display:none!important}'
+      +'nav{display:none!important}'
+      +'#notif-bar{display:none!important}'
+      +'#pdf-modal{display:none!important}'
+      +'#del-modal{display:none!important}'
+      +'#kunden-modal{display:none!important}'
+      +'.vl{box-shadow:none!important;border:none!important}'
+      +'body{background:white!important}'
+      +'.wrap{padding:0!important}'
+      +'}';
+    document.head.appendChild(style);
   }
-  buildVorlagePdf(r);
+  window.print();
 };
 
 
