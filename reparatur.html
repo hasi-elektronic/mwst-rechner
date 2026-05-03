@@ -985,18 +985,19 @@ function openAbForm(ab){
   abId=0;
   var taet=ab?JSON.parse(ab.taetigkeiten||'[]'):[];
   var mat=ab?JSON.parse(ab.material||'[]'):[];
-  taet.forEach(function(t){addTaet(t.desc,t.std);});
+  taet.forEach(function(t){addTaet(t.desc,t.std,t.festpreis||false);});
   mat.forEach(function(m){addMat(m.desc,m.preis);});
   if(!taet.length) addTaet();
   calcTots();
   document.getElementById('btn-ab').style.display='';
   showPg('pg-ab');
 }
-function addTaet(desc,std){
+function addTaet(desc,std,festpreis){
   abId++;
   var id=abId;
   var div=document.createElement('div');
-  div.className='ar art';
+  div.className='ar';
+  div.style.cssText='display:grid;gap:8px;align-items:center;margin-bottom:8px;grid-template-columns:1fr 60px 90px 90px 34px';
   div.id='tr'+id;
   div.innerHTML='<input placeholder="T\u00e4tigkeit..." value="'+(desc||'')+'"><input type="number" step="0.5" min="0" placeholder="0" value="'+(std||'')+'" onchange="calcTots()"><input type="number" readonly style="background:var(--bg)"><button class="del" onclick="document.getElementById(\'tr'+id+'\').remove();calcTots()">\u00d7</button>';
   document.getElementById('taet-rows').appendChild(div);
@@ -1018,8 +1019,10 @@ function calcTots(){
   var arb=0,mat=0;
   document.querySelectorAll('#taet-rows .ar').forEach(function(r){
     var ins=r.querySelectorAll('input');
-    var std=parseFloat(ins[1].value)||0;
-    var bet=std*SATZ;
+    var tog=r.querySelector('button[data-fest]');
+    var isFest=tog&&tog.dataset.fest==='1';
+    var val=parseFloat(ins[1].value)||0;
+    var bet=isFest?val:val*SATZ;
     ins[2].value=bet.toFixed(2);
     arb+=bet;
   });
@@ -1040,7 +1043,7 @@ document.getElementById('ab-save').onclick=async function(){
   if(!cur) return;
   var btn=this; btn.disabled=true;
   var taet=[],mat=[];
-  document.querySelectorAll('#taet-rows .ar').forEach(function(r){var ins=r.querySelectorAll('input');if(ins[0].value.trim())taet.push({desc:ins[0].value,std:parseFloat(ins[1].value)||0});});
+  document.querySelectorAll('#taet-rows .ar').forEach(function(r){var ins=r.querySelectorAll('input');var tog=r.querySelector('button[data-fest]');var isFest=tog&&tog.dataset.fest==='1';if(ins[0].value.trim())taet.push({desc:ins[0].value,std:parseFloat(ins[1].value)||0,festpreis:isFest});});
   document.querySelectorAll('#mat-rows .ar').forEach(function(r){var ins=r.querySelectorAll('input');if(ins[0].value.trim())mat.push({desc:ins[0].value,preis:parseFloat(ins[1].value)||0});});
   var net=parseFloat(document.getElementById('tot-net').textContent.replace(/[^\d,]/g,'').replace(',','.'))||0;
   try{
@@ -1125,7 +1128,7 @@ function openPdfWin(htmlContent,repData){
 
 function getTaetMat(){
   var taet=[],mat=[];
-  document.querySelectorAll('#taet-rows .ar').forEach(function(r){var ins=r.querySelectorAll('input');if(ins[0].value.trim())taet.push({desc:ins[0].value,std:parseFloat(ins[1].value)||0});});
+  document.querySelectorAll('#taet-rows .ar').forEach(function(r){var ins=r.querySelectorAll('input');var tog=r.querySelector('button[data-fest]');var isFest=tog&&tog.dataset.fest==='1';if(ins[0].value.trim())taet.push({desc:ins[0].value,std:parseFloat(ins[1].value)||0,festpreis:isFest});});
   document.querySelectorAll('#mat-rows .ar').forEach(function(r){var ins=r.querySelectorAll('input');if(ins[0].value.trim())mat.push({desc:ins[0].value,preis:parseFloat(ins[1].value)||0});});
   return {taet:taet,mat:mat};
 }
@@ -1832,18 +1835,23 @@ function fabRefreshAuftragList(){
   });
 }
 
-function fabAddTaet(desc,std){
+function fabAddTaet(desc,std,festpreis){
   fabAbId++;
   var id='fbt'+fabAbId;
   var div=document.createElement('div');
   div.className='ar art';
   div.id=id;
+  var isFest=festpreis||false;
   var d=document.createElement('input'); d.placeholder='Tätigkeit...'; d.value=desc||''; d.oninput=fabCalcTots;
-  var s=document.createElement('input'); s.type='number'; s.step='0.5'; s.min='0'; s.placeholder='0'; s.value=std||''; s.oninput=fabCalcTots;
+  var tog=document.createElement('button'); tog.type='button';
+  tog.style.cssText='font-size:9px;font-family:DM Mono,monospace;padding:4px 5px;border-radius:6px;cursor:pointer;border:1.5px solid var(--b2);background:'+(isFest?'var(--hasi)':'var(--bg)')+';color:'+(isFest?'#fff':'var(--m)')+';white-space:nowrap;font-weight:600';
+  tog.textContent=isFest?'Fest':'Std.'; tog.dataset.fest=isFest?'1':'0';
+  var s=document.createElement('input'); s.type='number'; s.step='0.5'; s.min='0'; s.placeholder=isFest?'€':'0'; s.value=std||''; s.oninput=fabCalcTots;
   var b=document.createElement('input'); b.type='number'; b.readOnly=true; b.style.background='var(--bg)';
   var x=document.createElement('button'); x.className='del'; x.textContent='×';
   x.onclick=function(){div.remove();fabCalcTots();};
-  div.appendChild(d); div.appendChild(s); div.appendChild(b); div.appendChild(x);
+  tog.onclick=function(){isFest=!isFest;tog.dataset.fest=isFest?'1':'0';tog.textContent=isFest?'Fest':'Std.';tog.style.background=isFest?'var(--hasi)':'var(--bg)';tog.style.color=isFest?'#fff':'var(--m)';s.placeholder=isFest?'€':'0';fabCalcTots();};
+  div.appendChild(d); div.appendChild(tog); div.appendChild(s); div.appendChild(b); div.appendChild(x);
   document.getElementById('fab-taet-rows').appendChild(div);
 }
 
@@ -1865,8 +1873,10 @@ function fabCalcTots(){
   var arb=0,mat=0;
   document.querySelectorAll('#fab-taet-rows .ar').forEach(function(r){
     var ins=r.querySelectorAll('input');
-    var std=parseFloat(ins[1].value)||0;
-    var bet=std*SATZ;
+    var tog=r.querySelector('button[data-fest]');
+    var isFest=tog&&tog.dataset.fest==='1';
+    var val=parseFloat(ins[1].value)||0;
+    var bet=isFest?val:val*SATZ;
     ins[2].value=bet.toFixed(2);
     arb+=bet;
   });
