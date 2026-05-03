@@ -450,7 +450,11 @@ tbody tr:last-child td{border-bottom:none}
             <div id="fab-mat-rows"></div>
             <button class="add-btn" id="fab-add-mat">+ Material</button>
           </div>
-          <div class="totals">
+          <div class="card" style="margin-bottom:14px">
+      <div class="ct">Bemerkungen</div>
+      <textarea class="inp" id="ab-bemerkung" rows="3" placeholder="z.B. Kunde wurde informiert, Gerät läuft stabil..."></textarea>
+    </div>
+    <div class="totals">
             <div class="tr"><span>Arbeitszeit netto</span><span id="fab-tot-arb">0,00 €</span></div>
             <div class="tr"><span>Material netto</span><span id="fab-tot-mat">0,00 €</span></div>
             <div class="tr big"><span>Gesamt netto</span><span id="fab-tot-net">0,00 €</span></div>
@@ -975,6 +979,7 @@ function openAbForm(ab){
   curAb=ab;
   document.getElementById('ab-title').textContent=cur?(cur.nr||'')+(ab?' \u2013 Bearbeiten':' \u2013 Neu'):'';
   document.getElementById('ab-msg').textContent='';
+  document.getElementById('ab-bemerkung').value=ab&&ab.notizen?ab.notizen:'';
   document.getElementById('taet-rows').innerHTML='';
   document.getElementById('mat-rows').innerHTML='';
   abId=0;
@@ -1039,7 +1044,7 @@ document.getElementById('ab-save').onclick=async function(){
   document.querySelectorAll('#mat-rows .ar').forEach(function(r){var ins=r.querySelectorAll('input');if(ins[0].value.trim())mat.push({desc:ins[0].value,preis:parseFloat(ins[1].value)||0});});
   var net=parseFloat(document.getElementById('tot-net').textContent.replace(/[^\d,]/g,'').replace(',','.'))||0;
   try{
-    var body={reparatur_id:cur.id,taetigkeiten:JSON.stringify(taet),material:JSON.stringify(mat),total_netto:net,stundensatz:SATZ};
+    var body={reparatur_id:cur.id,taetigkeiten:JSON.stringify(taet),material:JSON.stringify(mat),total_netto:net,stundensatz:SATZ,notizen:document.getElementById('ab-bemerkung').value||''};
     if(curAb&&curAb.id) body.id=curAb.id;
     var r=await fetch(W+'/api/arbeitsbericht',{method:'POST',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify(body)});
     var j=await r.json();
