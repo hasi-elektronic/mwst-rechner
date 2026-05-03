@@ -227,8 +227,6 @@ tbody tr:last-child td{border-bottom:none}
     <button class="tab on" data-pg="pg-dash">&#x1F4CA; Dashboard</button>
     <button class="tab" data-pg="pg-list">&#x1F4CB; Auftr&auml;ge</button>
     <button class="tab" data-pg="pg-form">&#xFF0B; Neuer Auftrag</button>
-    <button class="tab" id="btn-det" data-pg="pg-det" style="display:none">&#x1F527; Auftrag</button>
-    <button class="tab" id="btn-ab" data-pg="pg-ab" style="display:none">&#x1F4C4; Arbeitsbericht</button>
     <button class="tab" data-pg="pg-kal">&#x1F4C5; Kalender</button>
     <button class="tab" data-pg="pg-kunden">&#x1F465; Kunden</button>
     <button class="tab" data-pg="pg-berichte">&#x1F4C4; Berichte</button>
@@ -485,84 +483,135 @@ tbody tr:last-child td{border-bottom:none}
 
 <!-- DETAIL -->
 <div id="pg-det" class="pg">
-  <div class="wrap">
-    <div class="topbar">
-      <button class="btn" onclick="showPg('pg-list')">&larr; Zur&uuml;ck</button>
-      <h1 id="det-title" style="font-size:18px">Auftrag</h1>
-    </div>
-    <div class="card">
-      <div class="ct">Auftragsinfo</div>
-      <div class="grid2" id="det-info"></div>
-    </div>
-    <div class="card">
-      <div class="ct">Status &amp; Notizen</div>
-      <label>Status</label>
-      <select class="inp" id="det-status" onchange="detStatusChanged()">
-        <option>Neu</option><option>In Bearbeitung</option><option>Teile bestellt</option>
-        <option>Warten auf Kunde</option><option>Fertig</option><option>Abgeholt</option><option>Abgelehnt</option>
-      </select>
-      <div id="wa-wrap" style="display:none;margin-top:10px">
-        <button class="wa-btn" id="det-wa">&#x1F4F1; WhatsApp: Ger&auml;t fertig</button>
+  <div class="wrap" style="max-width:900px">
+
+    <!-- BACK + TITLE -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <button class="btn" onclick="cur=null;showPg('pg-list')" style="flex-shrink:0">&larr; Zur&uuml;ck</button>
+      <div>
+        <div id="fa-nr" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--hasi)"></div>
+        <div id="fa-name" style="font-size:20px;font-weight:700;color:var(--t)"></div>
       </div>
-      <label>Garantie</label>
-      <select class="inp" id="det-garantie">
-        <option value="">Keine Garantie</option>
-        <option value="3">3 Monate</option>
-        <option value="6">6 Monate</option>
-        <option value="12">12 Monate</option>
-        <option value="24">24 Monate</option>
-      </select>
-      <label>Interne Notizen</label>
-      <textarea class="inp" id="det-notiz" rows="3"></textarea>
-      <div class="btnrow">
-        <button class="btn p" id="det-save">Speichern</button>
-        <button class="btn" id="det-pdf">PDF Auftrag</button>
-        <button class="btn" id="det-zettel">&#x1F4C4; Auftragszettel</button>
-        <button class="btn" id="det-new-ab">+ Arbeitsbericht</button>
-        <button class="btn" id="det-del" style="background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3);color:var(--red);margin-left:auto">&#x1F5D1; L&ouml;schen</button>
+      <div id="fa-status-badge" style="margin-left:auto"></div>
+    </div>
+
+    <!-- GRID: Sol müşteri/cihaz, Sağ durum/actions -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+
+      <!-- MÜŞTERİ BİLGİLERİ -->
+      <div class="card" style="padding:20px">
+        <div class="ct">Kunde</div>
+        <div id="fa-kunde" style="font-size:14px;line-height:2"></div>
+        <div id="fa-geraet" style="margin-top:12px;padding-top:12px;border-top:1.5px solid var(--b);font-size:13px;line-height:1.8"></div>
       </div>
-      <div class="save-msg" id="det-msg"></div>
+
+      <!-- DURUM + ACTIONS -->
+      <div class="card" style="padding:20px">
+        <div class="ct">Status &amp; Aktionen</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <select class="inp" id="fa-status" style="flex:1;min-width:160px" onchange="detStatusChanged()">
+            <option>Neu</option>
+            <option>In Bearbeitung</option>
+            <option>Teile bestellt</option>
+            <option>Warten auf Kunde</option>
+            <option>Fertig</option>
+            <option>Abgeholt</option>
+            <option>Abgelehnt</option>
+          </select>
+          <button class="btn p" id="fa-save-status" style="white-space:nowrap">&#x2713; Speichern</button>
+        </div>
+        <div id="wa-wrap" style="display:none;margin-bottom:10px">
+          <button class="wa-btn" id="det-wa" style="width:100%">&#x1F4F1; WhatsApp: Ger&auml;t fertig</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <div style="font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;margin-bottom:4px">Garantie</div>
+            <select class="inp" id="fa-garantie" style="font-size:12px;padding:7px 10px">
+              <option value="">Keine</option>
+              <option value="3">3 Monate</option>
+              <option value="6">6 Monate</option>
+              <option value="12">12 Monate</option>
+              <option value="24">24 Monate</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;margin-bottom:4px">Kostenlimit</div>
+            <div id="fa-limit" style="font-size:13px;padding:7px 0;color:var(--t)"></div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;margin-bottom:4px">Interne Notizen</div>
+        <textarea class="inp" id="fa-notiz" rows="2" style="font-size:13px"></textarea>
+        <div class="save-msg" id="fa-msg"></div>
+      </div>
     </div>
-    <div class="card">
-      <div class="ct">Arbeitsberichte</div>
-      <div id="ab-list-wrap">Lade...</div>
+
+    <!-- FEHLERBESCHREIBUNG -->
+    <div id="fa-fehler-wrap" class="card" style="padding:16px 20px;margin-bottom:16px;display:none">
+      <div class="ct">Fehlerbeschreibung</div>
+      <div id="fa-fehler" style="font-size:13px;line-height:1.7;color:var(--t)"></div>
     </div>
+
+    <!-- ARBEITSBERICHTE TIMELINE -->
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1.5px solid var(--b)">
+        <div style="font-size:15px;font-weight:700">&#x1F4CB; Arbeitsberichte</div>
+        <button class="btn p" id="fa-new-ab" style="margin-left:auto;font-size:12px;padding:7px 14px">+ Neuer Bericht</button>
+      </div>
+      <div id="fa-ab-list" style="padding:12px 20px 4px">
+        <div style="color:var(--m);font-size:13px;padding:16px 0">Keine Arbeitsberichte vorhanden.</div>
+      </div>
+    </div>
+
+    <!-- NEUER AB INLINE FORM -->
+    <div id="fa-ab-form" style="display:none;border:2px solid var(--hasi);border-radius:16px;overflow:hidden;margin-bottom:16px">
+      <div style="background:var(--hasi);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:14px;font-weight:700">&#x1F4C4; Arbeitsbericht</span>
+        <span id="fa-ab-title" style="font-size:12px;opacity:.8"></span>
+        <button onclick="document.getElementById('fa-ab-form').style.display='none'" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;padding:5px 12px;border-radius:8px;cursor:pointer;font-size:13px">&#x2715;</button>
+      </div>
+      <div style="padding:20px">
+        <div class="card" style="margin-bottom:12px">
+          <div class="ct">T&auml;tigkeiten</div>
+          <div class="rh rht"><span>Beschreibung</span><span>Std</span><span>Betrag</span><span></span></div>
+          <div id="fa-taet-rows"></div>
+          <button class="add-btn" id="fa-add-taet">+ T&auml;tigkeit</button>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="ct">Material</div>
+          <div class="rh rhm"><span>Beschreibung</span><span>Preis</span><span></span></div>
+          <div id="fa-mat-rows"></div>
+          <button class="add-btn" id="fa-add-mat">+ Material</button>
+        </div>
+        <div class="totals">
+          <div class="tr"><span>Arbeitszeit netto</span><span id="fa-tot-arb">0,00 €</span></div>
+          <div class="tr"><span>Material netto</span><span id="fa-tot-mat">0,00 €</span></div>
+          <div class="tr big"><span>Gesamt netto</span><span id="fa-tot-net">0,00 €</span></div>
+          <div class="tr"><span>MwSt. 19%</span><span id="fa-tot-mwst">0,00 €</span></div>
+          <div class="tr big"><span>Gesamt brutto</span><span id="fa-tot-bru">0,00 €</span></div>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;margin-bottom:4px">Bemerkungen</div>
+          <textarea class="inp" id="fa-bemerkung" rows="2" placeholder="Notiz für Jasmin &amp; Sabine..."></textarea>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+          <button class="btn p" id="fa-ab-save" style="background:#0d9f6e;border-color:#0d9f6e">&#x1F4BE; Speichern</button>
+          <button class="btn" id="fa-ab-pdf">&#x1F5A8; Arbeitsbericht drucken</button>
+          <button class="btn" id="fa-ab-rec">&#x1F4B6; Rechnung drucken</button>
+          <span id="fa-ab-msg" style="font-size:13px;font-weight:600;align-self:center"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALT BUTONLAR -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:40px">
+      <button class="btn" id="fa-print-auftrag">&#x1F5A8; Auftragszettel</button>
+      <button class="btn" id="fa-print-vorlage">&#x1F4CB; Vorlage drucken</button>
+      <button class="btn" id="fa-del" style="background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3);color:var(--red);margin-left:auto">&#x1F5D1; L&ouml;schen</button>
+    </div>
+
   </div>
 </div>
 
-<!-- ARBEITSBERICHT -->
-<div id="pg-ab" class="pg">
-  <div class="wrap">
-    <div class="topbar">
-      <button class="btn" id="ab-back">&larr; Zur&uuml;ck</button>
-      <h1 id="ab-title" style="font-size:18px">Arbeitsbericht</h1>
-    </div>
-    <div class="card">
-      <div class="ct">T&auml;tigkeiten</div>
-      <div class="rh rht"><span>Beschreibung</span><span>Std</span><span>Betrag</span><span></span></div>
-      <div id="taet-rows"></div>
-      <button class="add-btn" id="add-taet">+ T&auml;tigkeit</button>
-    </div>
-    <div class="card">
-      <div class="ct">Material</div>
-      <div class="rh rhm"><span>Beschreibung</span><span>Preis</span><span></span></div>
-      <div id="mat-rows"></div>
-      <button class="add-btn" id="add-mat">+ Material</button>
-    </div>
-    <div class="totals">
-      <div class="tr"><span>Arbeitszeit netto</span><span id="tot-arb">0,00 €</span></div>
-      <div class="tr"><span>Material netto</span><span id="tot-mat">0,00 €</span></div>
-      <div class="tr big"><span>Gesamt netto</span><span id="tot-net">0,00 €</span></div>
-      <div class="tr"><span>MwSt. 19%</span><span id="tot-mwst">0,00 €</span></div>
-      <div class="tr big"><span>Gesamt brutto</span><span id="tot-bru">0,00 €</span></div>
-    </div>
-    <div class="btnrow" style="margin-top:16px">
-      <button class="btn p" id="ab-save">&#x1F4BE; Speichern</button>
-      <button class="btn" id="ab-pdf">PDF Arbeitsbericht</button>
-      <button class="btn" id="ab-rec">PDF Rechnung</button>
-    </div>
-    <div class="save-msg" id="ab-msg"></div>
-  </div>
 </div>
 
 <!-- BERICHTE -->
@@ -945,26 +994,6 @@ async function loadAbList(){
     });
   }catch(e){wrap.innerHTML='<div style="color:red">'+e.message+'</div>';}
 }
-document.getElementById('det-save').onclick=async function(){
-  var btn=this; btn.disabled=true;
-  if(!cur) return;
-  try{
-    var r=await fetch(W+'/api/reparatur/'+cur.id,{method:'PATCH',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify({status:document.getElementById('det-status').value,notizen:document.getElementById('det-notiz').value,garantie_monate:document.getElementById('det-garantie').value||null})});
-    var j=await r.json();
-    if(j.ok){cur.status=document.getElementById('det-status').value;var x=reps.find(function(r){return r.id===cur.id;});if(x)x.status=cur.status;renderStats();renderList();msg('det-msg','\u2713 Gespeichert');}
-    else msg('det-msg','Fehler!',true);
-  }catch(e){msg('det-msg',e.message,true);}
-  btn.disabled=false;
-};
-document.getElementById('det-new-ab').onclick=function(){
-  var wrap=document.getElementById('ab-list-wrap');
-  if(wrap&&wrap._abs&&wrap._abs.length>0) openAbForm(wrap._abs[wrap._abs.length-1]);
-  else openAbForm(null);
-};
-document.getElementById('det-del').onclick=function(){
-  if(!cur) return;
-  showDeleteConfirm(cur);
-};
 function showDeleteConfirm(rep){
   var ex=document.getElementById('del-modal');
   if(ex) ex.remove();
@@ -1097,26 +1126,6 @@ function calcTots(){
   document.getElementById('tot-mwst').textContent=fmt(mwst);
   document.getElementById('tot-bru').textContent=fmt(bru);
 }
-document.getElementById('add-taet').onclick=function(){addTaet();};
-document.getElementById('add-mat').onclick=function(){addMat();};
-document.getElementById('ab-back').onclick=async function(){await loadAbList();showPg('pg-det');};
-document.getElementById('ab-save').onclick=async function(){
-  if(!cur) return;
-  var btn=this; btn.disabled=true;
-  var taet=[],mat=[];
-  document.querySelectorAll('#taet-rows .ar').forEach(function(r){var ins=r.querySelectorAll('input');var tog=r.querySelector('button[data-fest]');var isFest=tog&&tog.dataset.fest==='1';if(ins[0].value.trim())taet.push({desc:ins[0].value,std:parseFloat(ins[1].value)||0,festpreis:isFest});});
-  document.querySelectorAll('#mat-rows .ar').forEach(function(r){var ins=r.querySelectorAll('input');if(ins[0].value.trim())mat.push({desc:ins[0].value,preis:parseFloat(ins[1].value)||0});});
-  var net=parseFloat(document.getElementById('tot-net').textContent.replace(/[^\d,]/g,'').replace(',','.'))||0;
-  try{
-    var body={reparatur_id:cur.id,taetigkeiten:JSON.stringify(taet),material:JSON.stringify(mat),total_netto:net,stundensatz:SATZ,notizen:document.getElementById('ab-bemerkung').value||''};
-    if(curAb&&curAb.id) body.id=curAb.id;
-    var r=await fetch(W+'/api/arbeitsbericht',{method:'POST',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify(body)});
-    var j=await r.json();
-    if(j.ok||j.id){msg('ab-msg','\u2713 Gespeichert');curAb=j;}
-    else msg('ab-msg','Fehler!',true);
-  }catch(e){msg('ab-msg',e.message,true);}
-  btn.disabled=false;
-};
 
 // PDF
 var FIRMA={name:'Hasi Elektronic',str:'Gra\u00dfenstra\u00dfe 18',plz:'71665 Vaihingen an der Enz',tel:'07042 163914',mail:'info@hasi-elektronic.de',ust:'DE367591246',iban:'DE71 6045 0050 0030 2488 01',inhaber:'Hamdi G\u00fcncavdi'};
@@ -1194,39 +1203,8 @@ function getTaetMat(){
   return {taet:taet,mat:mat};
 }
 
-document.getElementById('det-pdf').onclick=function(){
-  if(!cur) return;
-  var lines=[
-    '<!DOCTYPE html><html><head><meta charset="UTF-8">',
-    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,700;0,800;1,300&display=swap">',
-    '<style>@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}body{font-family:Arial,sans-serif;padding:16mm 14mm 24mm;color:#2C3E50}.hdr{display:flex;justify-content:space-between;border-bottom:3px solid #4FC1E9;padding-bottom:10px;margin-bottom:16px}.htitle .big{font-family:Raleway,Arial,sans-serif;font-size:22pt;font-weight:800;letter-spacing:2px}.htitle .sml{font-family:Raleway,Arial,sans-serif;font-size:18pt;font-weight:300;font-style:italic;color:#4FC1E9}.hdr img{height:50px}.footer{position:fixed;bottom:0;left:0;right:0;border-top:1px solid #BDC3C7;text-align:center;font-size:7pt;color:#7F8C8D;padding:5px;background:white}</style>',
-    '</head><body>',
-    '<div class="hdr"><div class="hdr-left"><h2 style="font-family:Raleway,Arial,sans-serif;font-size:17pt;font-weight:800;color:#1a1a2e;letter-spacing:2px;text-transform:uppercase;margin:0">Reparaturauftrag</h2></div><img src="'+window._LOGO+'" alt="Hasi"></div>',
-    '<h2 style="color:#2C3E50;margin-bottom:6px">Reparaturauftrag '+(cur.nr||'')+'</h2>',
-    '<p style="color:#4FC1E9;margin-bottom:14px">'+fmtD(cur.datum)+'</p>',
-    '<hr style="border-color:#4FC1E9;margin-bottom:14px">',
-    '<p style="line-height:1.7"><b>'+(cur.k_name||'')+'</b><br>'+(cur.k_adresse||'')+(cur.k_plz_ort?'<br>'+cur.k_plz_ort:'')+(cur.k_telefon?'<br>Tel: '+cur.k_telefon:'')+'</p>',
-    '<hr style="margin:14px 0">',
-    '<p style="line-height:1.7">Ger\u00e4t: <b>'+(cur.geraet_typ||'')+(cur.modell?' \u2013 '+cur.modell:'')+'</b><br>Problem: '+(cur.fehler||'\u2014')+(cur.kostenlimit?'<br>Kostenlimit: '+cur.kostenlimit+' \u20ac':'')+'</p>',
-    '<div class="footer">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+' | Tel: '+FIRMA.tel+' | '+FIRMA.mail+'</div>',
-    '</body></html>'
-  ];
-  openPdfWin(lines.join('\n'));
-};
 
-document.getElementById('det-zettel').onclick=function(){
-  if(!cur) return;
-  buildVorlagePdf(cur);
-};
 
-document.getElementById('ab-pdf').onclick=function(){
-  if(!cur||!curAb||!curAb.id){alert('Bitte zuerst Arbeitsbericht speichern!');return;}
-  window.open('https://tools.hasi-elektronic.de/ab-print.html?rep='+cur.id+'&ab='+curAb.id+'&type=arbeitsbericht','_blank');
-};
-document.getElementById('ab-rec').onclick=function(){
-  if(!cur||!curAb||!curAb.id){alert('Bitte zuerst Arbeitsbericht speichern!');return;}
-  window.open('https://tools.hasi-elektronic.de/ab-print.html?rep='+cur.id+'&ab='+curAb.id+'&type=rechnung','_blank');
-};
 
 // KALENDER
 function renderKal(){
@@ -1385,6 +1363,282 @@ function buildVorlagePdf(r){
 
 
 
+
+
+// ==================== FALL-AKTE ====================
+var faAbId=0;
+var faCurAb=null;
+
+function openDet(id){
+  cur=reps.find(function(r){return r.id===id;});
+  if(!cur){
+    loadList().then(function(){
+      cur=reps.find(function(r){return r.id===id;});
+      if(cur) renderFallAkte();
+    });
+    return;
+  }
+  renderFallAkte();
+}
+
+function renderFallAkte(){
+  if(!cur) return;
+  faCurAb=null;
+
+  // Nr + Name
+  document.getElementById('fa-nr').textContent=cur.nr||'';
+  document.getElementById('fa-name').textContent=cur.k_name||'';
+  document.getElementById('fa-status-badge').innerHTML=sbadge(cur.status);
+
+  // Müşteri
+  var k='';
+  if(cur.k_telefon) k+='<div>&#x1F4DE; <b>'+cur.k_telefon+'</b></div>';
+  if(cur.k_email) k+='<div>&#x2709; '+cur.k_email+'</div>';
+  if(cur.k_adresse) k+='<div>&#x1F4CD; '+cur.k_adresse+(cur.k_plz_ort?' &middot; '+cur.k_plz_ort:'')+'</div>';
+  document.getElementById('fa-kunde').innerHTML=k||'<span style="color:var(--m)">Keine Kontaktdaten</span>';
+
+  // Cihaz
+  var g='<div><b>&#x1F5A5; '+(cur.geraet_typ||'')+(cur.modell?' &mdash; '+cur.modell:'')+'</b></div>';
+  if(cur.fehler) g+='<div style="color:var(--m);font-size:12px">'+cur.fehler+'</div>';
+  if(cur.schaeden) g+='<div style="color:var(--amber);font-size:12px">Schäden: '+cur.schaeden+'</div>';
+  document.getElementById('fa-geraet').innerHTML=g;
+
+  // Fehlerbeschreibung
+  var fwrap=document.getElementById('fa-fehler-wrap');
+  if(cur.fehler||cur.beschreibung){
+    fwrap.style.display='';
+    document.getElementById('fa-fehler').textContent=cur.fehler||cur.beschreibung||'';
+  } else fwrap.style.display='none';
+
+  // Status
+  document.getElementById('fa-status').value=cur.status||'Neu';
+  document.getElementById('fa-notiz').value=cur.notizen||'';
+  document.getElementById('fa-garantie').value=cur.garantie_monate||'';
+  document.getElementById('fa-limit').textContent=cur.kostenlimit?cur.kostenlimit+' €':'—';
+  document.getElementById('fa-msg').textContent='';
+
+  // WhatsApp
+  var waWrap=document.getElementById('wa-wrap');
+  waWrap.style.display=(cur.status==='Fertig'||cur.status==='Abgeholt')?'':'none';
+
+  // AB listesini yükle
+  loadFaAbList();
+
+  showPg('pg-det');
+}
+
+async function loadFaAbList(){
+  if(!cur) return;
+  var wrap=document.getElementById('fa-ab-list');
+  wrap.innerHTML='<div style="color:var(--m);font-size:13px;padding:8px 0">Lade...</div>';
+  try{
+    var r=await fetch(W+'/api/arbeitsbericht?reparatur_id='+cur.id,{headers:{Authorization:A}});
+    var abs=await r.json();
+    wrap._abs=Array.isArray(abs)?abs:[];
+    if(!wrap._abs.length){
+      wrap.innerHTML='<div style="color:var(--m);font-size:13px;padding:16px 0">Keine Arbeitsberichte vorhanden.</div>';
+      return;
+    }
+    wrap.innerHTML=wrap._abs.map(function(ab){
+      var bezahlt=ab.payment_status==='bezahlt';
+      var taet=safeParseFa(ab.taetigkeiten);
+      var taetStr=taet.map(function(t){
+        var isFest=t.festpreis||false;
+        var val=parseFloat(t.std)||0;
+        var bet=isFest?val:val*SATZ;
+        return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--b);border-radius:6px;padding:2px 8px;font-size:11px;margin:2px">'
+          +(t.desc||t.beschreibung||'')
+          +'<b style="color:var(--hasi);margin-left:4px">'+fmt(bet)+'</b></span>';
+      }).join('');
+      return '<div style="border:1.5px solid var(--b);border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all .15s" '
+        +'class="ab-item" data-ab-id="'+ab.id+'">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+          +'<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--hasi);font-weight:600">'+(ab.ab_nr||'')+'</span>'
+          +'<span style="font-size:11px;color:var(--m)">'+fmtD(ab.datum)+'</span>'
+          +'<span style="margin-left:auto;font-size:15px;font-weight:700;color:var(--green)">'+fmt(ab.total_netto||0)+'</span>'
+          +'<button class="bez-badge '+(bezahlt?'bez-bezahlt':'bez-offen')+'" data-bez-id="'+ab.id+'" data-bez-status="'+(bezahlt?'bezahlt':'offen')+'" style="pointer-events:all">'
+            +(bezahlt?'✅ Bezahlt':'⏳ Offen')+'</button>'
+          +'<button class="btn" style="font-size:11px;padding:4px 10px" data-pab="'+ab.id+'" data-prep="'+(ab.reparatur_id||'')+'">&#x1F5A8;</button>'
+        +'</div>'
+        +(taetStr?'<div style="display:flex;flex-wrap:wrap;gap:2px">'+taetStr+'</div>':'')
+        +(ab.notizen?'<div style="margin-top:8px;font-size:11px;color:var(--m);background:var(--hasi-soft);border-radius:6px;padding:5px 8px">&#x1F4DD; '+ab.notizen+'</div>':'')
+        +'</div>';
+    }).join('');
+
+    // Events
+    wrap.querySelectorAll('.ab-item').forEach(function(el){
+      el.onclick=function(e){
+        var bz=e.target.closest('[data-bez-id]');
+        if(bz){e.stopPropagation();toggleBezahlt(parseInt(bz.dataset.bezId),bz.dataset.bezStatus,bz);return;}
+        var pb=e.target.closest('[data-pab]');
+        if(pb){e.stopPropagation();window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+pb.dataset.pab+(pb.dataset.prep?'&rep='+pb.dataset.prep:'')+'&type=arbeitsbericht','_blank');return;}
+        // AB form aç
+        var ab=wrap._abs.find(function(a){return a.id===parseInt(el.dataset.abId);});
+        if(ab) openFaAbForm(ab);
+      };
+    });
+  }catch(e){wrap.innerHTML='<div style="color:red">'+e.message+'</div>';}
+}
+
+function safeParseFa(s){
+  if(!s) return [];
+  try{var r=JSON.parse(s);if(typeof r==='string')r=JSON.parse(r);return Array.isArray(r)?r:[];}catch(e){return [];}
+}
+
+function openFaAbForm(ab){
+  faCurAb=ab||null;
+  faAbId=0;
+  var form=document.getElementById('fa-ab-form');
+  document.getElementById('fa-taet-rows').innerHTML='';
+  document.getElementById('fa-mat-rows').innerHTML='';
+  document.getElementById('fa-bemerkung').value=ab&&ab.notizen?ab.notizen:'';
+  document.getElementById('fa-ab-title').textContent=ab?(ab.ab_nr||'Bearbeiten'):'Neu';
+  document.getElementById('fa-ab-msg').textContent='';
+
+  var taet=ab?safeParseFa(ab.taetigkeiten):[];
+  var mat=ab?safeParseFa(ab.material):[];
+  taet.forEach(function(t){faAddTaet(t.desc||t.beschreibung,t.std,t.festpreis);});
+  mat.forEach(function(m){faAddMat(m.desc||m.beschreibung,m.preis);});
+  if(!taet.length) faAddTaet();
+  faCalcTots();
+  form.style.display='';
+  form.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function faAddTaet(desc,std,festpreis){
+  faAbId++;
+  var id='fat'+faAbId;
+  var isFest=festpreis||false;
+  var div=document.createElement('div');
+  div.className='ar'; div.id=id;
+  div.style.cssText='display:grid;gap:8px;align-items:center;margin-bottom:8px;grid-template-columns:1fr 60px 90px 90px 34px';
+  var d=document.createElement('input'); d.placeholder='Tätigkeit...'; d.value=desc||''; d.oninput=faCalcTots;
+  var tog=document.createElement('button'); tog.type='button';
+  tog.style.cssText='font-size:9px;font-family:DM Mono,monospace;padding:4px 5px;border-radius:6px;cursor:pointer;border:1.5px solid var(--b2);background:'+(isFest?'var(--hasi)':'var(--bg)')+';color:'+(isFest?'#fff':'var(--m)')+';white-space:nowrap;font-weight:600';
+  tog.textContent=isFest?'€':'⏱'; tog.dataset.fest=isFest?'1':'0';
+  var s=document.createElement('input'); s.type='number'; s.step='0.5'; s.min='0'; s.placeholder=isFest?'€':'0'; s.value=std||''; s.oninput=faCalcTots;
+  var b=document.createElement('input'); b.type='number'; b.readOnly=true; b.style.background='var(--bg)';
+  var x=document.createElement('button'); x.className='del'; x.textContent='×'; x.onclick=function(){div.remove();faCalcTots();};
+  tog.onclick=function(){isFest=!isFest;tog.dataset.fest=isFest?'1':'0';tog.textContent=isFest?'€':'⏱';tog.style.background=isFest?'var(--hasi)':'var(--bg)';tog.style.color=isFest?'#fff':'var(--m)';s.placeholder=isFest?'€':'0';faCalcTots();};
+  div.appendChild(d);div.appendChild(tog);div.appendChild(s);div.appendChild(b);div.appendChild(x);
+  document.getElementById('fa-taet-rows').appendChild(div);
+}
+
+function faAddMat(desc,preis){
+  faAbId++;
+  var id='fam'+faAbId;
+  var div=document.createElement('div'); div.className='ar arm'; div.id=id;
+  var d=document.createElement('input'); d.placeholder='Material...'; d.value=desc||''; d.oninput=faCalcTots;
+  var p=document.createElement('input'); p.type='number'; p.step='0.01'; p.min='0'; p.placeholder='0'; p.value=preis||''; p.oninput=faCalcTots;
+  var x=document.createElement('button'); x.className='del'; x.textContent='×'; x.onclick=function(){div.remove();faCalcTots();};
+  div.appendChild(d);div.appendChild(p);div.appendChild(x);
+  document.getElementById('fa-mat-rows').appendChild(div);
+}
+
+function faCalcTots(){
+  var arb=0,mat=0;
+  document.querySelectorAll('#fa-taet-rows .ar').forEach(function(r){
+    var ins=r.querySelectorAll('input');
+    var tog=r.querySelector('button[data-fest]');
+    var isFest=tog&&tog.dataset.fest==='1';
+    var val=parseFloat(ins[1].value)||0;
+    var bet=isFest?val:val*SATZ;
+    ins[2].value=bet.toFixed(2); arb+=bet;
+  });
+  document.querySelectorAll('#fa-mat-rows .ar').forEach(function(r){
+    mat+=parseFloat(r.querySelectorAll('input')[1].value)||0;
+  });
+  var net=arb+mat,mwst=net*0.19,bru=net+mwst;
+  document.getElementById('fa-tot-arb').textContent=fmt(arb);
+  document.getElementById('fa-tot-mat').textContent=fmt(mat);
+  document.getElementById('fa-tot-net').textContent=fmt(net);
+  document.getElementById('fa-tot-mwst').textContent=fmt(mwst);
+  document.getElementById('fa-tot-bru').textContent=fmt(bru);
+}
+
+document.getElementById('fa-add-taet').onclick=function(){faAddTaet();};
+document.getElementById('fa-add-mat').onclick=function(){faAddMat();};
+
+document.getElementById('fa-new-ab').onclick=function(){openFaAbForm(null);};
+
+document.getElementById('fa-save-status').onclick=async function(){
+  if(!cur) return;
+  var btn=this; btn.disabled=true;
+  try{
+    var r=await fetch(W+'/api/reparatur/'+cur.id,{
+      method:'PATCH',headers:{Authorization:A,'Content-Type':'application/json'},
+      body:JSON.stringify({status:document.getElementById('fa-status').value,notizen:document.getElementById('fa-notiz').value,garantie_monate:document.getElementById('fa-garantie').value||null})
+    });
+    var j=await r.json();
+    if(j.ok){
+      cur.status=document.getElementById('fa-status').value;
+      cur.notizen=document.getElementById('fa-notiz').value;
+      document.getElementById('fa-status-badge').innerHTML=sbadge(cur.status);
+      var waWrap=document.getElementById('wa-wrap');
+      waWrap.style.display=(cur.status==='Fertig'||cur.status==='Abgeholt')?'':'none';
+      var rep=reps.find(function(x){return x.id===cur.id;});
+      if(rep){rep.status=cur.status;rep.notizen=cur.notizen;}
+      renderStats();renderList();
+      msg('fa-msg','✓ Gespeichert');
+      showNotif('✅ Status: '+cur.status,'green');
+      playBeep(cur.status);
+    } else msg('fa-msg','Fehler!',true);
+  }catch(e){msg('fa-msg',e.message,true);}
+  btn.disabled=false;
+};
+
+document.getElementById('fa-ab-save').onclick=async function(){
+  if(!cur) return;
+  var taet=[],mat=[];
+  document.querySelectorAll('#fa-taet-rows .ar').forEach(function(r){
+    var ins=r.querySelectorAll('input');
+    var tog=r.querySelector('button[data-fest]');
+    var isFest=tog&&tog.dataset.fest==='1';
+    if(ins[0].value.trim()) taet.push({desc:ins[0].value,std:parseFloat(ins[1].value)||0,festpreis:isFest});
+  });
+  document.querySelectorAll('#fa-mat-rows .ar').forEach(function(r){
+    var ins=r.querySelectorAll('input');
+    if(ins[0].value.trim()) mat.push({desc:ins[0].value,preis:parseFloat(ins[1].value)||0});
+  });
+  var net=parseFloat(document.getElementById('fa-tot-net').textContent.replace(/[^\d,]/g,'').replace(',','.'))||0;
+  var btn=this; btn.disabled=true;
+  try{
+    var body={reparatur_id:cur.id,taetigkeiten:JSON.stringify(taet),material:JSON.stringify(mat),total_netto:net,stundensatz:SATZ,notizen:document.getElementById('fa-bemerkung').value||''};
+    if(faCurAb&&faCurAb.id) body.id=faCurAb.id;
+    var r=await fetch(W+'/api/arbeitsbericht',{method:'POST',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var j=await r.json();
+    if(j.ok||j.id){
+      faCurAb=j;
+      msg('fa-ab-msg','✓ Gespeichert');
+      showNotif('&#x1F4C4; Arbeitsbericht gespeichert','green');
+      loadFaAbList();
+    } else msg('fa-ab-msg','Fehler!',true);
+  }catch(e){msg('fa-ab-msg',e.message,true);}
+  btn.disabled=false;
+};
+
+document.getElementById('fa-ab-pdf').onclick=function(){
+  if(!faCurAb||!faCurAb.id){msg('fa-ab-msg','Bitte zuerst speichern!',true);return;}
+  window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+faCurAb.id+'&rep='+cur.id+'&type=arbeitsbericht','_blank');
+};
+document.getElementById('fa-ab-rec').onclick=function(){
+  if(!faCurAb||!faCurAb.id){msg('fa-ab-msg','Bitte zuerst speichern!',true);return;}
+  window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+faCurAb.id+'&rep='+cur.id+'&type=rechnung','_blank');
+};
+
+document.getElementById('fa-print-auftrag').onclick=function(){
+  if(!cur) return;
+  window.open('https://tools.hasi-elektronic.de/print.html?id='+cur.id,'_blank');
+};
+document.getElementById('fa-print-vorlage').onclick=function(){
+  if(!cur) return;
+  buildVorlagePdf(cur);
+};
+document.getElementById('fa-del').onclick=function(){
+  if(!cur) return;
+  showDeleteConfirm(cur);
+};
+// ==================== END FALL-AKTE ====================
 
 // ==================== WHATSAPP ====================
 function detStatusChanged(){
