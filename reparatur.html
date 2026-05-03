@@ -706,7 +706,7 @@ async function renderAbholbereit(){
   var listEl=document.getElementById('abholbereit-list');
   listEl.onclick=function(e){
     var btn=e.target.closest('[data-abhol-id]');
-    if(btn) abholungBestaetigen(parseInt(btn.dataset.abholId),btn.dataset.abholNr,btn.dataset.abholName);
+    if(btn){e.stopPropagation();abholungBestaetigen(parseInt(btn.dataset.abholId),btn.dataset.abholNr,btn.dataset.abholName);return;}
   };
   listEl.innerHTML=mitAB.map(function(item){
     var r=item.rep;
