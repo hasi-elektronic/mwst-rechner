@@ -17,6 +17,7 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:16px;color:#1a1a2e;
 .page{width:210mm;margin:0 auto;background:white;box-shadow:0 4px 24px rgba(0,0,0,.2)}
 .hdr{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 24px 14px;border-bottom:4px solid #0090c4;background:linear-gradient(135deg,#f0f9ff,#fff)}
 .hdr img{height:52px}
+.hdr-left h2{font-family:Raleway,Arial,sans-serif;font-size:17pt;font-weight:800;color:#1a1a2e;letter-spacing:2px;text-transform:uppercase;margin:0}
 .tbox{text-align:right}
 .tbox h2{font-family:Raleway,Arial,sans-serif;font-size:17pt;font-weight:800;color:#1a1a2e;letter-spacing:2px;text-transform:uppercase;margin:0}
 .tnr{font-size:11pt;color:#0090c4;font-family:'Courier New',monospace;margin-top:4px;font-weight:700}
@@ -68,6 +69,7 @@ function render(r){
   var html=[
     '<div class="page">',
     '<div class="hdr">',
+    '<div class="hdr-left"><h2>Reparaturauftrag</h2></div>',
     '<img src="'+logoSrc+'" alt="Hasi Elektronic" onerror="this.style.display=\'none\'">',
     '<div class="tbox">',
     '<h2>Reparaturauftrag</h2>',
