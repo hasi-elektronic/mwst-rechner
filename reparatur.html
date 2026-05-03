@@ -935,65 +935,8 @@ function openDet(id){
   }
   _openDetRender();
 }
-function _openDetRender(){
-  if(!cur) return;
-  document.getElementById('det-title').textContent=(cur.nr||'')+' \u00b7 '+(cur.k_name||'');
-  document.getElementById('det-status').value=cur.status||'Neu';
-  document.getElementById('det-notiz').value=cur.notizen||'';
-  document.getElementById('det-msg').textContent='';
-  // Garantie
-  var garEl=document.getElementById('det-garantie');
-  if(garEl) garEl.value=cur.garantie_monate||'';
-  // WhatsApp butonu
-  var waWrap=document.getElementById('wa-wrap');
-  if(waWrap) waWrap.style.display=(cur.status==='Fertig'||cur.status==='Abgeholt')?'':'none';
-  var fields=[['Kunde',cur.k_name],['Telefon',cur.k_telefon],['Adresse',[cur.k_adresse,cur.k_plz_ort].filter(Boolean).join(', ')],['Ger\u00e4t',cur.geraet_typ],['Modell',cur.modell],['Fehler',cur.fehler],['Win-PW',cur.win_passwort],['Limit',cur.kostenlimit?cur.kostenlimit+' \u20ac':'']];
-  document.getElementById('det-info').innerHTML=fields.filter(function(x){return x[1];}).map(function(x){return '<div class="ifield"><div class="il">'+x[0]+'</div><div class="iv">'+x[1]+'</div></div>';}).join('');
-  loadAbList();
-  document.getElementById('btn-det').style.display='';
-  showPg('pg-det');
-}
-async function loadAbList(){
-  var wrap=document.getElementById('ab-list-wrap');
-  if(!wrap||!cur) return;
-  wrap.innerHTML='Lade...';
-  try{
-    var r=await fetch(W+'/api/arbeitsbericht?reparatur_id='+cur.id,{headers:{Authorization:A}});
-    var abs=await r.json();
-    if(!Array.isArray(abs)||!abs.length){wrap.innerHTML='<div style="color:var(--m);font-size:13px">Keine Arbeitsberichte.</div>';return;}
-    wrap._abs=abs;
-    wrap._abs=abs;
-    function parseTaet2(ab){try{var t=JSON.parse(ab.taetigkeiten||'[]');if(typeof t==='string')t=JSON.parse(t);return Array.isArray(t)?t:[];}catch(e){return [];}}
-    wrap.innerHTML=abs.map(function(ab){
-      var bezahlt=ab.bezahlt||ab.payment_status==='bezahlt';
-      var taet=parseTaet2(ab);
-      var taetStr=taet.map(function(t){
-        var isFest=t.festpreis||false;
-        var val=parseFloat(t.std)||0;
-        var bet=isFest?val:val*SATZ;
-        return (t.desc||t.beschreibung||'')+(bet?' ('+fmt(bet)+')':'');
-      }).filter(Boolean).join(' &middot; ');
-      return '<div class="ab-item" data-ab-id="'+ab.id+'">'
-        +'<div style="flex:1;min-width:0">'
-          +'<div style="font-family:DM Mono,monospace;font-size:12px;color:var(--hasi)">'+(ab.ab_nr||'\u2014')+'</div>'
-          +'<div style="font-size:11px;color:var(--m);margin-top:2px">'+fmtD(ab.datum)+'</div>'
-          +(taetStr?'<div style="font-size:11px;color:var(--t);margin-top:4px;line-height:1.4">'+taetStr+'</div>':'')
-        +'</div>'
-        +'<div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">'
-          +'<div style="font-size:14px;font-weight:600;color:var(--green)">'+fmt(ab.total_netto||0)+'</div>'
-          +'<button class="bez-badge '+(bezahlt?'bez-bezahlt':'bez-offen')+'" data-bez-id="'+ab.id+'" data-bez-status="'+(bezahlt?'bezahlt':'offen')+'">'
-          +(bezahlt?'&#x2705; Bezahlt':'&#x23F3; Offen')+'</button>'
-        +'</div></div>';
-    }).join('');
-    document.querySelectorAll('.ab-item').forEach(function(el){
-      el.onclick=el.ontouchend=function(e){
-        if(e) e.preventDefault();
-        var ab=wrap._abs.find(function(a){return a.id===parseInt(el.dataset.abId);});
-        if(ab) openAbForm(ab);
-      };
-    });
-  }catch(e){wrap.innerHTML='<div style="color:red">'+e.message+'</div>';}
-}
+function _openDetRender(){if(cur)renderFallAkte();}
+async function loadAbList(){if(cur)loadFaAbList();}
 function showDeleteConfirm(rep){
   var ex=document.getElementById('del-modal');
   if(ex) ex.remove();
@@ -1022,7 +965,7 @@ function showDeleteConfirm(rep){
         reps=reps.filter(function(x){return x.id!==rep.id;});
         cur=null;
         renderStats(); renderList();
-        document.getElementById('btn-det').style.display='none';
+        
         showPg('pg-list');
       } else {
         showNotif('&#x26A0; Fehler','amber');
@@ -1065,207 +1008,10 @@ document.getElementById('f-send').onclick=async function(){
 };
 
 // ARBEITSBERICHT
-function openAbForm(ab){
-  curAb=ab;
-  document.getElementById('ab-title').textContent=cur?(cur.nr||'')+(ab?' \u2013 Bearbeiten':' \u2013 Neu'):'';
-  document.getElementById('ab-msg').textContent='';
-  document.getElementById('ab-bemerkung').value=ab&&ab.notizen?ab.notizen:'';
-  document.getElementById('taet-rows').innerHTML='';
-  document.getElementById('mat-rows').innerHTML='';
-  abId=0;
-  var taet=ab?JSON.parse(ab.taetigkeiten||'[]'):[];
-  var mat=ab?JSON.parse(ab.material||'[]'):[];
-  taet.forEach(function(t){addTaet(t.desc,t.std,t.festpreis||false);});
-  mat.forEach(function(m){addMat(m.desc,m.preis);});
-  if(!taet.length) addTaet();
-  calcTots();
-  document.getElementById('btn-ab').style.display='';
-  showPg('pg-ab');
-}
-function addTaet(desc,std,festpreis){
-  abId++;
-  var id=abId;
-  var div=document.createElement('div');
-  div.className='ar';
-  div.style.cssText='display:grid;gap:8px;align-items:center;margin-bottom:8px;grid-template-columns:1fr 60px 90px 90px 34px';
-  div.id='tr'+id;
-  div.innerHTML='<input placeholder="T\u00e4tigkeit..." value="'+(desc||'')+'"><input type="number" step="0.5" min="0" placeholder="0" value="'+(std||'')+'" onchange="calcTots()"><input type="number" readonly style="background:var(--bg)"><button class="del" onclick="document.getElementById(\'tr'+id+'\').remove();calcTots()">\u00d7</button>';
-  document.getElementById('taet-rows').appendChild(div);
-  div.querySelectorAll('input')[0].oninput=calcTots;
-  div.querySelectorAll('input')[1].oninput=calcTots;
-}
-function addMat(desc,preis){
-  abId++;
-  var id=abId;
-  var div=document.createElement('div');
-  div.className='ar arm';
-  div.id='mr'+id;
-  div.innerHTML='<input placeholder="Material..." value="'+(desc||'')+'"><input type="number" step="0.01" min="0" placeholder="0" value="'+(preis||'')+'" onchange="calcTots()"><button class="del" onclick="document.getElementById(\'mr'+id+'\').remove();calcTots()">\u00d7</button>';
-  document.getElementById('mat-rows').appendChild(div);
-  div.querySelectorAll('input')[0].oninput=calcTots;
-  div.querySelectorAll('input')[1].oninput=calcTots;
-}
-function calcTots(){
-  var arb=0,mat=0;
-  document.querySelectorAll('#taet-rows .ar').forEach(function(r){
-    var ins=r.querySelectorAll('input');
-    var tog=r.querySelector('button[data-fest]');
-    var isFest=tog&&tog.dataset.fest==='1';
-    var val=parseFloat(ins[1].value)||0;
-    var bet=isFest?val:val*SATZ;
-    ins[2].value=bet.toFixed(2);
-    arb+=bet;
-  });
-  document.querySelectorAll('#mat-rows .ar').forEach(function(r){
-    mat+=parseFloat(r.querySelectorAll('input')[1].value)||0;
-  });
-  var net=arb+mat, mwst=net*0.19, bru=net+mwst;
-  document.getElementById('tot-arb').textContent=fmt(arb);
-  document.getElementById('tot-mat').textContent=fmt(mat);
-  document.getElementById('tot-net').textContent=fmt(net);
-  document.getElementById('tot-mwst').textContent=fmt(mwst);
-  document.getElementById('tot-bru').textContent=fmt(bru);
-}
-
-// PDF
-var FIRMA={name:'Hasi Elektronic',str:'Gra\u00dfenstra\u00dfe 18',plz:'71665 Vaihingen an der Enz',tel:'07042 163914',mail:'info@hasi-elektronic.de',ust:'DE367591246',iban:'DE71 6045 0050 0030 2488 01',inhaber:'Hamdi G\u00fcncavdi'};
-
-function buildPdf(type,rep,ab,taet,mat){
-  var arb=taet.reduce(function(s,t){return s+(parseFloat(t.std)||0)*SATZ;},0);
-  var matT=mat.reduce(function(s,m){return s+(parseFloat(m.preis)||0);},0);
-  var net=arb+matT,mwst=net*0.19,bru=net+mwst;
-  var isRec=type==='rechnung';
-  var nr=ab&&ab.ab_nr?ab.ab_nr:(isRec?'RE':'AB')+'-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
-  var datum=ab&&ab.datum?ab.datum.split('-').reverse().join('.'):new Date().toLocaleDateString('de-DE');
-  var taetRows=taet.map(function(t){return '<tr><td>'+(t.desc||'')+'</td><td style="text-align:right">'+((parseFloat(t.std)||0).toFixed(2).replace('.',','))+' Std.</td><td style="text-align:right">'+fmt((parseFloat(t.std)||0)*SATZ)+'</td></tr>';}).join('');
-  var matRows=mat.length?('<tr style="background:#E8F0F5"><td colspan="3" style="padding:5px 9px;font-weight:700;color:#4FC1E9;font-size:9pt">Material</td></tr>'+mat.map(function(m){return '<tr><td>'+(m.desc||'')+'</td><td></td><td style="text-align:right">'+fmt(parseFloat(m.preis)||0)+'</td></tr>';}).join('')):'';
-  var lines=[
-    '<!DOCTYPE html><html><head><meta charset="UTF-8">',
-    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,700;0,800;1,300&display=swap">',
-    '<style>@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;font-size:10pt;color:#2C3E50}.page{width:210mm;min-height:297mm;margin:0 auto;padding:16mm 14mm 24mm;background:white}.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #4FC1E9;padding-bottom:10px;margin-bottom:16px}.htitle .big{font-family:Raleway,Arial,sans-serif;font-size:22pt;font-weight:800;color:#2C3E50;letter-spacing:2px}.htitle .sml{font-family:Raleway,Arial,sans-serif;font-size:18pt;font-weight:300;font-style:italic;color:#4FC1E9;letter-spacing:1px}.htitle .sub{font-size:8pt;color:#7F8C8D;letter-spacing:1px;text-transform:uppercase;margin-top:2px}.hdr img{height:50px}table{width:100%;border-collapse:collapse}thead th{background:#4FC1E9;color:white;padding:7px 9px;text-align:left;font-size:9.5pt;font-weight:600}thead th.r{text-align:right}tbody tr:nth-child(even){background:#F0F9FF}tbody td{padding:6px 9px;border-bottom:1px solid #E8F0F5;font-size:9.5pt}.sum-wrap{display:flex;justify-content:flex-end;margin-top:4px}.sum-tbl{width:280px}.sum-tbl table{width:100%;border:1.5px solid #BDC3C7}.sum-tbl td{padding:5px 9px;font-size:9.5pt;border-bottom:1px solid #E8F0F5}.sum-tbl td.r{text-align:right;font-weight:600}.sum-total{background:#4FC1E9;color:white;font-size:11pt;font-weight:700}.sum-total td{border-bottom:none;padding:7px 9px}.addr-row{display:flex;justify-content:space-between;margin-bottom:16px}.meta{text-align:right;font-size:9.5pt;line-height:1.8}.meta .nr{font-size:13pt;font-weight:700;color:#4FC1E9}.absender{font-size:7.5pt;color:#7F8C8D;border-bottom:1px solid #BDC3C7;padding-bottom:3px;margin-bottom:8px}.zahlung{margin-top:16px;font-size:9.5pt;line-height:1.6;background:#F0F9FF;border-left:3px solid #4FC1E9;padding:10px 12px}.footer{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #BDC3C7;text-align:center;font-size:7pt;color:#7F8C8D;padding:5px;line-height:1.6}</style></head><body><div class="page">',
-    '<div class="hdr"><div class="hdr-left"><h2 style="font-family:Raleway,Arial,sans-serif;font-size:17pt;font-weight:800;color:#1a1a2e;letter-spacing:2px;text-transform:uppercase;margin:0">Reparaturauftrag</h2></div><img src="'+window._LOGO+'" alt="Hasi Elektronic"></div>',
-    '<div class="absender">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+'</div>',
-    '<div class="addr-row"><div style="font-size:10pt;line-height:1.7"><b>'+(rep.k_name||'')+'</b><br>'+(rep.k_adresse||'')+(rep.k_plz_ort?'<br>'+rep.k_plz_ort:'')+(rep.k_telefon?'<br>Tel: '+rep.k_telefon:'')+'</div><div class="meta"><div class="nr">'+nr+'</div><div>'+(isRec?'Rechnung':'Arbeitsbericht')+'</div><div>Datum: '+datum+'</div><div>Auftrag: '+(rep.nr||'')+'</div></div></div>',
-    '<p style="font-size:9.5pt;margin-bottom:12px">Folgende T\u00e4tigkeiten wurden durchgef\u00fchrt:</p>',
-    '<table><thead><tr><th>Beschreibung</th><th class="r">Std.</th><th class="r">Betrag netto</th></tr></thead><tbody>'+taetRows+matRows+'</tbody></table>',
-    '<div class="sum-wrap"><div class="sum-tbl"><table><tbody>',
-    '<tr><td>Arbeitszeit netto</td><td class="r">'+fmt(arb)+'</td></tr>',
-    mat.length?'<tr><td>Material netto</td><td class="r">'+fmt(matT)+'</td></tr>':'',
-    '<tr><td>Zwischensumme netto</td><td class="r">'+fmt(net)+'</td></tr>',
-    '<tr><td>MwSt. 19%</td><td class="r">'+fmt(mwst)+'</td></tr>',
-    '<tr class="sum-total"><td>Gesamt brutto</td><td class="r">'+fmt(bru)+'</td></tr>',
-    '</tbody></table></div></div>',
-    isRec?'<div class="zahlung"><b>Zahlungsinformationen</b><br>Bitte \u00fcberweisen Sie den Betrag innerhalb von 14 Tagen.<br><br>Empf\u00e4nger: '+FIRMA.inhaber+'<br>IBAN: '+FIRMA.iban+'</div>':'',
-    '<div class="footer">'+FIRMA.name+' \u00b7 '+FIRMA.str+' \u00b7 '+FIRMA.plz+' | Tel: '+FIRMA.tel+' | '+FIRMA.mail+' | USt: '+FIRMA.ust+'</div>',
-    '</div></body></html>'
-  ];
-  return lines.join('\n');
-}
-
-function openPdfWin(htmlContent,repData){
-  // Her zaman yeni sekme aç — iPad ve Teams uyumlu
-  var w=window.open('about:blank','_blank');
-  if(w){
-    w.document.open();
-    w.document.write(htmlContent);
-    w.document.close();
-    return;
-  }
-  // Popup bloklu — modal fallback
-  var ex=document.getElementById('pdf-modal');
-  if(ex) ex.remove();
-  var modal=document.createElement('div');
-  modal.id='pdf-modal';
-  modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;flex-direction:column';
-  var bar=document.createElement('div');
-  bar.style.cssText='background:#1a2a3a;padding:10px 16px;display:flex;gap:12px;flex-shrink:0';
-  var pb=document.createElement('button');
-  pb.textContent='Drucken';
-  pb.style.cssText='background:#33afe2;color:#fff;border:none;padding:9px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer';
-  pb.onclick=function(){var fr=document.getElementById('pdf-frame');if(fr&&fr.contentWindow)try{fr.contentWindow.print();}catch(e){}};
-  var cb2=document.createElement('button');
-  cb2.textContent='× Schließen';
-  cb2.style.cssText='margin-left:auto;background:rgba(255,255,255,.2);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px';
-  cb2.onclick=function(){modal.remove();};
-  bar.appendChild(pb); bar.appendChild(cb2);
-  var frame=document.createElement('iframe');
-  frame.id='pdf-frame';
-  frame.style.cssText='flex:1;border:none;background:#fff';
-  frame.srcdoc=htmlContent;
-  modal.appendChild(bar); modal.appendChild(frame);
-  document.body.appendChild(modal);
-}
-
-function getTaetMat(){
-  var taet=[],mat=[];
-  document.querySelectorAll('#taet-rows .ar').forEach(function(r){var ins=r.querySelectorAll('input');var tog=r.querySelector('button[data-fest]');var isFest=tog&&tog.dataset.fest==='1';if(ins[0].value.trim())taet.push({desc:ins[0].value,std:parseFloat(ins[1].value)||0,festpreis:isFest});});
-  document.querySelectorAll('#mat-rows .ar').forEach(function(r){var ins=r.querySelectorAll('input');if(ins[0].value.trim())mat.push({desc:ins[0].value,preis:parseFloat(ins[1].value)||0});});
-  return {taet:taet,mat:mat};
-}
+function openAbForm(ab){openFaAbForm(ab);}
 
 
-
-
-// KALENDER
-function renderKal(){
-  var now=new Date();
-  var todayStr=now.toISOString().slice(0,10);
-  var monate=['Januar','Februar','M\u00e4rz','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-  document.getElementById('kal-title').textContent=monate[kalM]+' '+kalY;
-  var days=['Mo','Di','Mi','Do','Fr','Sa','So'];
-  document.getElementById('kal-hdr').innerHTML=days.map(function(d){return '<div class="kh">'+d+'</div>';}).join('');
-  var firstDay=new Date(kalY,kalM,1);
-  var lastDay=new Date(kalY,kalM+1,0);
-  var startDow=(firstDay.getDay()+6)%7;
-  var byDay={};
-  reps.forEach(function(r){
-    var d=(r.datum||r.created_at||'').slice(0,10);
-    if(!byDay[d]) byDay[d]=[];
-    byDay[d].push(r);
-  });
-  var alarmReps=reps.filter(function(r){
-    if(r.status==='Fertig'||r.status==='Abgeholt'||r.status==='Abgelehnt') return false;
-    var d=new Date((r.datum||r.created_at||'').slice(0,10));
-    return (now-d)/(1000*60*60*24)>=7;
-  });
-  var ab=document.getElementById('alarm-box');
-  if(alarmReps.length){
-    ab.style.display='block';
-    document.getElementById('alarm-list').innerHTML=alarmReps.map(function(r){
-      var diff=Math.floor((now-new Date((r.datum||r.created_at||'').slice(0,10)))/(1000*60*60*24));
-      return '<div style="display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:4px" onclick="openDet('+r.id+')">'
-        +'<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--hasi)">'+(r.nr||'')+'</span>'
-        +'<span style="font-size:13px;font-weight:600">'+r.k_name+'</span>'
-        +'<span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--red)">'+diff+' Tage offen</span></div>';
-    }).join('');
-  } else { ab.style.display='none'; }
-  var cells=[];
-  var prevLast=new Date(kalY,kalM,0).getDate();
-  for(var i=startDow-1;i>=0;i--) cells.push({day:prevLast-i,curr:false,ds:null});
-  for(var d2=1;d2<=lastDay.getDate();d2++){
-    var ds=kalY+'-'+String(kalM+1).padStart(2,'0')+'-'+String(d2).padStart(2,'0');
-    cells.push({day:d2,curr:true,ds:ds});
-  }
-  var rem=(7-cells.length%7)%7;
-  for(var d3=1;d3<=rem;d3++) cells.push({day:d3,curr:false,ds:null});
-  document.getElementById('kal-grid').innerHTML=cells.map(function(c){
-    var isToday=c.ds===todayStr;
-    var isSel=c.ds===kalSel;
-    var cls='kal-day'+(isToday?' today':'')+(c.curr?'':' other')+(isSel?' sel':'');
-    var dots='';
-    if(c.ds&&byDay[c.ds]){
-      dots=byDay[c.ds].slice(0,3).map(function(r){
-        var dayDiff=(now-new Date(c.ds))/(1000*60*60*24);
-        var sc=r.status==='Fertig'||r.status==='Abgeholt'?'s-fer':r.status==='Neu'?'s-neu':'s-off';
-        if(sc!=='s-fer'&&dayDiff>=7) sc='s-alarm';
-        return '<div class="kal-dot '+sc+'" title="'+r.k_name+'">'+(r.k_name||r.nr||'')+'</div>';
-      }).join('');
-      if(byDay[c.ds].length>3) dots+='<div style="font-size:8px;color:var(--m)">+'+(byDay[c.ds].length-3)+' mehr</div>';
-    }
-    var oc=c.ds?'onclick="kalSel=\''+c.ds+'\';renderKal();kalShowDay(\''+c.ds+'\')"':'';
-    return '<div class="'+cls+'" '+oc+'><div class="kal-nr">'+c.day+'</div>'+dots+'</div>';
-  }).join('');
-}
+function calcTots(){faCalcTots();}
 function kalShowDay(ds){
   var dayReps=reps.filter(function(r){return (r.datum||r.created_at||'').slice(0,10)===ds;});
   var parts=ds.split('-');
@@ -1642,9 +1388,9 @@ document.getElementById('fa-del').onclick=function(){
 
 // ==================== WHATSAPP ====================
 function detStatusChanged(){
-  var status=document.getElementById('det-status').value;
+  var status=document.getElementById('fa-status')?document.getElementById('fa-status').value:'';
   var wrap=document.getElementById('wa-wrap');
-  wrap.style.display=(status==='Fertig'||status==='Abgeholt')?'':'none';
+  if(wrap) wrap.style.display=(status==='Fertig'||status==='Abgeholt')?'':'none';
 }
 
 document.getElementById('det-wa').onclick=function(){
@@ -1666,10 +1412,7 @@ document.getElementById('det-wa').onclick=function(){
 };
 
 // ==================== BEZAHLT TOGGLE ====================
-document.getElementById('ab-list-wrap').addEventListener('click',function(e){
-  var btn=e.target.closest('[data-bez-id]');
-  if(btn) toggleBezahlt(parseInt(btn.dataset.bezId), btn.dataset.bezStatus, btn);
-});
+// ab-list-wrap removed
 
 async function toggleBezahlt(abId, currentStatus, btn){
   var newStatus=currentStatus==='bezahlt'?'offen':'bezahlt';
@@ -2335,26 +2078,12 @@ function renderBerichte(){
     if(row&&row.dataset.repId) openDet(parseInt(row.dataset.repId));
   };
 }
-async function renderDashBerichte(){
-  try{
-    var r=await fetch(W+'/api/arbeitsbericht',{headers:{Authorization:A}});
-    var abs=await r.json();
-    if(!Array.isArray(abs)||!abs.length){document.getElementById('dash-ber-wrap').style.display='none';return;}
-    document.getElementById('dash-ber-wrap').style.display='block';
-    document.getElementById('dash-ber-list').innerHTML=abs.slice(0,5).map(function(ab){
-      var b=ab.payment_status==='bezahlt';
-      return '<div class="ber-row" onclick="'+(ab.reparatur_id?'openDet('+ab.reparatur_id+')':'')+'">'
-        +'<div style="font-family:DM Mono,monospace;font-size:11px;color:var(--hasi)">'+(ab.ab_nr||'')+'</div>'
-        +'<div><div style="font-size:13px;font-weight:600">'+(ab.k_name||'Ohne Auftrag')+'</div>'
-          +'<div style="font-size:11px;color:var(--m)">'+(ab.geraet_typ||'')+'</div></div>'
-        +'<div style="font-size:12px;color:var(--m);text-align:right">'+fmtD(ab.datum)+'</div>'
-        +'<div style="text-align:right;font-weight:700;color:var(--green)">'+fmt(ab.total_netto||0)+'</div>'
-        +'<div style="text-align:right"><span class="bez-badge '+(b?'bez-bezahlt':'bez-offen')+'">'+(b?'✅':'⏳')+'</span></div>'
-        +'</div>';
-    }).join('');
-  }catch(e){}
-}
+async function renderDashBerichte(){}
 // ==================== END BERICHTE ====================
+
+
+// Safe element access — eski referanslar için null guard
+function safeEl(id){return document.getElementById(id)||{onclick:null,oninput:null,onchange:null,style:{},value:'',textContent:'',innerHTML:''};}
 
 // INIT
 window.addEventListener('load',function(){
