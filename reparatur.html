@@ -436,6 +436,10 @@ tbody tr:last-child td{border-bottom:none}
             <div id="fab-kunde-wrap">
               <span class="vl-lbl">Kundenname (optional)</span>
               <input class="vl-inp" id="fab-kunde" placeholder="z.B. Max Mustermann">
+              <div class="vl-row2">
+                <div><span class="vl-lbl">Telefon</span><input class="vl-inp" id="fab-tel" placeholder="+49 ..."></div>
+                <div><span class="vl-lbl">Adresse</span><input class="vl-inp" id="fab-adr" placeholder="Stra&szlig;e, PLZ Ort"></div>
+              </div>
             </div>
           </div>
           <div class="card" style="margin-bottom:14px">
@@ -461,6 +465,10 @@ tbody tr:last-child td{border-bottom:none}
             <div class="tr"><span>MwSt. 19%</span><span id="fab-tot-mwst">0,00 €</span></div>
             <div class="tr big"><span>Gesamt brutto</span><span id="fab-tot-bru">0,00 €</span></div>
           </div>
+        </div>
+        <div class="vl-sec" style="padding:0 28px 16px">
+          <div class="vl-sec-title">Notiz f&uuml;r Jasmin &amp; Sabine</div>
+          <textarea class="vl-inp" id="fab-notiz" rows="2" placeholder="z.B. Rechnung bitte bis Freitag ausstellen..."></textarea>
         </div>
         <div class="vl-actions">
           <button class="btn p" id="fab-save" style="background:#0d9f6e;color:#fff;border-color:#0d9f6e">&#x1F4BE; Speichern</button>
@@ -1845,12 +1853,12 @@ function fabAddTaet(desc,std,festpreis){
   var d=document.createElement('input'); d.placeholder='Tätigkeit...'; d.value=desc||''; d.oninput=fabCalcTots;
   var tog=document.createElement('button'); tog.type='button';
   tog.style.cssText='font-size:9px;font-family:DM Mono,monospace;padding:4px 5px;border-radius:6px;cursor:pointer;border:1.5px solid var(--b2);background:'+(isFest?'var(--hasi)':'var(--bg)')+';color:'+(isFest?'#fff':'var(--m)')+';white-space:nowrap;font-weight:600';
-  tog.textContent=isFest?'Fest':'Std.'; tog.dataset.fest=isFest?'1':'0';
+  tog.textContent=isFest?'€':'⏱'; tog.dataset.fest=isFest?'1':'0';
   var s=document.createElement('input'); s.type='number'; s.step='0.5'; s.min='0'; s.placeholder=isFest?'€':'0'; s.value=std||''; s.oninput=fabCalcTots;
   var b=document.createElement('input'); b.type='number'; b.readOnly=true; b.style.background='var(--bg)';
   var x=document.createElement('button'); x.className='del'; x.textContent='×';
   x.onclick=function(){div.remove();fabCalcTots();};
-  tog.onclick=function(){isFest=!isFest;tog.dataset.fest=isFest?'1':'0';tog.textContent=isFest?'Fest':'Std.';tog.style.background=isFest?'var(--hasi)':'var(--bg)';tog.style.color=isFest?'#fff':'var(--m)';s.placeholder=isFest?'€':'0';fabCalcTots();};
+  tog.onclick=function(){isFest=!isFest;tog.dataset.fest=isFest?'1':'0';tog.textContent=isFest?'€':'⏱';tog.style.background=isFest?'var(--hasi)':'var(--bg)';tog.style.color=isFest?'#fff':'var(--m)';s.placeholder=isFest?'€':'0';fabCalcTots();};
   div.appendChild(d); div.appendChild(tog); div.appendChild(s); div.appendChild(b); div.appendChild(x);
   document.getElementById('fab-taet-rows').appendChild(div);
 }
@@ -1912,9 +1920,16 @@ document.getElementById('fab-save').onclick=async function(){
   var net=parseFloat(document.getElementById('fab-tot-net').textContent.replace(/[^\d,]/g,'').replace(',','.'))||0;
   var btn=this; btn.disabled=true;
   try{
+    var fabKunde=document.getElementById('fab-kunde').value.trim();
+    var fabTel=document.getElementById('fab-tel').value.trim();
+    var fabAdr=document.getElementById('fab-adr').value.trim();
+    var fabNotiz=document.getElementById('fab-notiz').value.trim();
     var body={taetigkeiten:JSON.stringify(taet),material:JSON.stringify(mat),total_netto:net,stundensatz:SATZ};
     if(repId) body.reparatur_id=parseInt(repId);
-    if(!repId&&kundeOhneAuftrag) body.k_name=kundeOhneAuftrag;
+    if(!repId&&fabKunde) body.k_name=fabKunde;
+    if(fabTel) body.k_telefon=fabTel;
+    if(fabAdr) body.k_adresse=fabAdr;
+    if(fabNotiz) body.notizen=fabNotiz;
     var r=await fetch(W+'/api/arbeitsbericht',{method:'POST',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify(body)});
     var j=await r.json();
     if(j.ok||j.id){
@@ -1925,6 +1940,9 @@ document.getElementById('fab-save').onclick=async function(){
       document.getElementById('fab-mat-rows').innerHTML='';
       document.getElementById('fab-auftrag').value='';
       document.getElementById('fab-kunde').value='';
+      document.getElementById('fab-tel').value='';
+      document.getElementById('fab-adr').value='';
+      document.getElementById('fab-notiz').value='';
       document.getElementById('fab-kunde-wrap').style.display='';
       fabCalcTots();
       fabAbId=0;
