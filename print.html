@@ -3,43 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Reparaturauftrag — Drucken</title>
+<title>Reparaturauftrag</title>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700;800&display=swap" rel="stylesheet">
 <style>
-@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none}}
+@media print{
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact;margin:0;padding:0;background:white}
+  .no-print{display:none!important}
+  .page{box-shadow:none!important;margin:0!important;border-radius:0!important}
+  @page{size:A4 portrait;margin:0}
+}
 *{box-sizing:border-box}
-body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:16px;color:#1a1a2e;font-size:10pt;background:#dce8f5}
+body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:16px;background:#eef4fb;color:#1a1a2e;font-size:10pt}
 .no-print{position:fixed;bottom:20px;right:20px;display:flex;gap:10px;z-index:999}
 .no-print button{padding:12px 22px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
 .btn-print{background:#0090c4;color:#fff;box-shadow:0 4px 12px rgba(0,144,196,.4)}
-.btn-close{background:#fff;color:#333;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.loading{text-align:center;padding:80px;font-size:16px;color:#555;font-family:monospace}
-.page{width:210mm;margin:0 auto;background:white;box-shadow:0 4px 24px rgba(0,0,0,.2)}
-.hdr{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 24px 14px;border-bottom:4px solid #0090c4;background:linear-gradient(135deg,#f0f9ff,#fff)}
-.hdr img{height:52px}
-.hdr-left h2{font-family:Raleway,Arial,sans-serif;font-size:17pt;font-weight:800;color:#1a1a2e;letter-spacing:2px;text-transform:uppercase;margin:0}
-.tbox{text-align:right}
-.tbox h2{font-family:Raleway,Arial,sans-serif;font-size:17pt;font-weight:800;color:#1a1a2e;letter-spacing:2px;text-transform:uppercase;margin:0}
-.tnr{font-size:11pt;color:#0090c4;font-family:'Courier New',monospace;margin-top:4px;font-weight:700}
-.tdat{font-size:9pt;color:#555;margin-top:3px}
-.notice{background:#fff3cd;border-left:4px solid #e08c00;padding:9px 20px;font-size:9pt;color:#7a4800;font-weight:500}
-.body{padding:18px 24px}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:14px}
-.st{font-size:8pt;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#fff;background:#0090c4;padding:4px 8px;border-radius:4px;margin-bottom:9px;display:block}
-.box{background:#e8f5fc;border:2px solid #b3d9ee;border-radius:7px;padding:11px;font-size:9.5pt;line-height:1.75;color:#1a1a2e}
-.f{margin-bottom:8px}
-.f .l{font-size:7.5pt;color:#444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;font-weight:700}
-.f .v{font-size:10pt;font-weight:600;border-bottom:2px solid #0090c4;padding-bottom:3px;min-height:16px;color:#1a1a2e}
-.cbw{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
-.cbi{background:#0090c4;color:#fff;border-radius:4px;padding:2px 9px;font-size:9pt;font-weight:600}
-.stars{color:#e09000;font-size:14pt;letter-spacing:2px}
-.sig-area{margin-top:14px;border-top:2px dashed #999;padding-top:12px}
-.sig-row{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:8px}
-.sbox .line{border-bottom:2px solid #1a1a2e;height:42px;margin-bottom:5px}
-.sbox .lbl{font-size:8pt;color:#555;text-align:center;font-weight:600}
-.agb{background:#e8f5fc;border-left:4px solid #0090c4;padding:8px 12px;font-size:9pt;margin-top:10px;font-weight:500}
-.fbar{background:#0090c4;padding:9px 24px;font-size:8pt;color:#fff;display:flex;justify-content:space-between;font-weight:500}
-@media(max-width:600px){.cols{grid-template-columns:1fr}.page{width:100%}}
+.btn-close{background:#fff;color:#333;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.loading{text-align:center;padding:80px;font-size:16px;color:#555}
+/* PAGE */
+.page{width:210mm;margin:0 auto;background:white;box-shadow:0 4px 24px rgba(0,0,0,.15);border-radius:4px;overflow:hidden}
+/* HEADER */
+.vl-header{display:flex;justify-content:space-between;align-items:flex-start;padding:22px 28px 16px;border-bottom:2px solid #e0ecf5}
+.vl-logo{height:52px}
+.vl-title{text-align:right}
+.vl-title h2{font-family:Raleway,Arial,sans-serif;font-size:19px;font-weight:800;color:#1a1a2e;letter-spacing:2px;text-transform:uppercase;margin:0}
+.vl-title .nr{font-size:11px;color:#0090c4;font-family:'Courier New',monospace;margin-top:4px;font-weight:700}
+.vl-title .dat{font-size:12px;color:#666;margin-top:4px}
+/* NOTICE */
+.vl-notice{background:#fff3cd;border-left:4px solid #e08c00;padding:10px 28px;font-size:12px;color:#7a4800;font-weight:500}
+/* BODY */
+.vl-body{padding:22px 28px}
+.vl-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:18px}
+/* SECTION */
+.vl-sec-title{font-size:8pt;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#fff;background:#0090c4;padding:4px 9px;border-radius:4px;margin-bottom:10px;display:block}
+/* AUFTRAGNEHMER BOX */
+.vl-auftnehmer{background:#e8f5fc;border:1.5px solid #b3d9ee;border-radius:8px;padding:12px;font-size:9.5pt;line-height:1.8;color:#1a1a2e}
+/* FIELDS */
+.vl-field{margin-bottom:8px}
+.vl-field .lbl{font-size:7.5pt;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;font-weight:700}
+.vl-field .val{font-size:10pt;font-weight:600;border-bottom:2px solid #0090c4;padding-bottom:3px;min-height:16px;color:#1a1a2e}
+.vl-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* STARS */
+.stars{color:#e09000;font-size:14pt;letter-spacing:2px;margin-top:2px}
+/* CHECKBOXES */
+.cb-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.cb-item{background:#0090c4;color:#fff;border-radius:4px;padding:2px 9px;font-size:9pt;font-weight:600}
+/* SIGNATURE */
+.vl-sig{margin-top:16px;border-top:1.5px dashed #999;padding-top:14px}
+.vl-sig-row{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:8px}
+.vl-sig-box .line{border-bottom:2px solid #1a1a2e;height:44px;margin-bottom:5px}
+.vl-sig-box .lbl{font-size:8pt;color:#555;text-align:center;font-weight:600}
+/* AGB */
+.vl-agb{background:#e8f5fc;border-left:4px solid #0090c4;padding:8px 12px;font-size:9pt;margin-top:12px;font-weight:500}
+/* FOOTER */
+.vl-footer{background:#0090c4;padding:9px 28px;font-size:8pt;color:#fff;display:flex;justify-content:space-between;font-weight:500}
+@media(max-width:600px){.vl-cols{grid-template-columns:1fr}.page{width:100%}}
 </style>
 </head>
 <body>
@@ -52,101 +69,100 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:16px;color:#1a1a2e;
 <script>
 var W='https://hasi-reparatur.hguencavdi.workers.dev';
 var A='Bearer 71665';
+var LOGO_URL='https://tools.hasi-elektronic.de/logo.jpg';
 
-function fmtD(s){if(!s)return '\u2014';var p=s.slice(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
-function g(id){return document.getElementById(id);}
+function fmtD(s){if(!s)return '';var p=(s||'').slice(0,10).split('-');return p.length===3?p[2]+'.'+p[1]+'.'+p[0]:s;}
 
-function cb(t){return '<span class="cbi">'+t.trim()+'</span>';}
-function starH(n){var s='';for(var i=1;i<=5;i++)s+=(i<=n?'&#9733;':'&#9734;');return s;}
+function starH(n){var s='';for(var i=1;i<=5;i++)s+=(i<=(n||0)?'&#9733;':'&#9734;');return s;}
+
+function cb(t){return '<span class="cb-item">'+t.trim()+'</span>';}
 
 function render(r){
   var zub=r.zubehoer?r.zubehoer.split(',').filter(function(s){return s.trim();}):[]; 
   var feh=r.fehler?r.fehler.split(',').filter(function(s){return s.trim();}):[]; 
-  
-  // Logo base64
-  var logoSrc='https://tools.hasi-elektronic.de/logo.jpg';
+  var NR=r.nr||'';
 
-  var html=[
+  document.title='Reparaturauftrag '+NR;
+
+  document.getElementById('root').innerHTML=[
     '<div class="page">',
-    '<div class="hdr">',
-    '<div class="hdr-left"><h2>Reparaturauftrag</h2></div>',
-    '<img src="'+logoSrc+'" alt="Hasi Elektronic" onerror="this.style.display=\'none\'">',
-    '<div class="tbox">',
+    // HEADER
+    '<div class="vl-header">',
+    '<img class="vl-logo" src="'+LOGO_URL+'" alt="Hasi Elektronic" onerror="this.style.display=\'none\'">',
+    '<div class="vl-title">',
     '<h2>Reparaturauftrag</h2>',
-    '<div class="tnr">'+(r.nr||'')+'</div>',
-    '<div class="tdat">Datum: '+fmtD(r.datum)+'</div>',
+    '<div class="nr">'+NR+'</div>',
+    '<div class="dat">Datum: '+fmtD(r.datum)+'</div>',
     '</div></div>',
-    '<div class="notice">Bitte f\u00fcllen Sie das Formular leserlich aus. Die Rechnung wird auf den angegebenen Namen ausgestellt.</div>',
-    '<div class="body">',
-    '<div class="cols">',
+    // NOTICE
+    '<div class="vl-notice">Bitte f\u00fcllen Sie das Formular leserlich aus. Die Rechnung wird auf den angegebenen Namen ausgestellt und kann nachtr\u00e4glich nicht ge\u00e4ndert werden.</div>',
+    // BODY
+    '<div class="vl-body">',
+    '<div class="vl-cols">',
     // Auftragnehmer
     '<div>',
-    '<span class="st">Auftragnehmer</span>',
-    '<div class="box"><b>Hasi Elektronic</b><br>Gra\u00dfenstra\u00dfe 18 \u00b7 71665 Vaihingen/Enz<br>Tel: +49 7042 163914<br>info@hasi-elektronic.de<br>www.hasi-elektronic.de</div>',
+    '<span class="vl-sec-title">Auftragnehmer</span>',
+    '<div class="vl-auftnehmer"><b>Hasi Elektronic</b><br>Gra\u00dfenstra\u00dfe 18 \u00b7 71665 Vaihingen/Enz<br>Tel: +49 7042 163914<br>info@hasi-elektronic.de<br>www.hasi-elektronic.de</div>',
     '</div>',
     // Auftraggeber
     '<div>',
-    '<span class="st">Auftraggeber</span>',
-    '<div class="f"><div class="l">Name</div><div class="v">'+(r.k_name||'')+'</div></div>',
-    '<div class="f"><div class="l">Adresse</div><div class="v">'+(r.k_adresse||'')+'</div></div>',
-    '<div class="f"><div class="l">PLZ / Ort</div><div class="v">'+(r.k_plz_ort||'')+'</div></div>',
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">',
-    '<div class="f"><div class="l">Telefon</div><div class="v">'+(r.k_telefon||'')+'</div></div>',
-    '<div class="f"><div class="l">E-Mail</div><div class="v">'+(r.k_email||'')+'</div></div>',
+    '<span class="vl-sec-title">Auftraggeber</span>',
+    '<div class="vl-field"><div class="lbl">Name</div><div class="val">'+(r.k_name||'')+'</div></div>',
+    '<div class="vl-field"><div class="lbl">Adresse</div><div class="val">'+(r.k_adresse||'')+'</div></div>',
+    '<div class="vl-field"><div class="lbl">PLZ / Ort</div><div class="val">'+(r.k_plz_ort||'')+'</div></div>',
+    '<div class="vl-row2">',
+    '<div class="vl-field"><div class="lbl">Telefon</div><div class="val">'+(r.k_telefon||'')+'</div></div>',
+    '<div class="vl-field"><div class="lbl">E-Mail</div><div class="val">'+(r.k_email||'')+'</div></div>',
     '</div></div>',
     '</div>',
     // Gerät + Kostenlimit
-    '<div class="cols">',
+    '<div class="vl-cols">',
     '<div>',
-    '<span class="st">Ger\u00e4teinformation</span>',
-    '<div class="f"><div class="l">Ger\u00e4te-Typ</div><div class="v">'+(r.geraet_typ||'')+'</div></div>',
-    '<div class="f"><div class="l">Modell</div><div class="v">'+(r.modell||'')+'</div></div>',
-    r.win_passwort?'<div class="f"><div class="l" style="color:#d97706">Windows Passwort</div><div class="v">'+r.win_passwort+'</div></div>':'',
-    '<div class="f"><div class="l">Allg. Zustand</div><div class="stars">'+starH(r.zustand||0)+'</div></div>',
+    '<span class="vl-sec-title">Ger\u00e4teinformation</span>',
+    '<div class="vl-field"><div class="lbl">Ger\u00e4te-Typ</div><div class="val">'+(r.geraet_typ||'')+'</div></div>',
+    '<div class="vl-field"><div class="lbl">Modell</div><div class="val">'+(r.modell||'')+'</div></div>',
+    r.win_passwort?'<div class="vl-field"><div class="lbl" style="color:#d97706">Windows Passwort</div><div class="val" style="border-color:#d97706">'+r.win_passwort+'</div></div>':'',
+    '<div class="vl-field"><div class="lbl">Allg. Zustand</div><div class="stars">'+starH(r.zustand)+'</div></div>',
     '</div>',
     '<div>',
-    '<span class="st">Kostenlimit</span>',
-    '<div class="f"><div class="l">Maximaler Betrag</div><div class="v">'+(r.kostenlimit?r.kostenlimit+' \u20ac':'')+'</div></div>',
-    '<div style="font-size:8.5pt;color:#7F8C8D;margin-bottom:12px">Bis zu diesem Betrag ohne R\u00fcckfrage.</div>',
-    r.schaeden?'<span class="st">Sch\u00e4den</span><div class="f"><div class="l">Sichtbare Sch\u00e4den</div><div class="v">'+r.schaeden+'</div></div>':'',
+    '<span class="vl-sec-title">Kostenlimit</span>',
+    '<div class="vl-field"><div class="lbl">Maximaler Betrag</div><div class="val">'+(r.kostenlimit?r.kostenlimit+' \u20ac':'')+'</div></div>',
+    '<div style="font-size:8.5pt;color:#777;margin-bottom:12px">Bis zu diesem Betrag ohne R\u00fcckfrage.</div>',
+    r.schaeden?'<span class="vl-sec-title" style="display:inline-block;margin-top:8px">Sch\u00e4den</span><div class="vl-field"><div class="lbl">Sichtbare Sch\u00e4den</div><div class="val">'+r.schaeden+'</div></div>':'',
     '</div></div>',
     // Zubehör
-    zub.length?'<span class="st">Beigelegtes Zubeh\u00f6r</span><div class="cbw">'+zub.map(cb).join('')+'</div><br>':'',
-    // Fehler
-    feh.length?'<span class="st">Fehlerbeschreibung</span><div class="cbw">'+feh.map(cb).join('')+'</div><br>':'',
+    zub.length?'<div style="margin-bottom:12px"><span class="vl-sec-title" style="display:inline-block;margin-bottom:8px">Beigelegtes Zubeh\u00f6r</span><div class="cb-list">'+zub.map(cb).join('')+'</div></div>':'',
+    // Fehlerbeschreibung
+    feh.length?'<div style="margin-bottom:12px"><span class="vl-sec-title" style="display:inline-block;margin-bottom:8px">Fehlerbeschreibung</span><div class="cb-list">'+feh.map(cb).join('')+'</div></div>':'',
     // AGB
-    '<div class="agb">&#9745; Ich akzeptiere die <b>AGB der Hasi Elektronic</b> \u2014 www.hasi-elektronic.de</div>',
+    '<div class="vl-agb">&#9745; Ich akzeptiere die <b>AGB der Hasi Elektronic</b> \u2014 www.hasi-elektronic.de</div>',
     // Unterschrift
-    '<div class="sig-area">',
+    '<div class="vl-sig">',
     '<div style="font-size:9pt;font-weight:700;margin-bottom:8px">Best\u00e4tigung der Ger\u00e4te\u00fcbergabe</div>',
-    '<div class="sig-row">',
-    '<div class="sbox"><div class="line"></div><div class="lbl">Ort, Datum</div></div>',
-    '<div class="sbox"><div class="line"></div><div class="lbl">Unterschrift Auftraggeber</div></div>',
+    '<div class="vl-sig-row">',
+    '<div class="vl-sig-box"><div class="line"></div><div class="lbl">Ort, Datum</div></div>',
+    '<div class="vl-sig-box"><div class="line"></div><div class="lbl">Unterschrift Auftraggeber</div></div>',
     '</div></div>',
     '</div>',
-    '<div class="fbar">',
+    // FOOTER
+    '<div class="vl-footer">',
     '<span>Hasi Elektronic \u00b7 Gra\u00dfenstra\u00dfe 18 \u00b7 71665 Vaihingen/Enz \u00b7 +49 7042 163914 \u00b7 info@hasi-elektronic.de</span>',
-    '<span>'+(r.nr||'')+'</span>',
-    '</div></div>'
-  ];
-  document.getElementById('root').innerHTML=html.join('');
-  document.title='Auftrag '+(r.nr||'');
+    '<span>'+NR+'</span>',
+    '</div>',
+    '</div>'
+  ].join('');
 }
 
-// URL'den id al
 var params=new URLSearchParams(window.location.search);
 var id=params.get('id');
-var data=params.get('data');
 
-if(data){
-  // Direkt veri geçilmişse (form'dan)
-  try{render(JSON.parse(decodeURIComponent(data)));}
-  catch(e){document.getElementById('root').innerHTML='<div class="loading" style="color:red">Fehler: '+e.message+'</div>';}
-} else if(id){
-  // ID ile Worker'dan yükle
+if(id){
   fetch(W+'/api/reparatur/'+id,{headers:{Authorization:A}})
     .then(function(r){return r.json();})
-    .then(function(r){render(r);})
+    .then(function(r){
+      if(r.error) document.getElementById('root').innerHTML='<div class="loading" style="color:red">'+r.error+'</div>';
+      else render(r);
+    })
     .catch(function(e){document.getElementById('root').innerHTML='<div class="loading" style="color:red">Fehler: '+e.message+'</div>';});
 } else {
   document.getElementById('root').innerHTML='<div class="loading" style="color:red">Kein Auftrag angegeben.</div>';
