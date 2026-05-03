@@ -1311,19 +1311,22 @@ document.getElementById('f-print').onclick=function(){
   if(!style){
     style=document.createElement('style');
     style.id='vl-print-style';
-    style.textContent='@media print{'
+    style.textContent='@page{size:A4 portrait;margin:8mm}'
+      +'@media print{'
       +'.pg{display:none!important}'
       +'#pg-form{display:block!important}'
       +'.vl-actions{display:none!important}'
+      +'#ftab-ab-content{display:none!important}'
       +'.ni{display:none!important}'
       +'nav{display:none!important}'
       +'#notif-bar{display:none!important}'
       +'#pdf-modal{display:none!important}'
       +'#del-modal{display:none!important}'
       +'#kunden-modal{display:none!important}'
-      +'.vl{box-shadow:none!important;border:none!important}'
-      +'body{background:white!important}'
-      +'.wrap{padding:0!important}'
+      +'.vl{box-shadow:none!important;border:none!important;transform-origin:top left}'
+      +'body{background:white!important;margin:0!important;padding:0!important}'
+      +'.wrap{padding:0!important;max-width:100%!important}'
+      +'#pg-form{transform:scale(0.72);transform-origin:top left;width:139%}'
       +'}';
     document.head.appendChild(style);
   }
