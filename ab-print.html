@@ -91,7 +91,7 @@ function render(rep,ab,type){
   var taet=safeParse(ab.taetigkeiten);
   var mat=safeParse(ab.material);
   var isRec=type==='rechnung';
-  var arb=taet.reduce(function(s,t){return s+(parseFloat(t.std)||0)*SATZ;},0);
+  var arb=taet.reduce(function(s,t){var isFest=t.festpreis||false;var val=parseFloat(t.std)||0;return s+(isFest?val:val*SATZ);},0);
   var matT=mat.reduce(function(s,m){return s+(parseFloat(m.preis)||0);},0);
   var net=arb+matT,mwst=net*0.19,bru=net+mwst;
   var nr=ab.ab_nr||(isRec?'RE':'AB')+'-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
@@ -99,8 +99,11 @@ function render(rep,ab,type){
   document.title=(isRec?'Rechnung ':'Arbeitsbericht ')+nr;
 
   var taetRows=taet.map(function(t){
-    var bet=(parseFloat(t.std)||0)*SATZ;
-    return '<tr><td>'+(t.desc||t.beschreibung||'')+'</td><td class="r">'+fmtStd(parseFloat(t.std)||0)+'</td><td class="r">'+fmt(bet)+'</td></tr>';
+    var isFest=t.festpreis||false;
+    var val=parseFloat(t.std)||0;
+    var bet=isFest?val:val*SATZ;
+    var stdCol=isFest?'Festpreis':fmtStd(val);
+    return '<tr><td>'+(t.desc||t.beschreibung||'')+'</td><td class="r">'+stdCol+'</td><td class="r">'+fmt(bet)+'</td></tr>';
   }).join('');
 
   var matRows=mat.length
