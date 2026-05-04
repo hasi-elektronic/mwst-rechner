@@ -9,11 +9,12 @@
 @media print{
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact;margin:0;padding:0;background:white}
   .no-print{display:none!important}
-  .page{box-shadow:none!important;margin:0!important;border-radius:0!important}
   @page{size:A4 portrait;margin:0}
+  .page{box-shadow:none!important;margin:0!important;border-radius:0!important;transform:scale(0.78);transform-origin:top left;width:128%;max-height:297mm;overflow:hidden;page-break-after:avoid}
+  * {page-break-inside:avoid}
 }
 *{box-sizing:border-box}
-body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:16px;background:#eef4fb;color:#1a1a2e;font-size:10pt}
+body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:8px;background:#eef4fb;color:#1a1a2e;font-size:9.5pt}
 .no-print{position:fixed;bottom:20px;right:20px;display:flex;gap:10px;z-index:999}
 .no-print button{padding:12px 22px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
 .btn-print{background:#0090c4;color:#fff;box-shadow:0 4px 12px rgba(0,144,196,.4)}
@@ -22,7 +23,7 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:16px;background:#ee
 /* PAGE */
 .page{width:210mm;margin:0 auto;background:white;box-shadow:0 4px 24px rgba(0,0,0,.15);border-radius:4px;overflow:hidden}
 /* HEADER */
-.vl-header{display:flex;justify-content:space-between;align-items:flex-start;padding:22px 28px 16px;border-bottom:2px solid #e0ecf5}
+.vl-header{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 22px 12px;border-bottom:2px solid #e0ecf5}
 .vl-logo{height:52px}
 .vl-title{text-align:right}
 .vl-title h2{font-family:Raleway,Arial,sans-serif;font-size:19px;font-weight:800;color:#1a1a2e;letter-spacing:2px;text-transform:uppercase;margin:0}
@@ -31,8 +32,8 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:16px;background:#ee
 /* NOTICE */
 .vl-notice{background:#fff3cd;border-left:4px solid #e08c00;padding:10px 28px;font-size:12px;color:#7a4800;font-weight:500}
 /* BODY */
-.vl-body{padding:22px 28px}
-.vl-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:18px}
+.vl-body{padding:14px 22px}
+.vl-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}
 /* SECTION */
 .vl-sec-title{font-size:8pt;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#fff;background:#0090c4;padding:4px 9px;border-radius:4px;margin-bottom:10px;display:block}
 /* AUFTRAGNEHMER BOX */
