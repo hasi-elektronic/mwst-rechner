@@ -96,7 +96,7 @@ tbody tr:last-child td{border-bottom:none}
 .tr.big span:last-child{color:var(--hasi)}
 .btnrow{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
 /* KALENDER */
-.kal-day{min-height:80px;border-right:1px solid var(--b);border-bottom:1px solid var(--b);padding:4px;cursor:pointer;transition:background .15s}
+.kal-day{min-height:110px;border-right:1px solid var(--b);border-bottom:1px solid var(--b);padding:4px;cursor:pointer;transition:background .15s}
 .kal-day:hover{background:var(--hasi-soft)}
 .kal-day.today{background:rgba(51,175,226,.08)}
 .kal-day.other{opacity:.35}
@@ -654,7 +654,7 @@ tbody tr:last-child td{border-bottom:none}
 
 <!-- KALENDER -->
 <div id="pg-kal" class="pg">
-  <div class="wrap">
+  <div class="wrap" style="max-width:100%">
     <div class="topbar">
       <h1>Kalender <span>Ansicht</span></h1>
       <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
