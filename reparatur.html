@@ -741,7 +741,21 @@ async function loadDash(){
     document.getElementById('k-off').textContent=d.kpi.offen||0;
     document.getElementById('k-don').textContent=d.kpi.abgeschlossen||0;
     if(chM){chM.destroy();}
-    chM=new Chart(document.getElementById('ch-m').getContext('2d'),{type:'bar',data:{labels:d.monthly.map(function(m){return m.monat;}),datasets:[{data:d.monthly.map(function(m){return m.auftraege||0;}),backgroundColor:'rgba(51,175,226,0.7)',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+    var allMonths=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    var monthMap={};
+    (d.monthly||[]).forEach(function(m){var mo=parseInt((m.monat||'').split('-')[1]||0);if(mo>=1&&mo<=12)monthMap[mo]=m.auftraege||0;});
+    var monthData=allMonths.map(function(l,i){return monthMap[i+1]||0;});
+    chM=new Chart(document.getElementById('ch-m').getContext('2d'),{
+      type:'bar',
+      data:{labels:allMonths,datasets:[{data:monthData,backgroundColor:'rgba(51,175,226,0.7)',borderRadius:4,borderSkipped:false,barPercentage:0.5,categoryPercentage:0.6}]},
+      options:{
+        plugins:{legend:{display:false}},
+        scales:{
+          y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'rgba(0,0,0,.04)'}},
+          x:{grid:{display:false},ticks:{font:{size:10}}}
+        }
+      }
+    });
     if(chS){chS.destroy();}
     var gColors2=['#33afe2','#0d9f6e','#f59e0b','#a78bfa','#f87171','#60a5fa','#34d399'];
     var gD2=d.geraete||[];
