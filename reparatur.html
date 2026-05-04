@@ -496,7 +496,7 @@ tbody tr:last-child td{border-bottom:none}
 
     <!-- HEADER BAR -->
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
-      <button class="btn" onclick="cur=null;showPg('pg-list')" style="flex-shrink:0;gap:6px">&#x2190; Zur&uuml;ck</button>
+      <button class="btn" onclick="cur=null;showPg(_prevPg||'pg-list')" style="flex-shrink:0;gap:6px">&#x2190; Zur&uuml;ck</button>
       <div style="flex:1;min-width:0">
         <div id="fa-nr" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--hasi);letter-spacing:.5px"></div>
         <div id="fa-name" style="font-size:22px;font-weight:800;color:var(--t);letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
@@ -956,6 +956,7 @@ document.querySelectorAll('.fbtn[data-f]').forEach(function(b){
 
 // DETAIL
 function openDet(id){
+  _prevPg=document.querySelector('.pg.on')?document.querySelector('.pg.on').id:'pg-list';
   cur=reps.find(function(r){return r.id===id;});
   if(!cur){
     loadList().then(function(){
@@ -1229,6 +1230,7 @@ function renderTimeline(abs){
 
 // ==================== FALL-AKTE ====================
 var faAbId=0;
+var _prevPg="pg-list";
 var faCurAb=null;
 
 function openDet(id){
