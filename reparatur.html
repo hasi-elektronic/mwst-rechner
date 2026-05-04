@@ -2221,13 +2221,10 @@ function safeEl(id){return document.getElementById(id)||{onclick:null,oninput:nu
   }
   // Sayfa hazır olunca başlat
   window.addEventListener('load', function(){
-    // pg-form açıldığında tekrar init
-    var orig = window.showPg || function(){};
-    window.showPg = function(pg){
-      orig(pg);
-      if(pg==='pg-form') setTimeout(init, 100);
-    };
     init();
+    // Neuer Auftrag butonuna tıklayınca tekrar init
+    var btn = document.querySelector('[data-pg="pg-form"], .ni-btn');
+    if(btn) btn.addEventListener('click', function(){ setTimeout(init, 200); });
   });
 })();
 // END AUTOCOMPLETE
