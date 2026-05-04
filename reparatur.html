@@ -352,7 +352,7 @@ tbody tr:last-child td{border-bottom:none}
           </div>
           <div class="vl-sec">
             <div class="vl-sec-title">Auftraggeber</div>
-            <span class="vl-lbl">Name *</span><input class="vl-inp" id="f-name" placeholder="Vor- und Nachname">
+            <span class="vl-lbl">Name *</span><div style="position:relative"><input class="vl-inp" id="f-name" placeholder="Vor- und Nachname" autocomplete="off"><div id="f-name-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--hasi);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:200px;overflow-y:auto;margin-top:2px"></div></div>
             <span class="vl-lbl">Adresse</span><input class="vl-inp" id="f-adr" placeholder="Stra&szlig;e und Hausnummer">
             <span class="vl-lbl">PLZ / Ort</span><input class="vl-inp" id="f-plz" placeholder="71665 Vaihingen/Enz">
             <div class="vl-row2">
@@ -2274,6 +2274,44 @@ window.addEventListener('load',function(){
   setInterval(function(){
     var active=document.querySelector('.pg.on');
     if(active&&active.id==='pg-dash') loadDash();
+
+  // AUTOCOMPLETE
+  var acInp=document.getElementById('f-name');
+  var acDd=document.getElementById('f-name-dd');
+  if(acInp&&acDd){
+    acInp.addEventListener('input',function(){
+      var q=this.value.trim().toLowerCase();
+      acDd.style.display='none';
+      if(q.length<2||!reps.length) return;
+      var seen={},matches=[];
+      reps.forEach(function(r){
+        if(!r.k_name) return;
+        if(r.k_name.toLowerCase().indexOf(q)>=0&&!seen[r.k_name]){seen[r.k_name]=true;matches.push(r);}
+      });
+      if(!matches.length) return;
+      acDd.innerHTML=matches.slice(0,6).map(function(r){
+        return '<div class="ac-i" data-n="'+(r.k_name||'')+'" data-t="'+(r.k_telefon||'')+'" data-e="'+(r.k_email||'')+'" data-a="'+(r.k_adresse||'')+'" data-p="'+(r.k_plz_ort||'')+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--b)">'
+          +'<div style="font-size:13px;font-weight:600">'+(r.k_name||'')+'</div>'
+          +'<div style="font-size:11px;color:var(--m)">'+(r.k_telefon||'')+(r.geraet_typ?' &middot; '+r.geraet_typ:'')+'</div>'
+          +'</div>';
+      }).join('');
+      acDd.style.display='block';
+    });
+    acDd.addEventListener('click',function(e){
+      var i=e.target.closest('.ac-i');
+      if(!i) return;
+      acInp.value=i.dataset.n;
+      var t=document.getElementById('f-telefon'),em=document.getElementById('f-email'),ad=document.getElementById('f-adresse'),pl=document.getElementById('f-plz');
+      if(t) t.value=i.dataset.t;
+      if(em) em.value=i.dataset.e;
+      if(ad) ad.value=i.dataset.a;
+      if(pl) pl.value=i.dataset.p;
+      acDd.style.display='none';
+    });
+    acDd.addEventListener('mouseover',function(e){var x=e.target.closest('.ac-i');if(x)x.style.background='var(--hasi-soft)';});
+    acDd.addEventListener('mouseout',function(e){var x=e.target.closest('.ac-i');if(x)x.style.background='';});
+    document.addEventListener('click',function(e){if(acDd&&!e.target.closest('#f-name')&&!e.target.closest('#f-name-dd'))acDd.style.display='none';});
+  }
   }, 30000);
 });
 </script>
