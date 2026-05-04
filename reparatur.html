@@ -779,7 +779,7 @@ function renderOffeneAuftraege(){
   var SC={'Neu':'#33afe2','In Bearbeitung':'#0d9f6e','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa'};
   listEl.innerHTML=offene.map(function(r){
     var col=SC[r.status]||'#33afe2';
-    return '<div class="row" style="grid-template-columns:160px 1fr 180px 110px;cursor:pointer" onclick="openDet('+r.id+')">'
+    return '<div class="row" style="grid-template-columns:160px 1fr 180px 110px;cursor:pointer" onclick="openDet('+r.id+',\'pg-dash\')">'
       +'<div class="nr">'+r.nr+'</div>'
       +'<div class="nm">'+(r.k_name||'')
         +'<span class="sub">'+(r.geraet_typ||'')+(r.modell?' &middot; '+r.modell:'')
@@ -955,8 +955,8 @@ document.querySelectorAll('.fbtn[data-f]').forEach(function(b){
 });
 
 // DETAIL
-function openDet(id){
-  _prevPg=document.querySelector('.pg.on')?document.querySelector('.pg.on').id:'pg-list';
+function openDet(id,fromPg){
+  _prevPg=fromPg||(document.querySelector('.pg.on')?document.querySelector('.pg.on').id:'pg-list');
   cur=reps.find(function(r){return r.id===id;});
   if(!cur){
     loadList().then(function(){
