@@ -101,6 +101,13 @@ tbody tr:last-child td{border-bottom:none}
 .kal-day.today{background:rgba(51,175,226,.08)}
 .kal-day.other{opacity:.35}
 .kal-day.sel{background:var(--hasi-soft);outline:2px solid var(--hasi)}
+.kpi-card{background:#fff;border:1.5px solid var(--b);border-radius:14px;padding:16px 18px;transition:all .2s;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kc)}
+.kpi-card:hover{border-color:var(--kc);box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px)}
+.kpi-icon{font-size:22px;margin-bottom:6px}
+.kpi-val{font-size:28px;font-weight:800;color:var(--kc);line-height:1;margin-bottom:4px;font-family:'DM Mono',monospace}
+.kpi-lbl{font-size:11px;font-weight:700;color:var(--t);text-transform:uppercase;letter-spacing:.5px}
+.kpi-sub{font-size:11px;color:var(--m);margin-top:2px}
 .ber-row{display:grid;grid-template-columns:150px 1fr 100px 120px 130px;gap:12px;align-items:center;padding:12px 16px;border-bottom:1.5px solid var(--b);cursor:pointer}
 .ber-row:hover{background:var(--hasi-soft)}
 .ber-row:last-child{border-bottom:none}
@@ -238,55 +245,34 @@ tbody tr:last-child td{border-bottom:none}
 <!-- DASHBOARD -->
 <div id="pg-dash" class="pg on">
   <div class="wrap">
-    <div class="topbar">
-      <h1>Hasi <span>Dashboard</span></h1>
-      <button class="btn" onclick="loadDash()" style="margin-left:auto">&#x21BB; Aktualisieren</button>
-    </div>
+    <div class="topbar"><h1>Dashboard</h1><button class="btn" onclick="loadDash()" style="margin-left:auto">&#x21BB;</button></div>
     <div id="dash-loading" style="text-align:center;padding:60px;color:var(--m);font-family:'DM Mono',monospace;font-size:13px">Lade...</div>
     <div id="dash-content" style="display:none">
-      <!-- OFFENE RECHNUNGEN -->
-      <div id="offen-rek-wrap" style="margin-bottom:24px;display:none">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-          <div style="font-size:18px;font-weight:700">&#x1F4B8; Offene Rechnungen</div>
-          <div id="offen-rek-count" style="background:var(--red);color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div>
-        </div>
-        <div id="offen-rek-list" class="lw"></div>
-      </div>
-      <!-- GARANTİ UYARISI -->
-      <div id="garantie-wrap" style="margin-bottom:24px;display:none">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-          <div style="font-size:18px;font-weight:700">&#x1F6E1; Garantie-Ablauf</div>
-          <div id="garantie-count" style="background:var(--amber);color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div>
-        </div>
-        <div id="garantie-list" class="lw"></div>
-      </div>
-      <!-- JASMIN & SABINE BÖLÜMÜ -->
-      <div id="abholbereit-wrap" style="margin-bottom:24px;display:none">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-          <div style="font-size:18px;font-weight:700">&#x1F4CB; Abholbereit</div>
-          <div id="abholbereit-count" style="background:var(--red);color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div>
-          <div style="font-size:12px;color:var(--m);margin-left:4px">Fertig &amp; Arbeitsbericht vorhanden &mdash; bitte abholen lassen</div>
-        </div>
+      <div id="abholbereit-wrap" style="margin-bottom:20px;display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="font-size:15px;font-weight:700">&#x1F3E0; Abholbereit</div><div id="abholbereit-count" style="background:var(--green);color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div></div>
         <div id="abholbereit-list" class="lw"></div>
       </div>
-      <div class="kpi-grid">
-        <div class="kpi" style="--kc:#33afe2"><div>&#x1F4CB;</div><div class="v" id="k-ges">0</div><div class="l">Gesamt</div></div>
-        <div class="kpi" style="--kc:#0d9f6e"><div>&#x1F4B6;</div><div class="v" id="k-ums">0</div><div class="l">Umsatz Netto</div></div>
-        <div class="kpi" style="--kc:#d97706;cursor:pointer" onclick="flt='Neu';showPg('pg-list');renderList()"><div>&#x1F527;</div><div class="v" id="k-off">0</div><div class="l">Offen &#x2192;</div></div>
-        <div class="kpi" style="--kc:#7c3aed;cursor:pointer" onclick="flt='Fertig';showPg('pg-list');renderList()"><div>&#x2705;</div><div class="v" id="k-don">0</div><div class="l">Abgeschlossen &#x2192;</div></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+        <div class="kpi-card" style="--kc:var(--hasi);cursor:pointer" onclick="showPg('pg-list');flt='';renderList()"><div class="kpi-icon">&#x1F4CB;</div><div class="kpi-val" id="k-ges">0</div><div class="kpi-lbl">Gesamt</div><div class="kpi-sub" id="k-heute">0 heute</div></div>
+        <div class="kpi-card" style="--kc:#d97706;cursor:pointer" onclick="showPg('pg-list');flt='Neu';renderList()"><div class="kpi-icon">&#x1F4E5;</div><div class="kpi-val" id="k-off">0</div><div class="kpi-lbl">Offen</div><div class="kpi-sub">Neu &amp; In Bearb.</div></div>
+        <div class="kpi-card" style="--kc:var(--green);cursor:pointer" onclick="showPg('pg-list');flt='Fertig';renderList()"><div class="kpi-icon">&#x2705;</div><div class="kpi-val" id="k-don">0</div><div class="kpi-lbl">Fertig</div><div class="kpi-sub">Abholbereit &#x2192;</div></div>
+        <div class="kpi-card" style="--kc:var(--hasi)"><div class="kpi-icon">&#x1F4B0;</div><div class="kpi-val" id="k-ums" style="font-size:16px">0</div><div class="kpi-lbl">Umsatz netto</div><div class="kpi-sub" id="k-offen-rek">0 offen</div></div>
       </div>
-      <div class="charts-row">
-        <div class="card"><div class="ct">Monatliche Auftr&auml;ge</div><canvas id="ch-m" height="200"></canvas></div>
-        <div class="card"><div class="ct">Status</div><canvas id="ch-s" height="160"></canvas><div id="ch-leg" style="margin-top:8px"></div></div>
+      <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="card" style="padding:18px"><div class="ct">Monatliche Auftr&auml;ge</div><canvas id="ch-m" height="160"></canvas></div>
+        <div class="card" style="padding:18px"><div class="ct">Ger&auml;te-Typen</div><div id="geraet-bars" style="margin-top:10px"></div></div>
       </div>
-      <div class="card"><div class="ct">Ger&auml;tetypen</div><div id="geraete-bars" class="bar-list"></div></div>
-      <div class="card" style="padding:0;overflow:hidden">
-        <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1.5px solid var(--b)">
-          <b>Auftragsverlauf</b>
-          <input class="inp" id="dash-q" placeholder="&#x1F50D; Suche..." style="max-width:280px;padding:7px 11px;font-size:13px">
-        </div>
-        <table><thead><tr><th>Nr.</th><th>Datum</th><th>Kunde</th><th>Ger&auml;t</th><th>Status</th><th class="r">Netto</th></tr></thead>
-        <tbody id="dash-tbody"></tbody></table>
+      <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:14px;margin-bottom:14px">
+        <div class="card" style="padding:18px"><div class="ct">Status</div><div style="display:flex;align-items:center;gap:16px;margin-top:8px"><canvas id="ch-s" width="110" height="110" style="flex-shrink:0"></canvas><div id="status-legend" style="font-size:12px;line-height:2.4;flex:1"></div></div></div>
+        <div class="card" style="padding:18px"><div class="ct">Letzte Aktivit&auml;t</div><div id="letzte-list" style="margin-top:4px"></div></div>
+      </div>
+      <div id="offen-rek-wrap" style="margin-bottom:14px;display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="font-size:15px;font-weight:700">&#x1F4B8; Offene Rechnungen</div><div id="offen-rek-count" style="background:var(--red);color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div></div>
+        <div id="offen-rek-list" class="lw"></div>
+      </div>
+      <div id="garantie-wrap" style="margin-bottom:14px;display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="font-size:15px;font-weight:700">&#x1F6E1; Garantie-Ablauf</div><div id="garantie-count" style="background:var(--amber);color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div></div>
+        <div id="garantie-list" class="lw"></div>
       </div>
     </div>
   </div>
@@ -725,33 +711,32 @@ async function loadDash(){
   document.getElementById('dash-loading').style.display='block';
   document.getElementById('dash-content').style.display='none';
   try{
-    var r=await fetch(W+'/api/dashboard',{headers:{Authorization:A}});
-    var d=await r.json();
-    allDash=d;
-    document.getElementById('k-ges').textContent=d.kpi.gesamt_auftraege||0;
-    document.getElementById('k-ums').textContent=fmt(d.kpi.gesamt_umsatz_netto);
-    document.getElementById('k-off').textContent=d.kpi.offen||0;
-    document.getElementById('k-don').textContent=d.kpi.abgeschlossen||0;
-    if(chM){chM.destroy();}
-    chM=new Chart(document.getElementById('ch-m').getContext('2d'),{type:'bar',data:{labels:d.monthly.map(function(m){return m.monat;}),datasets:[{data:d.monthly.map(function(m){return m.auftraege||0;}),backgroundColor:'rgba(51,175,226,0.7)',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
-    if(chS){chS.destroy();}
-    var sc=['#33afe2','#60a5fa','#fb923c','#a78bfa','#34d399','#6b7585','#f87171'];
-    chS=new Chart(document.getElementById('ch-s').getContext('2d'),{type:'doughnut',data:{labels:d.status.map(function(s){return s.status;}),datasets:[{data:d.status.map(function(s){return s.anzahl;}),backgroundColor:sc}]},options:{plugins:{legend:{display:false}},cutout:'65%'}});
-    document.getElementById('ch-leg').innerHTML=d.status.map(function(s,i){return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:4px"><div style="width:10px;height:10px;border-radius:50%;background:'+sc[i]+';flex-shrink:0"></div>'+s.status+'<span style="margin-left:auto;font-family:DM Mono,monospace;font-size:11px;color:var(--m)">'+s.anzahl+'</span></div>';}).join('');
-    var mx=d.geraete[0]?d.geraete[0].anzahl:1;
-    document.getElementById('geraete-bars').innerHTML=d.geraete.map(function(g){return '<div class="bar-item"><div class="bar-lbl">'+g.geraet_typ+'</div><div class="bar-track"><div class="bar-fill" style="width:'+(g.anzahl/mx*100)+'%"></div></div><div class="bar-num">'+g.anzahl+'</div></div>';}).join('');
-    renderDashTbl(d.history,'');
-    // Abholbereit listesi — fertig + AB var
+    var resp=await fetch(W+'/api/dashboard',{headers:{Authorization:A}});
+    var d=await resp.json();
+    var heute=new Date().toISOString().slice(0,10);
+    var heuteN=reps.filter(function(x){return x.datum===heute;}).length;
+    document.getElementById('k-ges').textContent=d.gesamt_auftraege||0;
+    document.getElementById('k-heute').textContent=heuteN+' heute';
+    document.getElementById('k-off').textContent=d.offen||0;
+    document.getElementById('k-don').textContent=d.abgeschlossen||0;
+    document.getElementById('k-ums').textContent=fmt(d.umsatz_netto||0);
+    if(chM)chM.destroy();
+    chM=new Chart(document.getElementById('ch-m').getContext('2d'),{type:'bar',data:{labels:(d.monthly||[]).map(function(m){return m.monat;}),datasets:[{data:(d.monthly||[]).map(function(m){return m.auftraege||0;}),backgroundColor:'rgba(51,175,226,0.75)',borderRadius:6,borderSkipped:false}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false}}}}});
+    if(chS)chS.destroy();
+    var SC={'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'};
+    var sD=d.status_verteilung||[];
+    chS=new Chart(document.getElementById('ch-s').getContext('2d'),{type:'doughnut',data:{labels:sD.map(function(s){return s.status;}),datasets:[{data:sD.map(function(s){return s.anzahl;}),backgroundColor:sD.map(function(s){return SC[s.status]||'#ccc';}),borderWidth:2,borderColor:'#fff'}]},options:{plugins:{legend:{display:false}},cutout:'65%'}});
+    document.getElementById('status-legend').innerHTML=sD.map(function(s){return '<div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:'+(SC[s.status]||'#ccc')+';flex-shrink:0;display:inline-block"></span><span>'+s.status+'</span><span style="margin-left:auto;font-weight:700;font-family:DM Mono,monospace">'+s.anzahl+'</span></div>';}).join('');
+    var gD=d.geraet_typen||[];
+    var gMax=gD.length?Math.max.apply(null,gD.map(function(g){return g.anzahl;})):1;
+    document.getElementById('geraet-bars').innerHTML=gD.slice(0,6).map(function(g){var pct=Math.round((g.anzahl/gMax)*100);return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px"><span>'+(g.geraet_typ||'Sonstiges')+'</span><span style="font-weight:700;font-family:DM Mono,monospace;color:var(--hasi)">'+g.anzahl+'</span></div><div style="height:7px;background:var(--b);border-radius:100px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#33afe2,#5bc8f0);border-radius:100px;width:'+pct+'%"></div></div></div>';}).join('');
+    document.getElementById('letzte-list').innerHTML=reps.slice(0,5).map(function(r){var col=SC[r.status||'Neu']||'#33afe2';return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--b);cursor:pointer" onclick="openDet('+r.id+')"><div style="width:8px;height:8px;border-radius:50%;background:'+col+';flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r.k_name||'')+'</div><div style="font-size:11px;color:var(--m)">'+(r.geraet_typ||'')+'</div></div><div style="text-align:right"><div style="font-size:10px;color:var(--m);font-family:DM Mono,monospace">'+fmtD(r.datum)+'</div><div style="font-size:10px;font-weight:600;color:'+col+'">'+r.status+'</div></div></div>';}).join('');
     renderAbholbereit();
-    // Offene Rechnungen
     renderOffeneRechnungen();
-    // Garantie
     renderGarantie();
     document.getElementById('dash-loading').style.display='none';
     document.getElementById('dash-content').style.display='block';
-  }catch(e){
-    document.getElementById('dash-loading').innerHTML='<div style="color:red">Fehler: '+e.message+'</div>';
-  }
+  }catch(e){document.getElementById('dash-loading').innerHTML='<div style="color:red">Fehler: '+e.message+'</div>';}
 }
 
 var mitAB=[];
