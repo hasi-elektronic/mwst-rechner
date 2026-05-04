@@ -352,7 +352,10 @@ tbody tr:last-child td{border-bottom:none}
           </div>
           <div class="vl-sec">
             <div class="vl-sec-title">Auftraggeber</div>
-            <span class="vl-lbl">Name *</span><input class="vl-inp" id="f-name" placeholder="Vor- und Nachname">
+            <span class="vl-lbl">Name *</span><div style="position:relative">
+  <input class="vl-inp" id="f-name" placeholder="Vor- und Nachname" autocomplete="off">
+  <div id="f-name-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--hasi);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:200px;overflow-y:auto;margin-top:2px"></div>
+</div>
             <span class="vl-lbl">Adresse</span><input class="vl-inp" id="f-adr" placeholder="Stra&szlig;e und Hausnummer">
             <span class="vl-lbl">PLZ / Ort</span><input class="vl-inp" id="f-plz" placeholder="71665 Vaihingen/Enz">
             <div class="vl-row2">
@@ -2163,6 +2166,71 @@ async function renderDashBerichte(){}
 
 // Safe element access — eski referanslar için null guard
 function safeEl(id){return document.getElementById(id)||{onclick:null,oninput:null,onchange:null,style:{},value:'',textContent:'',innerHTML:''};}
+
+
+// AUTOCOMPLETE
+(function(){
+  var dd, inp;
+  function init(){
+    inp = document.getElementById('f-name');
+    dd  = document.getElementById('f-name-dd');
+    if(!inp||!dd) return;
+    inp.addEventListener('input', function(){
+      var q=this.value.trim().toLowerCase();
+      dd.style.display='none';
+      if(q.length<2) return;
+      var seen={}, matches=[];
+      reps.forEach(function(r){
+        if(!r.k_name) return;
+        if(r.k_name.toLowerCase().indexOf(q)>=0 && !seen[r.k_name]){
+          seen[r.k_name]=true; matches.push(r);
+        }
+      });
+      if(!matches.length) return;
+      dd.innerHTML=matches.slice(0,6).map(function(r){
+        return '<div class="ac-item"'
+          +' data-name="'+(r.k_name||'')+'"'
+          +' data-tel="'+(r.k_telefon||'')+'"'
+          +' data-email="'+(r.k_email||'')+'"'
+          +' data-adr="'+(r.k_adresse||'')+'"'
+          +' data-plz="'+(r.k_plz_ort||'')+'"'
+          +' style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--b)">'
+          +'<div style="font-size:13px;font-weight:600">'+(r.k_name||'')+'</div>'
+          +'<div style="font-size:11px;color:var(--m)">'+(r.k_telefon||'')+(r.geraet_typ?' &middot; '+r.geraet_typ:'')+'</div>'
+          +'</div>';
+      }).join('');
+      dd.style.display='block';
+    });
+    dd.addEventListener('click', function(e){
+      var item=e.target.closest('.ac-item');
+      if(!item) return;
+      inp.value=item.dataset.name;
+      var t=document.getElementById('f-telefon');
+      var em=document.getElementById('f-email');
+      var ad=document.getElementById('f-adresse');
+      var pl=document.getElementById('f-plz');
+      if(t&&item.dataset.tel) t.value=item.dataset.tel;
+      if(em&&item.dataset.email) em.value=item.dataset.email;
+      if(ad&&item.dataset.adr) ad.value=item.dataset.adr;
+      if(pl&&item.dataset.plz) pl.value=item.dataset.plz;
+      dd.style.display='none';
+    });
+    dd.addEventListener('mouseover',function(e){var i=e.target.closest('.ac-item');if(i)i.style.background='var(--hasi-soft)';});
+    dd.addEventListener('mouseout',function(e){var i=e.target.closest('.ac-item');if(i)i.style.background='';});
+    document.addEventListener('click',function(e){if(!e.target.closest('#f-name')&&!e.target.closest('#f-name-dd'))dd.style.display='none';});
+  }
+  // Sayfa hazır olunca başlat
+  window.addEventListener('load', function(){
+    // pg-form açıldığında tekrar init
+    var orig = window.showPg || function(){};
+    window.showPg = function(pg){
+      orig(pg);
+      if(pg==='pg-form') setTimeout(init, 100);
+    };
+    init();
+  });
+})();
+// END AUTOCOMPLETE
 
 // INIT
 window.addEventListener('load',function(){
