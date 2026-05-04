@@ -244,6 +244,14 @@ tbody tr:last-child td{border-bottom:none}
     </div>
     <div id="dash-loading" style="text-align:center;padding:60px;color:var(--m);font-family:'DM Mono',monospace;font-size:13px">Lade...</div>
     <div id="dash-content" style="display:none">
+      <!-- OFFENE AUFTRÄGE -->
+      <div id="offen-auf-wrap" style="margin-bottom:24px;display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="font-size:17px;font-weight:700">&#x1F4CB; Offene Auftr&auml;ge</div>
+          <div id="offen-auf-count" style="background:#d97706;color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div>
+        </div>
+        <div id="offen-auf-list" class="lw"></div>
+      </div>
       <!-- OFFENE RECHNUNGEN -->
       <div id="offen-rek-wrap" style="margin-bottom:24px;display:none">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
@@ -743,6 +751,7 @@ async function loadDash(){
     renderDashTbl(d.history,'');
     // Abholbereit listesi — fertig + AB var
     renderAbholbereit();
+    renderOffeneAuftraege();
     // Offene Rechnungen
     renderOffeneRechnungen();
     // Garantie
@@ -755,6 +764,34 @@ async function loadDash(){
 }
 
 var mitAB=[];
+
+function renderOffeneAuftraege(){
+  var wrap=document.getElementById('offen-auf-wrap');
+  var listEl=document.getElementById('offen-auf-list');
+  var countEl=document.getElementById('offen-auf-count');
+  if(!wrap||!listEl||!countEl) return;
+  var offene=reps.filter(function(r){
+    return r.status==='Neu'||r.status==='In Bearbeitung'||r.status==='Teile bestellt'||r.status==='Warten auf Kunde';
+  });
+  if(!offene.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  countEl.textContent=offene.length;
+  var SC={'Neu':'#33afe2','In Bearbeitung':'#0d9f6e','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa'};
+  listEl.innerHTML=offene.map(function(r){
+    var col=SC[r.status]||'#33afe2';
+    return '<div class="row" style="grid-template-columns:160px 1fr 180px 110px;cursor:pointer" onclick="openDet('+r.id+')">'
+      +'<div class="nr">'+r.nr+'</div>'
+      +'<div class="nm">'+(r.k_name||'')
+        +'<span class="sub">'+(r.geraet_typ||'')+(r.modell?' &middot; '+r.modell:'')
+        +(r.k_telefon?' &middot; &#x1F4DE; '+r.k_telefon:'')+'</span></div>'
+      +'<div style="font-size:11px;color:var(--m);align-self:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px">'+(r.fehler||'')+'</div>'
+      +'<div style="text-align:right;align-self:center">'
+        +'<span style="background:'+col+'22;color:'+col+';border:1px solid '+col+'55;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700">'+r.status+'</span>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
 async function renderAbholbereit(){
   // Fertig olan ve AB'si olan auftragler
   var fertig=reps.filter(function(r){return r.status==='Fertig';});
