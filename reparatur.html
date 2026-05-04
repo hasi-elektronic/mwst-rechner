@@ -122,9 +122,9 @@ tbody tr:last-child td{border-bottom:none}
 .km-header{padding:20px 24px;border-bottom:1.5px solid var(--b);display:flex;align-items:center;gap:14px}
 .km-body{padding:20px 24px}
 .km-close{margin-left:auto;background:var(--bg);border:1.5px solid var(--b2);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:inherit;font-size:13px}
-.kal-nr{font-size:11px;font-weight:700;margin-bottom:3px;color:var(--m)}
+.kal-nr{font-size:13px;font-weight:700;margin-bottom:3px;color:var(--m)}
 .kal-day.today .kal-nr{color:var(--hasi)}
-.kal-dot{font-size:9px;border-radius:4px;padding:1px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.kal-dot{font-size:11px;border-radius:4px;padding:1px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 .kal-dot.s-neu{background:#33afe222;color:#33afe2;border:1px solid #33afe244}
 .kal-dot.s-off{background:#d9770622;color:#d97706;border:1px solid #d9770644}
 .kal-dot.s-fer{background:#0d9f6e22;color:#0d9f6e;border:1px solid #0d9f6e44}
@@ -602,6 +602,29 @@ tbody tr:last-child td{border-bottom:none}
           <span id="fa-ab-msg" style="font-size:12px;font-weight:600;align-self:center"></span>
         </div>
       </div>
+    </div>
+
+    <!-- ERLEDIGEN PANEL -->
+    <div id="fa-erledigen" class="card" style="padding:18px 20px;margin-bottom:14px;border:2px solid var(--green);display:none">
+      <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">&#x2705; Auftrag abschlie&szlig;en</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end">
+        <div>
+          <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Zahlung</div>
+          <select class="inp" id="fa-zahlung" style="font-size:13px">
+            <option value="">-- Bitte w&auml;hlen --</option>
+            <option value="Bar">&#x1F4B5; Bar</option>
+            <option value="Karte">&#x1F4B3; EC-Karte</option>
+            <option value="Kreditkarte">&#x1F4B3; Kreditkarte</option>
+            <option value="&Uuml;berweisung">&#x1F3E6; &Uuml;berweisung</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn p" id="fa-abschliessen" style="width:100%;background:var(--green);border-color:var(--green);font-size:13px;padding:10px">
+            &#x2705; Abgeholt &amp; Bezahlt
+          </button>
+        </div>
+      </div>
+      <div id="fa-erl-msg" style="font-size:12px;font-weight:600;margin-top:8px;min-height:16px"></div>
     </div>
 
     <!-- ALT BUTONLAR -->
@@ -1346,6 +1369,8 @@ function renderFallAkte(){
   document.getElementById('fa-msg').textContent='';
   var waWrap=document.getElementById('wa-wrap');
   waWrap.style.display=(cur.status==='Fertig'||cur.status==='Abgeholt')?'':'none';
+  var erlPanel=document.getElementById('fa-erledigen');
+  if(erlPanel) erlPanel.style.display=(cur.status==='Fertig')?'block':'none';
   // Timeline
   renderTimeline([]);
   loadFaAbList();
@@ -1456,6 +1481,8 @@ document.getElementById('fa-save-status').onclick=async function(){
     var j=await r.json();
     if(j.ok){
       cur.status=document.getElementById('fa-status').value;
+      var erlPanel=document.getElementById('fa-erledigen');
+      if(erlPanel) erlPanel.style.display=(cur.status==='Fertig')?'block':'none';
       cur.notizen=document.getElementById('fa-notiz').value;
       document.getElementById('fa-status-badge').innerHTML=sbadge(cur.status);
       var waWrap=document.getElementById('wa-wrap');
@@ -1518,6 +1545,45 @@ document.getElementById('fa-print-vorlage').onclick=function(){
   if(!cur) return;
   buildVorlagePdf(cur);
 };
+document.getElementById('fa-abschliessen').onclick=async function(){
+  if(!cur) return;
+  var zahlung=document.getElementById('fa-zahlung').value;
+  if(!zahlung){msg('fa-erl-msg','Bitte Zahlungsart wählen!',true);return;}
+  var btn=this; btn.disabled=true;
+  try{
+    // Status → Abgeholt
+    var r1=await fetch(W+'/api/reparatur/'+cur.id,{
+      method:'PATCH',headers:{Authorization:A,'Content-Type':'application/json'},
+      body:JSON.stringify({status:'Abgeholt',notizen:(document.getElementById('fa-notiz').value||'')+' | Zahlung: '+zahlung})
+    });
+    var j1=await r1.json();
+    // Tüm AB'leri bezahlt yap
+    var wrap=document.getElementById('fa-timeline');
+    var abItems=wrap?wrap.querySelectorAll('[data-ab-id]'):[];
+    var proms=[];
+    abItems.forEach(function(el){
+      var abId=parseInt(el.dataset.abId);
+      if(abId) proms.push(fetch(W+'/api/arbeitsbericht/'+abId+'/bezahlt',{method:'PATCH',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify({payment_status:'bezahlt'})}));
+    });
+    await Promise.all(proms);
+    if(j1.ok){
+      cur.status='Abgeholt';
+      cur.notizen=document.getElementById('fa-notiz').value+' | Zahlung: '+zahlung;
+      document.getElementById('fa-status').value='Abgeholt';
+      document.getElementById('fa-status-badge').innerHTML=sbadge('Abgeholt');
+      document.getElementById('fa-erledigen').style.display='none';
+      document.getElementById('wa-wrap').style.display='none';
+      var rep=reps.find(function(x){return x.id===cur.id;});
+      if(rep){rep.status='Abgeholt';}
+      renderStats&&renderStats();renderList&&renderList();
+      loadFaAbList();
+      msg('fa-erl-msg','✅ Abgeholt & Bezahlt ('+(zahlung)+')');
+      showNotif('✅ Auftrag abgeschlossen · Zahlung: '+zahlung,'green');
+    } else msg('fa-erl-msg','Fehler!',true);
+  }catch(e){msg('fa-erl-msg',e.message,true);}
+  btn.disabled=false;
+};
+
 document.getElementById('fa-del').onclick=function(){
   if(!cur) return;
   showDeleteConfirm(cur);
