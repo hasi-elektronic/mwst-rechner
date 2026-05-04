@@ -743,9 +743,10 @@ async function loadDash(){
     if(chM){chM.destroy();}
     chM=new Chart(document.getElementById('ch-m').getContext('2d'),{type:'bar',data:{labels:d.monthly.map(function(m){return m.monat;}),datasets:[{data:d.monthly.map(function(m){return m.auftraege||0;}),backgroundColor:'rgba(51,175,226,0.7)',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
     if(chS){chS.destroy();}
-    var sc=['#33afe2','#60a5fa','#fb923c','#a78bfa','#34d399','#6b7585','#f87171'];
-    chS=new Chart(document.getElementById('ch-s').getContext('2d'),{type:'doughnut',data:{labels:d.status.map(function(s){return s.status;}),datasets:[{data:d.status.map(function(s){return s.anzahl;}),backgroundColor:sc}]},options:{plugins:{legend:{display:false}},cutout:'65%'}});
-    document.getElementById('ch-leg').innerHTML=d.status.map(function(s,i){return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:4px"><div style="width:10px;height:10px;border-radius:50%;background:'+sc[i]+';flex-shrink:0"></div>'+s.status+'<span style="margin-left:auto;font-family:DM Mono,monospace;font-size:11px;color:var(--m)">'+s.anzahl+'</span></div>';}).join('');
+    var gColors2=['#33afe2','#0d9f6e','#f59e0b','#a78bfa','#f87171','#60a5fa','#34d399'];
+    var gD2=d.geraete||[];
+    chS=new Chart(document.getElementById('ch-s').getContext('2d'),{type:'doughnut',data:{labels:gD2.map(function(g){return g.geraet_typ;}),datasets:[{data:gD2.map(function(g){return g.anzahl;}),backgroundColor:gD2.map(function(g,i){return gColors2[i%gColors2.length];}),borderWidth:2,borderColor:'#fff'}]},options:{plugins:{legend:{display:false}},cutout:'65%'}});
+    document.getElementById('ch-leg').innerHTML=gD2.map(function(g,i){return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:4px"><div style="width:10px;height:10px;border-radius:50%;background:'+gColors2[i%gColors2.length]+';flex-shrink:0"></div>'+g.geraet_typ+'<span style="margin-left:auto;font-family:DM Mono,monospace;font-size:11px;font-weight:700;color:var(--t)">'+g.anzahl+'</span></div>';}).join('');
     var mx=d.geraete[0]?d.geraete[0].anzahl:1;
     document.getElementById('geraete-bars').innerHTML=d.geraete.map(function(g){return '<div class="bar-item"><div class="bar-lbl">'+g.geraet_typ+'</div><div class="bar-track"><div class="bar-fill" style="width:'+(g.anzahl/mx*100)+'%"></div></div><div class="bar-num">'+g.anzahl+'</div></div>';}).join('');
     renderDashTbl(d.history,'');
