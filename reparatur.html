@@ -743,7 +743,6 @@ async function loadDash(){
     renderDashTbl(d.history,'');
     // Abholbereit listesi — fertig + AB var
     renderAbholbereit();
-    renderOffeneAuftraege();
     // Offene Rechnungen
     renderOffeneRechnungen();
     // Garantie
@@ -1411,33 +1410,6 @@ document.getElementById('fa-del').onclick=function(){
   showDeleteConfirm(cur);
 };
 // ==================== END FALL-AKTE ====================
-
-
-function renderOffeneAuftraege(){
-  var offene=reps.filter(function(r){
-    return r.status==='Neu'||r.status==='In Bearbeitung'||r.status==='Teile bestellt'||r.status==='Warten auf Kunde';
-  });
-  var wrap=document.getElementById('offen-auf-wrap');
-  if(!offene.length){wrap.style.display='none';return;}
-  wrap.style.display='block';
-  document.getElementById('offen-auf-count').textContent=offene.length;
-  var SC={'Neu':'#33afe2','In Bearbeitung':'#0d9f6e','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa'};
-  document.getElementById('offen-auf-list').innerHTML=offene.map(function(r){
-    var col=SC[r.status]||'#33afe2';
-    return '<div class="row" style="grid-template-columns:160px 1fr 160px 110px;cursor:pointer" onclick="openDet('+r.id+')">'
-      +'<div class="nr">'+r.nr+'</div>'
-      +'<div class="nm">'+(r.k_name||'')
-        +'<span class="sub">'+(r.geraet_typ||'')+(r.modell?' &middot; '+r.modell:'')
-        +(r.k_telefon?' &middot; &#x1F4DE; '+r.k_telefon:'')+'</span></div>'
-      +'<div style="font-size:11px;color:var(--m);text-align:center;align-self:center">'
-        +(r.fehler?'<span style="background:var(--bg);border:1px solid var(--b);border-radius:5px;padding:2px 7px;display:inline-block;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.fehler+'</span>':'')
-      +'</div>'
-      +'<div style="text-align:right;align-self:center">'
-        +'<span style="background:'+col+'22;color:'+col+';border:1px solid '+col+'55;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700">'+r.status+'</span>'
-      +'</div>'
-      +'</div>';
-  }).join('');
-}
 
 // ==================== WHATSAPP ====================
 function detStatusChanged(){
