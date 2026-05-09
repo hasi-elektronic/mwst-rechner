@@ -288,7 +288,7 @@ tbody tr:last-child td{border-bottom:none}
 </div>
 <div id="notif-bar"></div>
 <div id="kunden-modal"><div id="kunden-modal-box"></div></div>
-<nav>
+<nav style="display:none">
   <div class="ni">
     <img id="logo-img" src="" alt="Hasi">
     <button class="tab on" data-pg="pg-dash">&#x1F4CA; Dashboard</button>
@@ -2496,7 +2496,7 @@ function doLogin(){
   sessionStorage.setItem('hasi-user', JSON.stringify(_currentUser));
   document.getElementById('login-screen').style.display = 'none';
   document.querySelector('nav').style.display = '';
-  document.querySelectorAll('.pg').forEach(function(p){ if(!p.classList.contains('on')) p.style.display = ''; });
+  document.querySelectorAll('.pg').forEach(function(p){ p.style.display = ''; });
   // Badge güncelle
   var badge = document.getElementById('user-badge');
   var badgeName = document.getElementById('user-badge-name');
@@ -2530,11 +2530,17 @@ function logout(){
     try{
       _currentUser = JSON.parse(saved);
       document.getElementById('login-screen').style.display = 'none';
+      document.querySelector('nav').style.display = '';
       var badge = document.getElementById('user-badge');
       var badgeName = document.getElementById('user-badge-name');
       if(badge) badge.style.display = 'inline-flex';
       if(badgeName) badgeName.textContent = _currentUser.name;
     }catch(e){ sessionStorage.removeItem('hasi-user'); }
+  } else {
+    // Session yok — nav'ı gizle
+    var nav = document.querySelector('nav');
+    if(nav) nav.style.display = 'none';
+    document.querySelectorAll('.pg').forEach(function(p){ p.style.display = 'none'; });
   }
 })();
 
