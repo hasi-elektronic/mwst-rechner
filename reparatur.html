@@ -250,45 +250,9 @@ tbody tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
-<div id="login-screen" style="position:fixed;inset:0;background:linear-gradient(135deg,#0f172a,#1e3a5f);display:flex;align-items:center;justify-content:center;z-index:9999">
-  <div style="background:#fff;border-radius:20px;padding:40px;width:340px;box-shadow:0 24px 64px rgba(0,0,0,.4);text-align:center">
-    <img id="login-logo" src="" style="height:52px;margin-bottom:20px" onerror="this.style.display='none'">
-    <h2 style="font-size:20px;font-weight:800;color:#1a1a2e;margin-bottom:4px">Reparatur-System</h2>
-    <p style="font-size:12px;color:#64748b;margin-bottom:24px">Bitte anmelden</p>
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-      <button class="user-btn" data-user="hamdi" data-name="Hamdi" onclick="selectUser(this)" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;transition:all .2s">
-        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#33afe2,#0d9f6e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px">H</div>
-        <div style="text-align:left"><div style="font-weight:700;font-size:14px">Hamdi</div><div style="font-size:11px;color:#64748b">Admin</div></div>
-      </button>
-      <button class="user-btn" data-user="jbraun" data-name="Jasmin" onclick="selectUser(this)" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;transition:all .2s">
-        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#ec4899);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px">J</div>
-        <div style="text-align:left"><div style="font-weight:700;font-size:14px">Jasmin</div><div style="font-size:11px;color:#64748b">Mitarbeiterin</div></div>
-      </button>
-      <button class="user-btn" data-user="skugel" data-name="Sabine" onclick="selectUser(this)" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;transition:all .2s">
-        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#fb923c,#f59e0b);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px">S</div>
-        <div style="text-align:left"><div style="font-weight:700;font-size:14px">Sabine</div><div style="font-size:11px;color:#64748b">Mitarbeiterin</div></div>
-      </button>
-    </div>
-    <div id="pin-wrap" style="display:none">
-      <div style="font-size:13px;font-weight:600;color:#1a1a2e;margin-bottom:10px">PIN eingeben</div>
-      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px" id="pin-dots">
-        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:220px;margin:0 auto">
-        <button class="pin-btn" onclick="pinPress(1)">1</button><button class="pin-btn" onclick="pinPress(2)">2</button><button class="pin-btn" onclick="pinPress(3)">3</button>
-        <button class="pin-btn" onclick="pinPress(4)">4</button><button class="pin-btn" onclick="pinPress(5)">5</button><button class="pin-btn" onclick="pinPress(6)">6</button>
-        <button class="pin-btn" onclick="pinPress(7)">7</button><button class="pin-btn" onclick="pinPress(8)">8</button><button class="pin-btn" onclick="pinPress(9)">9</button>
-        <button class="pin-btn" onclick="pinClear()" style="font-size:11px;color:#64748b">&#x2190;</button>
-        <button class="pin-btn" onclick="pinPress(0)">0</button>
-        <button class="pin-btn" onclick="pinClear(true)" style="font-size:11px;color:#ef4444">&#x2715;</button>
-      </div>
-      <div id="pin-err" style="color:#ef4444;font-size:12px;margin-top:10px;min-height:16px"></div>
-    </div>
-  </div>
-</div>
 <div id="notif-bar"></div>
 <div id="kunden-modal"><div id="kunden-modal-box"></div></div>
-<nav style="display:none">
+<nav>
   <div class="ni">
     <img id="logo-img" src="" alt="Hasi">
     <button class="tab on" data-pg="pg-dash">&#x1F4CA; Dashboard</button>
@@ -2441,114 +2405,7 @@ async function syncAuftragToOutlook(repId){
 // ==================== END OUTLOOK SYNC ====================
 
 
-// ==================== LOGIN ====================
-var _currentUser = null;
-var _selectedUserBtn = null;
-var _pinValue = '';
-var PIN_CORRECT = '71665';
 
-function selectUser(btn){
-  if(_selectedUserBtn) _selectedUserBtn.classList.remove('selected');
-  _selectedUserBtn = btn;
-  btn.classList.add('selected');
-  _selectedUserBtn.style.borderColor = '#33afe2';
-  document.getElementById('pin-wrap').style.display = 'block';
-  document.getElementById('pin-err').textContent = '';
-  _pinValue = '';
-  updatePinDots();
-  _currentUser = {id: btn.dataset.user, name: btn.dataset.name};
-}
-
-function pinPress(n){
-  if(_pinValue.length >= 5) return;
-  _pinValue += n;
-  updatePinDots();
-  if(_pinValue.length === 5) setTimeout(checkPin, 100);
-}
-
-function pinClear(all){
-  if(all) _pinValue = '';
-  else _pinValue = _pinValue.slice(0,-1);
-  updatePinDots();
-  document.getElementById('pin-err').textContent = '';
-}
-
-function updatePinDots(){
-  var dots = document.querySelectorAll('.pin-dot');
-  dots.forEach(function(d,i){ d.classList.toggle('filled', i < _pinValue.length); });
-}
-
-function checkPin(){
-  if(_pinValue === PIN_CORRECT){
-    doLogin();
-  } else {
-    document.getElementById('pin-err').textContent = 'Falscher PIN!';
-    _pinValue = '';
-    updatePinDots();
-    // Shake animation
-    var wrap = document.getElementById('pin-dots');
-    wrap.style.animation = 'shake .4s';
-    setTimeout(function(){ wrap.style.animation = ''; }, 400);
-  }
-}
-
-function doLogin(){
-  sessionStorage.setItem('hasi-user', JSON.stringify(_currentUser));
-  document.getElementById('login-screen').style.display = 'none';
-  document.querySelector('nav').style.display = '';
-  document.querySelectorAll('.pg').forEach(function(p){ p.style.display = ''; });
-  // Badge güncelle
-  var badge = document.getElementById('user-badge');
-  var badgeName = document.getElementById('user-badge-name');
-  if(badge){ badge.style.display = 'inline-flex'; }
-  if(badgeName){ badgeName.textContent = _currentUser.name; }
-  // Logo
-  var ll = document.getElementById('login-logo');
-  var nl = document.getElementById('logo-img');
-  if(ll && nl && nl.src) ll.src = nl.src;
-  // Outlook status
-  checkOutlookStatus();
-}
-
-function logout(){
-  if(!confirm('Abmelden?')) return;
-  sessionStorage.removeItem('hasi-user');
-  _currentUser = null;
-  _pinValue = '';
-  _selectedUserBtn = null;
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('pin-wrap').style.display = 'none';
-  document.getElementById('user-badge').style.display = 'none';
-  document.querySelectorAll('.user-btn').forEach(function(b){ b.classList.remove('selected'); b.style.borderColor = ''; });
-  updatePinDots();
-}
-
-// Session kontrolü — sayfa yenilenince
-(function(){
-  var saved = sessionStorage.getItem('hasi-user');
-  if(saved){
-    try{
-      _currentUser = JSON.parse(saved);
-      document.getElementById('login-screen').style.display = 'none';
-      document.querySelector('nav').style.display = '';
-      var badge = document.getElementById('user-badge');
-      var badgeName = document.getElementById('user-badge-name');
-      if(badge) badge.style.display = 'inline-flex';
-      if(badgeName) badgeName.textContent = _currentUser.name;
-    }catch(e){ sessionStorage.removeItem('hasi-user'); }
-  } else {
-    // Session yok — nav'ı gizle
-    var nav = document.querySelector('nav');
-    if(nav) nav.style.display = 'none';
-    document.querySelectorAll('.pg').forEach(function(p){ p.style.display = 'none'; });
-  }
-})();
-
-// Shake CSS
-var shakeStyle = document.createElement('style');
-shakeStyle.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}';
-document.head.appendChild(shakeStyle);
-// ==================== END LOGIN ====================
 
 // KLAVYE KISAYOLLARI
 document.addEventListener('keydown', function(e){
