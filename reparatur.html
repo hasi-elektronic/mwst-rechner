@@ -866,6 +866,7 @@ async function loadDash(){
     // Abholbereit listesi — fertig + AB var
     renderAbholbereit();
     renderOffeneAuftraege();
+    checkOutlookStatus();
     // Offene Rechnungen
     renderOffeneRechnungen();
     // Garantie
@@ -1503,6 +1504,7 @@ document.getElementById('fa-save-status').onclick=async function(){
       if(rep){rep.status=cur.status;rep.notizen=cur.notizen;}
       renderStats();renderList();
       msg('fa-msg','✓ Gespeichert');
+      syncAuftragToOutlook(cur.id);
       showNotif('✅ Status: '+cur.status,'green');
       playBeep(cur.status);
     } else msg('fa-msg','Fehler!',true);
@@ -2323,6 +2325,71 @@ document.addEventListener('keydown',function(e){
   if(e.altKey&&(e.key==='d'||e.key==='D')){e.preventDefault();toggleDark();}
 });
 // END DARK MODE
+
+
+// ==================== OUTLOOK SYNC ====================
+var _outlookConnected = false;
+
+async function checkOutlookStatus(){
+  try{
+    var r=await fetch(W+'/api/outlook/status',{headers:{Authorization:A}});
+    var d=await r.json();
+    _outlookConnected=d.connected;
+    var btn=document.getElementById('outlook-btn');
+    if(btn) btn.title=d.connected?'Outlook verbunden ✅':'Outlook verbinden';
+    if(btn) btn.style.opacity=d.connected?'1':'0.5';
+  }catch(e){}
+}
+
+async function outlookConnect(){
+  if(_outlookConnected){
+    showNotif('✅ Outlook bereits verbunden!','green');
+    return;
+  }
+  try{
+    var r=await fetch(W+'/api/outlook/auth-url',{headers:{Authorization:A}});
+    var d=await r.json();
+    if(d.url) window.location.href=d.url;
+  }catch(e){showNotif('Fehler: '+e.message,'amber');}
+}
+
+async function syncAuftragToOutlook(repId){
+  if(!_outlookConnected) return;
+  try{
+    var r=await fetch(W+'/api/outlook/sync',{
+      method:'POST',headers:{Authorization:A,'Content-Type':'application/json'},
+      body:JSON.stringify({rep_id:repId})
+    });
+    var d=await r.json();
+    if(d.ok) showNotif('📅 Outlook Kalender aktualisiert','green');
+  }catch(e){}
+}
+
+// OAuth callback — URL'de code varsa exchange et
+(async function(){
+  var params=new URLSearchParams(window.location.search);
+  var code=params.get('code');
+  var state=params.get('state');
+  if(code&&state==='outlook_sync'){
+    // URL'den code'u temizle
+    window.history.replaceState({},'',window.location.pathname);
+    showNotif('🔄 Outlook verbinden...','amber');
+    try{
+      var r=await fetch(W+'/api/outlook/exchange',{
+        method:'POST',headers:{Authorization:A,'Content-Type':'application/json'},
+        body:JSON.stringify({code:code})
+      });
+      var d=await r.json();
+      if(d.ok){
+        _outlookConnected=true;
+        showNotif('✅ Outlook erfolgreich verbunden!','green');
+        var btn=document.getElementById('outlook-btn');
+        if(btn){btn.title='Outlook verbunden ✅';btn.style.opacity='1';}
+      } else showNotif('Outlook Fehler: '+(d.error||'Unknown'),'amber');
+    }catch(e){showNotif('Fehler: '+e.message,'amber');}
+  }
+})();
+// ==================== END OUTLOOK SYNC ====================
 
 // KLAVYE KISAYOLLARI
 document.addEventListener('keydown', function(e){
