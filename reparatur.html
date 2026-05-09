@@ -1335,17 +1335,7 @@ var faAbId=0;
 var _prevPg="pg-list";
 var faCurAb=null;
 
-function openDet(id){
-  cur=reps.find(function(r){return r.id===id;});
-  if(!cur){
-    loadList().then(function(){
-      cur=reps.find(function(r){return r.id===id;});
-      if(cur) renderFallAkte();
-    });
-    return;
-  }
-  renderFallAkte();
-}
+// openDet merged above
 
 function renderFallAkte(){
   if(!cur) return;
