@@ -915,12 +915,11 @@ async function renderAbholbereit(){
   listEl.onclick=function(e){
     var btn=e.target.closest('[data-abhol-id]');
     if(btn){e.stopPropagation();abholungBestaetigen(parseInt(btn.dataset.abholId),btn.dataset.abholNr,btn.dataset.abholName);return;}
-    // Satıra tıklayınca AB print aç
+    // Satıra tıklayınca Fall-Akte aç
     var row=e.target.closest('.row[id^="abrow-"]');
     if(row){
       var rid=row.id.replace('abrow-','');
-      var item=mitAB.find(function(x){return String(x.rep.id)===rid;});
-      if(item) window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+item.ab.id+'&rep='+item.rep.id+'&type=arbeitsbericht','_blank');
+      openDet(parseInt(rid),'pg-dash');
     }
   };
   listEl.innerHTML=mitAB.map(function(item){
