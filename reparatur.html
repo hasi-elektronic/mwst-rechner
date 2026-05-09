@@ -1032,7 +1032,7 @@ function renderList(){
     var nextColor='';
     if(r.status==='Neu'){nextStatus='In Bearbeitung';nextLabel='&#x25B6; Start';nextColor='#60a5fa';}
     else if(r.status==='In Bearbeitung'){nextStatus='Fertig';nextLabel='&#x2713; Fertig';nextColor='#34d399';}
-    else if(r.status==='Fertig'){nextStatus='Abgeholt';nextLabel='&#x1F3E0; Abgeholt';nextColor='#6b7585';}
+    // Fertig → Abgeholt sadece Fall-Akte'den yapılır
     var qsBtn=nextStatus?'<button class="qs-btn" style="background:'+nextColor+'22;color:'+nextColor+';border-color:'+nextColor+'44" data-qid="'+r.id+'" data-qs="'+nextStatus+'">'+nextLabel+'</button>':'';
     return '<div class="row" onclick="openDet('+r.id+')" ontouchend="openDet('+r.id+')" id="row-'+r.id+'">'
       +'<div class="nr">'+(r.nr||'\u2014')+'</div>'
