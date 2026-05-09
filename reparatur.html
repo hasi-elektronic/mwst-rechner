@@ -1130,10 +1130,16 @@ document.getElementById('f-send').onclick=async function(){
       lastSaved=Object.assign({},body,{nr:nr,status:'Neu',id:j.id});
       msg('f-msg','✓ Gespeichert! Nr: '+nr);
       loadList();
+      // Butonu disabled bırak — tekrar basılmasın
+      btn.textContent='✓ Gespeichert';
+      btn.style.background='#6b7585';
+      btn.style.borderColor='#6b7585';
       setTimeout(function(){document.getElementById('f-print').click();},400);
-    } else msg('f-msg','Fehler!',true);
-  }catch(e){msg('f-msg',e.message,true);}
-  btn.disabled=false;
+    } else {
+      msg('f-msg','Fehler!',true);
+      btn.disabled=false;
+    }
+  }catch(e){msg('f-msg',e.message,true);btn.disabled=false;}
 };
 
 // ARBEITSBERICHT
@@ -2323,7 +2329,10 @@ window.addEventListener('load',function(){
     document.getElementById('vl-nr-footer').textContent='Nr: '+nr2;
     window._vlNr=nr2;
     msg('f-msg','');
-  };
+  // f-send'i sıfırla
+  var fsend=document.getElementById('f-send');
+  if(fsend){fsend.disabled=false;fsend.textContent='✓ Absenden & Speichern';fsend.style.background='#0d9f6e';fsend.style.borderColor='#0d9f6e';}
+};;
   // AB form başlangıç satırı
   fabAddTaet();
   document.getElementById('kunden-q').oninput=function(){renderKunden(this.value);};
