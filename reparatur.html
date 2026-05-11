@@ -1139,8 +1139,10 @@ function showDeleteConfirm(rep){
 
 // FORM
 document.getElementById('f-send').onclick=async function(){
+  if(window._sending){return;}
+  window._sending=true;
   var name=document.getElementById('f-name').value.trim();
-  if(!name){msg('f-msg','Name ist erforderlich!',true);return;}
+  if(!name){msg('f-msg','Name ist erforderlich!',true);window._sending=false;return;}
   var FEHLER_MAP={'cb-keine':'Keine Reaktion','cb-wupdate':'Windows Update','cb-akku2':'Akku tausch','cb-display':'Display tausch','cb-boot':'Probleme b. Booten','cb-sw':'Softwareprobleme','cb-absturz':'Windows Absturz','cb-viren':'Viren & Trojaner','cb-daten':'Datenrettung','cb-sonst2':'Sonstiges'};
   var ZUB_MAP={'cb-akku':'Akku','cb-netzteil':'Netzteil','cb-tasche':'Tasche/Rucksack','cb-hdd':'Festplatte/SSD'};
   var fa=Object.keys(FEHLER_MAP).filter(function(id){var el=document.getElementById(id);return el&&el.checked;}).map(function(id){return FEHLER_MAP[id];});
@@ -1169,7 +1171,7 @@ document.getElementById('f-send').onclick=async function(){
       msg('f-msg','Fehler!',true);
       btn.disabled=false;
     }
-  }catch(e){msg('f-msg',e.message,true);btn.disabled=false;}
+  }catch(e){msg('f-msg',e.message,true);btn.disabled=false;window._sending=false;}
 };
 
 // ARBEITSBERICHT
@@ -2483,6 +2485,7 @@ window.addEventListener('load',function(){
   // f-send'i sıfırla
   var fsend=document.getElementById('f-send');
   if(fsend){fsend.disabled=false;fsend.textContent='✓ Absenden & Speichern';fsend.style.background='#0d9f6e';fsend.style.borderColor='#0d9f6e';}
+  window._sending=false;
 };;
   // AB form başlangıç satırı
   fabAddTaet();
