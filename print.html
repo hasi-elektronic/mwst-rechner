@@ -7,10 +7,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700;800&display=swap" rel="stylesheet">
 <style>
 @media print{
+  html,body{height:auto!important;overflow:visible!important;margin:0!important}
+  body > *:not(.page){display:none!important}
+  .page > * {page-break-inside:avoid}
+
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact;margin:0;padding:0;background:white}
   .no-print{display:none!important}
   @page{size:A4 portrait;margin:0}
-  .page{box-shadow:none!important;margin:0!important;border-radius:0!important;transform:scale(0.78);transform-origin:top left;width:128%;max-height:297mm;overflow:hidden;page-break-after:avoid}
+  .page{box-shadow:none!important;margin:0!important;border-radius:0!important;padding:8mm!important;font-size:9pt!important;page-break-after:avoid;page-break-inside:avoid}
   * {page-break-inside:avoid}
 }
 *{box-sizing:border-box}
