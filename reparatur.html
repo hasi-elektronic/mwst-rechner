@@ -313,10 +313,11 @@ tbody tr:last-child td{border-bottom:none}
         <div class="kpi" style="--kc:#d97706;cursor:pointer" onclick="typFlt='all';flt='Neu';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F527;</div><div class="v" id="k-off">0</div><div class="l">Offen &#x2192;</div></div>
         <div class="kpi" style="--kc:#7c3aed;cursor:pointer" onclick="typFlt='all';flt='Fertig';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x2705;</div><div class="v" id="k-don">0</div><div class="l">Abgeschlossen &#x2192;</div></div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px">
         <div class="kpi" style="--kc:#1e40af;cursor:pointer" onclick="typFlt='reparatur';flt='all';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F527;</div><div class="v" id="k-typ-ra">0</div><div class="l">Reparaturen &#x2192;</div></div>
         <div class="kpi" style="--kc:#15803d;cursor:pointer" onclick="typFlt='verkauf';flt='all';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F4E6;</div><div class="v" id="k-typ-vk">0</div><div class="l">Verk&auml;ufe &#x2192;</div></div>
         <div class="kpi" style="--kc:#a16207;cursor:pointer" onclick="typFlt='bestellung';flt='all';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F6D2;</div><div class="v" id="k-typ-bs">0</div><div class="l">Bestellungen &#x2192;</div></div>
+        <div class="kpi" style="--kc:#6d28d9;cursor:pointer" onclick="typFlt='fernwartung';flt='all';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F4DE;</div><div class="v" id="k-typ-fw">0</div><div class="l">Fernwartung &#x2192;</div></div>
       </div>
       <div class="charts-row">
         <div class="card"><div class="ct">Monatliche Auftr&auml;ge</div><canvas id="ch-m" height="200"></canvas></div>
@@ -351,6 +352,7 @@ tbody tr:last-child td{border-bottom:none}
       <button class="fbtn" data-tf="reparatur">&#x1F527; Reparatur</button>
       <button class="fbtn" data-tf="verkauf">&#x1F4E6; Verkauf</button>
       <button class="fbtn" data-tf="bestellung">&#x1F6D2; Bestellung</button>
+      <button class="fbtn" data-tf="fernwartung">&#x1F4DE; Fernwartung</button>
     </div>
     <div class="filters">
       <button class="fbtn on" data-f="all">Alle</button>
@@ -381,6 +383,7 @@ tbody tr:last-child td{border-bottom:none}
         <button type="button" class="typ-btn typ-active" data-typ="reparatur" onclick="selectTyp('reparatur')" style="flex:1;min-width:140px;padding:12px 16px;border:2px solid var(--hasi);background:var(--hasi-soft);color:var(--hasi);font-weight:700;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit">&#x1F527; Reparatur</button>
         <button type="button" class="typ-btn" data-typ="verkauf" onclick="selectTyp('verkauf')" style="flex:1;min-width:140px;padding:12px 16px;border:2px solid #e2e8f0;background:#fff;color:#64748b;font-weight:700;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit">&#x1F4E6; Verkauf / Neuger&auml;t</button>
         <button type="button" class="typ-btn" data-typ="bestellung" onclick="selectTyp('bestellung')" style="flex:1;min-width:140px;padding:12px 16px;border:2px solid #e2e8f0;background:#fff;color:#64748b;font-weight:700;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit">&#x1F6D2; Bestellung</button>
+        <button type="button" class="typ-btn" data-typ="fernwartung" onclick="selectTyp('fernwartung')" style="flex:1;min-width:140px;padding:12px 16px;border:2px solid #e2e8f0;background:#fff;color:#64748b;font-weight:700;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit">&#x1F4DE; Fernwartung / Anruf</button>
       </div>
       <div class="vl-header">
         <img class="vl-logo" id="vl-logo-img" src="" alt="Hasi">
@@ -436,6 +439,19 @@ tbody tr:last-child td{border-bottom:none}
               <span class="vl-lbl">Lieferant</span><input class="vl-inp" id="f-bs-lieferant" placeholder="z.B. Wortmann, Bechtle">
               <span class="vl-lbl">Erwartetes Lieferdatum</span><input class="vl-inp" id="f-bs-liefdatum" type="date">
               <span class="vl-lbl">Bestellpreis (&euro;)</span><input class="vl-inp" id="f-bs-preis" type="number" placeholder="z.B. 750">
+            </div>
+            <div class="vl-sec typ-only-fernwartung" style="display:none">
+              <div class="vl-sec-title">Fernwartung / Anruf</div>
+              <span class="vl-lbl">Kontaktart</span>
+              <select class="vl-inp" id="f-fw-kontakt" style="width:100%">
+                <option value="Fernwartung">📞 Fernwartung (AnyDesk/TeamViewer)</option>
+                <option value="Telefon">☎️ Telefon-Support</option>
+                <option value="Vor-Ort">🚗 Vor-Ort-Termin</option>
+                <option value="E-Mail">✉️ E-Mail-Support</option>
+              </select>
+              <span class="vl-lbl">Anliegen / Auftrag</span>
+              <textarea class="vl-inp" id="f-fw-anliegen" rows="3" placeholder="z.B. Drucker einrichten, Outlook neu konfigurieren, Virusverdacht prüfen ..."></textarea>
+              <span class="vl-lbl">Gesch&auml;tzte Dauer (Min.)</span><input class="vl-inp" id="f-fw-dauer" type="number" placeholder="z.B. 30">
             </div>
             <div class="vl-sec typ-only-reparatur">
               <div class="vl-sec-title">Zustand &amp; Sch&auml;den</div>
@@ -599,6 +615,12 @@ tbody tr:last-child td{border-bottom:none}
             <option class="opt-bestellung" style="display:none">Verkauft</option>
             <option class="opt-bestellung" style="display:none">Abgeholt</option>
             <option class="opt-bestellung" style="display:none">Storniert</option>
+            <!-- Fernwartung seçenekleri -->
+            <option class="opt-fernwartung" style="display:none">Neu</option>
+            <option class="opt-fernwartung" style="display:none">In Bearbeitung</option>
+            <option class="opt-fernwartung" style="display:none">Erledigt</option>
+            <option class="opt-fernwartung" style="display:none">Abgerechnet</option>
+            <option class="opt-fernwartung" style="display:none">Abgelehnt</option>
           </select>
           <button class="btn p" id="fa-save-status" style="white-space:nowrap;flex-shrink:0">&#x2713; Speichern</button>
         </div>
@@ -892,7 +914,7 @@ function fmt(n){return Number(n||0).toFixed(2).replace('.',',').replace(/\B(?=(\
 function fmtD(s){if(!s)return '\u2014';var p=s.slice(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function tod(){return new Date().toISOString().split('T')[0];}
 function msg(id,t,err){var e=document.getElementById(id);if(!e)return;e.textContent=t;e.style.color=err?'var(--red)':'var(--green)';if(!err)setTimeout(function(){e.textContent=''},3000);}
-function sbadge(s){var c={Neu:'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa',Fertig:'#34d399',Abgeholt:'#6b7585',Abgelehnt:'#f87171'};var col=c[s]||'#33afe2';return '<span class="badge" style="background:'+col+'22;border:1px solid '+col+'44;color:'+col+'">'+(s||'Neu')+'</span>';}
+function sbadge(s){var c={Neu:'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa',Fertig:'#34d399',Abgeholt:'#6b7585',Abgelehnt:'#f87171','Erledigt':'#34d399','Abgerechnet':'#6b7585','Verkauft':'#15803d','Bestellt':'#a16207','Eingetroffen':'#f59e0b','In Einrichtung':'#fb923c','Bereit':'#34d399','Storniert':'#f87171'};var col=c[s]||'#33afe2';return '<span class="badge" style="background:'+col+'22;border:1px solid '+col+'44;color:'+col+'">'+(s||'Neu')+'</span>';}
 
 function showPg(id){
   document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
@@ -1119,6 +1141,7 @@ function typBadge(typ){
   var t = typ || 'reparatur';
   if(t === 'verkauf') return '<span style="display:inline-block;background:#dcfce7;color:#15803d;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;margin-right:6px">📦 VK</span>';
   if(t === 'bestellung') return '<span style="display:inline-block;background:#fef3c7;color:#a16207;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;margin-right:6px">🛒 BS</span>';
+  if(t === 'fernwartung') return '<span style="display:inline-block;background:#ede9fe;color:#6d28d9;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;margin-right:6px">📞 FW</span>';
   return '<span style="display:inline-block;background:#dbeafe;color:#1e40af;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;margin-right:6px">🔧 RA</span>';
 }
 
@@ -1186,19 +1209,22 @@ function updateStatusFltButtons(){
 
 // Dashboard tip bazlı KPI sayıları
 function renderTypKpi(){
-  var ra=0, vk=0, bs=0;
+  var ra=0, vk=0, bs=0, fw=0;
   (reps||[]).forEach(function(r){
     var t=r.auftragstyp||'reparatur';
     if(t==='verkauf') vk++;
     else if(t==='bestellung') bs++;
+    else if(t==='fernwartung') fw++;
     else ra++;
   });
   var elRa=document.getElementById('k-typ-ra');
   var elVk=document.getElementById('k-typ-vk');
   var elBs=document.getElementById('k-typ-bs');
+  var elFw=document.getElementById('k-typ-fw');
   if(elRa) elRa.textContent=ra;
   if(elVk) elVk.textContent=vk;
   if(elBs) elBs.textContent=bs;
+  if(elFw) elFw.textContent=fw;
 }
 
 // DETAIL
@@ -1282,10 +1308,16 @@ document.getElementById('f-send').onclick=async function(){
     if(lf&&lf.value) extraNotes += 'Lieferant: '+lf.value+' | ';
     if(ld&&ld.value) extraNotes += 'Lieferdatum: '+ld.value+' | ';
     if(bp&&bp.value) extraNotes += 'Preis: '+bp.value+' €';
+  } else if(typ === 'fernwartung'){
+    var fk=document.getElementById('f-fw-kontakt'); var fa2=document.getElementById('f-fw-anliegen'); var fd=document.getElementById('f-fw-dauer');
+    if(fk&&fk.value) extraNotes += 'Kontaktart: '+fk.value+' | ';
+    if(fa2&&fa2.value) extraNotes += 'Anliegen: '+fa2.value+' | ';
+    if(fd&&fd.value) extraNotes += 'Dauer ca.: '+fd.value+' Min.';
   }
   var btn=this; btn.disabled=true;
   try{
-    var body={auftragstyp:typ,k_name:name,k_telefon:document.getElementById('f-tel').value,k_email:document.getElementById('f-mail').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,datum:document.getElementById('f-dat').value,geraet_typ:document.getElementById('f-typ').value||'Sonstiges',modell:document.getElementById('f-mod').value,win_passwort:document.getElementById('f-pw').value,fehler:fa.join(', '),beschreibung:(document.getElementById('f-fehler')?document.getElementById('f-fehler').value:'')+(extraNotes?' | '+extraNotes:''),kostenlimit:document.getElementById('f-limit').value,zustand:window._starVal||0,schaeden:document.getElementById('f-schaeden').value,zubehoer:za.join(', ')};
+    var geraetTyp = (typ === 'fernwartung') ? 'Fernwartung' : (document.getElementById('f-typ').value||'Sonstiges');
+    var body={auftragstyp:typ,k_name:name,k_telefon:document.getElementById('f-tel').value,k_email:document.getElementById('f-mail').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,datum:document.getElementById('f-dat').value,geraet_typ:geraetTyp,modell:document.getElementById('f-mod').value,win_passwort:document.getElementById('f-pw').value,fehler:fa.join(', '),beschreibung:(document.getElementById('f-fehler')?document.getElementById('f-fehler').value:'')+(extraNotes?' | '+extraNotes:''),kostenlimit:document.getElementById('f-limit').value,zustand:window._starVal||0,schaeden:document.getElementById('f-schaeden').value,zubehoer:za.join(', ')};
     var r=await fetch(W+'/api/reparatur',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     var j=await r.json();
     if(j.ok||j.id){
@@ -1492,6 +1524,7 @@ function renderFallAkte(){
   document.querySelectorAll('#fa-status .opt-reparatur').forEach(function(o){o.style.display=(curTyp==='reparatur')?'':'none';});
   document.querySelectorAll('#fa-status .opt-verkauf').forEach(function(o){o.style.display=(curTyp==='verkauf')?'':'none';});
   document.querySelectorAll('#fa-status .opt-bestellung').forEach(function(o){o.style.display=(curTyp==='bestellung')?'':'none';});
+  document.querySelectorAll('#fa-status .opt-fernwartung').forEach(function(o){o.style.display=(curTyp==='fernwartung')?'':'none';});
   // Yeni Bericht butonunun yazısı
   var newBtn = document.getElementById('fa-new-ab');
   if(newBtn){
@@ -2628,6 +2661,7 @@ function selectTyp(typ){
   if(h){
     if(typ === 'verkauf') h.textContent = 'Verkauf / Neugerät';
     else if(typ === 'bestellung') h.textContent = 'Bestellung';
+    else if(typ === 'fernwartung') h.textContent = 'Fernwartung / Anruf';
     else h.textContent = 'Reparaturauftrag';
   }
   // Notice metnini güncelle
@@ -2635,12 +2669,21 @@ function selectTyp(typ){
   if(notice){
     if(typ === 'verkauf') notice.textContent = 'Verkaufsbeleg / Lieferschein für neues Gerät.';
     else if(typ === 'bestellung') notice.textContent = 'Bestellung — Lieferung erwartet, Status wird nach Eintreffen aktualisiert.';
+    else if(typ === 'fernwartung') notice.textContent = 'Fernwartung oder Anruf — kurz erfassen, nach Erledigung Arbeitsbericht schreiben.';
     else notice.textContent = 'Bitte füllen Sie das Formular leserlich aus. Die Rechnung wird auf den angegebenen Namen ausgestellt und kann nachträglich nicht geändert werden.';
   }
   // Alanları göster/gizle
   document.querySelectorAll('.typ-only-reparatur').forEach(function(el){ el.style.display = (typ === 'reparatur') ? '' : 'none'; });
   document.querySelectorAll('.typ-only-verkauf').forEach(function(el){ el.style.display = (typ === 'verkauf') ? '' : 'none'; });
   document.querySelectorAll('.typ-only-bestellung').forEach(function(el){ el.style.display = (typ === 'bestellung') ? '' : 'none'; });
+  document.querySelectorAll('.typ-only-fernwartung').forEach(function(el){ el.style.display = (typ === 'fernwartung') ? '' : 'none'; });
+  // NR prefix dinamik güncelle (sadece preview — backend yeniden üretir)
+  var prefMap = {reparatur:'RA', verkauf:'VK', bestellung:'BS', fernwartung:'FW'};
+  var pref = prefMap[typ] || 'RA';
+  var newNr = pref+'-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+String(Math.floor(Math.random()*900)+100);
+  var nrEl = document.getElementById('vl-nr'); if(nrEl) nrEl.textContent = 'Nr: '+newNr;
+  var nrFt = document.getElementById('vl-nr-footer'); if(nrFt) nrFt.textContent = 'Nr: '+newNr;
+  window._vlNr = newNr;
 }
 // f-clear'de tip sıfırla
 document.addEventListener('DOMContentLoaded', function(){
