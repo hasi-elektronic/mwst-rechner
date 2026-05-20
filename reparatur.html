@@ -1176,9 +1176,23 @@ document.getElementById('f-send').onclick=async function(){
   var bd=document.getElementById('f-fehler').value.trim(); if(bd) fa.push(bd);
   var za=Object.keys(ZUB_MAP).filter(function(id){var el=document.getElementById(id);return el&&el.checked;}).map(function(id){return ZUB_MAP[id];});
   var sz=document.getElementById('f-zubehoer').value.trim(); if(sz) za.push(sz);
+  // Auftragstyp ve ekstra notlar
+  var typ = window._selectedTyp || 'reparatur';
+  var extraNotes = '';
+  if(typ === 'verkauf'){
+    var p=document.getElementById('f-vk-preis'); var g=document.getElementById('f-vk-garantie'); var s=document.getElementById('f-vk-sn');
+    if(p&&p.value) extraNotes += 'Preis: '+p.value+' € | ';
+    if(g&&g.value) extraNotes += 'Garantie: '+g.value+' Mon. | ';
+    if(s&&s.value) extraNotes += 'SN: '+s.value;
+  } else if(typ === 'bestellung'){
+    var lf=document.getElementById('f-bs-lieferant'); var ld=document.getElementById('f-bs-liefdatum'); var bp=document.getElementById('f-bs-preis');
+    if(lf&&lf.value) extraNotes += 'Lieferant: '+lf.value+' | ';
+    if(ld&&ld.value) extraNotes += 'Lieferdatum: '+ld.value+' | ';
+    if(bp&&bp.value) extraNotes += 'Preis: '+bp.value+' €';
+  }
   var btn=this; btn.disabled=true;
   try{
-    var body={k_name:name,k_telefon:document.getElementById('f-tel').value,k_email:document.getElementById('f-mail').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,datum:document.getElementById('f-dat').value,geraet_typ:document.getElementById('f-typ').value||'Sonstiges',modell:document.getElementById('f-mod').value,win_passwort:document.getElementById('f-pw').value,fehler:fa.join(', '),beschreibung:(document.getElementById('f-fehler')?document.getElementById('f-fehler').value:'')+(extraNotes?' | '+extraNotes:''),kostenlimit:document.getElementById('f-limit').value,zustand:window._starVal||0,schaeden:document.getElementById('f-schaeden').value,zubehoer:za.join(', ')};
+    var body={auftragstyp:typ,k_name:name,k_telefon:document.getElementById('f-tel').value,k_email:document.getElementById('f-mail').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,datum:document.getElementById('f-dat').value,geraet_typ:document.getElementById('f-typ').value||'Sonstiges',modell:document.getElementById('f-mod').value,win_passwort:document.getElementById('f-pw').value,fehler:fa.join(', '),beschreibung:(document.getElementById('f-fehler')?document.getElementById('f-fehler').value:'')+(extraNotes?' | '+extraNotes:''),kostenlimit:document.getElementById('f-limit').value,zustand:window._starVal||0,schaeden:document.getElementById('f-schaeden').value,zubehoer:za.join(', ')};
     var r=await fetch(W+'/api/reparatur',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     var j=await r.json();
     if(j.ok||j.id){
