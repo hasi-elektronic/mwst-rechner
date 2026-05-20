@@ -310,8 +310,13 @@ tbody tr:last-child td{border-bottom:none}
       <div class="kpi-grid">
         <div class="kpi" style="--kc:#33afe2"><div>&#x1F4CB;</div><div class="v" id="k-ges">0</div><div class="l">Gesamt</div></div>
         <div class="kpi" style="--kc:#0d9f6e"><div>&#x1F4B6;</div><div class="v" id="k-ums">0</div><div class="l">Umsatz Netto</div></div>
-        <div class="kpi" style="--kc:#d97706;cursor:pointer" onclick="flt='Neu';showPg('pg-list');renderList()"><div>&#x1F527;</div><div class="v" id="k-off">0</div><div class="l">Offen &#x2192;</div></div>
-        <div class="kpi" style="--kc:#7c3aed;cursor:pointer" onclick="flt='Fertig';showPg('pg-list');renderList()"><div>&#x2705;</div><div class="v" id="k-don">0</div><div class="l">Abgeschlossen &#x2192;</div></div>
+        <div class="kpi" style="--kc:#d97706;cursor:pointer" onclick="typFlt='all';flt='Neu';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F527;</div><div class="v" id="k-off">0</div><div class="l">Offen &#x2192;</div></div>
+        <div class="kpi" style="--kc:#7c3aed;cursor:pointer" onclick="typFlt='all';flt='Fertig';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x2705;</div><div class="v" id="k-don">0</div><div class="l">Abgeschlossen &#x2192;</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
+        <div class="kpi" style="--kc:#1e40af;cursor:pointer" onclick="typFlt='reparatur';flt='all';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F527;</div><div class="v" id="k-typ-ra">0</div><div class="l">Reparaturen &#x2192;</div></div>
+        <div class="kpi" style="--kc:#15803d;cursor:pointer" onclick="typFlt='verkauf';flt='all';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F4E6;</div><div class="v" id="k-typ-vk">0</div><div class="l">Verk&auml;ufe &#x2192;</div></div>
+        <div class="kpi" style="--kc:#a16207;cursor:pointer" onclick="typFlt='bestellung';flt='all';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F6D2;</div><div class="v" id="k-typ-bs">0</div><div class="l">Bestellungen &#x2192;</div></div>
       </div>
       <div class="charts-row">
         <div class="card"><div class="ct">Monatliche Auftr&auml;ge</div><canvas id="ch-m" height="200"></canvas></div>
@@ -340,6 +345,12 @@ tbody tr:last-child td{border-bottom:none}
       <div class="stat"><div class="v" id="s-off" style="color:var(--amber)">0</div><div class="l">Offen</div></div>
       <div class="stat"><div class="v" id="s-fer" style="color:var(--green)">0</div><div class="l">Fertig</div></div>
       <div class="stat"><div class="v" id="s-heu" style="color:var(--purple)">0</div><div class="l">Heute</div></div>
+    </div>
+    <div class="filters" style="margin-bottom:8px">
+      <button class="fbtn on" data-tf="all">Alle Typen</button>
+      <button class="fbtn" data-tf="reparatur">&#x1F527; Reparatur</button>
+      <button class="fbtn" data-tf="verkauf">&#x1F4E6; Verkauf</button>
+      <button class="fbtn" data-tf="bestellung">&#x1F6D2; Bestellung</button>
     </div>
     <div class="filters">
       <button class="fbtn on" data-f="all">Alle</button>
@@ -811,7 +822,7 @@ var W = 'https://hasi-reparatur.hguencavdi.workers.dev';
 var lastSaved = null;
 var A = 'Bearer 71665';
 var SATZ = 96;
-var reps=[], cur=null, curAb=null, flt='all', abId=0, chM=null, chS=null, allDash=null;
+var reps=[], cur=null, curAb=null, flt='all', typFlt='all', abId=0, chM=null, chS=null, allDash=null;
 var kalY=new Date().getFullYear(), kalM=new Date().getMonth(), kalSel=null;
 function renderKal(){
   var now=new Date();
@@ -1087,16 +1098,17 @@ async function loadList(){
     var r=await fetch(W+'/api/reparatur',{headers:{Authorization:A}});
     reps=await r.json();
     if(!Array.isArray(reps)) reps=[];
-    renderStats(); renderList();
+    renderStats(); renderList(); renderTypKpi();
   }catch(e){
     document.getElementById('list-body').innerHTML='<div style="color:red;padding:20px">Fehler: '+e.message+'</div>';
   }
 }
 function renderStats(){
-  var o=reps.filter(function(r){return r.status!='Fertig'&&r.status!='Abgeholt'&&r.status!='Abgelehnt';}).length;
-  var f=reps.filter(function(r){return r.status=='Fertig'||r.status=='Abgeholt';}).length;
-  var h=reps.filter(function(r){return (r.datum||'').slice(0,10)==tod();}).length;
-  document.getElementById('s-ges').textContent=reps.length;
+  var src = typFlt==='all' ? reps : reps.filter(function(r){return (r.auftragstyp||'reparatur')===typFlt;});
+  var o=src.filter(function(r){return r.status!='Fertig'&&r.status!='Abgeholt'&&r.status!='Abgelehnt';}).length;
+  var f=src.filter(function(r){return r.status=='Fertig'||r.status=='Abgeholt';}).length;
+  var h=src.filter(function(r){return (r.datum||'').slice(0,10)==tod();}).length;
+  document.getElementById('s-ges').textContent=src.length;
   document.getElementById('s-off').textContent=o;
   document.getElementById('s-fer').textContent=f;
   document.getElementById('s-heu').textContent=h;
@@ -1113,6 +1125,7 @@ function typBadge(typ){
 function renderList(){
   var q=(document.getElementById('list-q').value||'').toLowerCase();
   var data=reps.filter(function(r){
+    if(typFlt!=='all'&&(r.auftragstyp||'reparatur')!==typFlt) return false;
     if(flt!='all'&&r.status!=flt) return false;
     if(!q) return true;
     return [r.k_name,r.nr,r.geraet_typ,r.modell].some(function(v){return (v||'').toLowerCase().includes(q);});
@@ -1150,6 +1163,43 @@ document.querySelectorAll('.fbtn[data-f]').forEach(function(b){
     b.classList.add('on'); flt=b.dataset.f; renderList();
   };
 });
+
+// Typ filter butonları
+document.querySelectorAll('.fbtn[data-tf]').forEach(function(b){
+  b.onclick=function(){
+    document.querySelectorAll('.fbtn[data-tf]').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); typFlt=b.dataset.tf; renderStats(); renderList();
+  };
+});
+
+// Typ filter butonlarını dışarıdan güncelle (Dashboard KPI tıklamasında)
+function updateTypFltButtons(){
+  document.querySelectorAll('.fbtn[data-tf]').forEach(function(x){
+    x.classList.toggle('on', x.dataset.tf===typFlt);
+  });
+}
+function updateStatusFltButtons(){
+  document.querySelectorAll('.fbtn[data-f]').forEach(function(x){
+    x.classList.toggle('on', x.dataset.f===flt);
+  });
+}
+
+// Dashboard tip bazlı KPI sayıları
+function renderTypKpi(){
+  var ra=0, vk=0, bs=0;
+  (reps||[]).forEach(function(r){
+    var t=r.auftragstyp||'reparatur';
+    if(t==='verkauf') vk++;
+    else if(t==='bestellung') bs++;
+    else ra++;
+  });
+  var elRa=document.getElementById('k-typ-ra');
+  var elVk=document.getElementById('k-typ-vk');
+  var elBs=document.getElementById('k-typ-bs');
+  if(elRa) elRa.textContent=ra;
+  if(elVk) elVk.textContent=vk;
+  if(elBs) elBs.textContent=bs;
+}
 
 // DETAIL
 function openDet(id,fromPg){
