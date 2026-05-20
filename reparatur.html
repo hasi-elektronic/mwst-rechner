@@ -365,10 +365,16 @@ tbody tr:last-child td{border-bottom:none}
       </div>
       <!-- AUFTRAG FORM -->
       <div id="ftab-auftrag-content">
+      <!-- AUFTRAGSTYP -->
+      <div style="display:flex;gap:8px;padding:14px 24px 0 24px;flex-wrap:wrap">
+        <button type="button" class="typ-btn typ-active" data-typ="reparatur" onclick="selectTyp('reparatur')" style="flex:1;min-width:140px;padding:12px 16px;border:2px solid var(--hasi);background:var(--hasi-soft);color:var(--hasi);font-weight:700;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit">&#x1F527; Reparatur</button>
+        <button type="button" class="typ-btn" data-typ="verkauf" onclick="selectTyp('verkauf')" style="flex:1;min-width:140px;padding:12px 16px;border:2px solid #e2e8f0;background:#fff;color:#64748b;font-weight:700;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit">&#x1F4E6; Verkauf / Neuger&auml;t</button>
+        <button type="button" class="typ-btn" data-typ="bestellung" onclick="selectTyp('bestellung')" style="flex:1;min-width:140px;padding:12px 16px;border:2px solid #e2e8f0;background:#fff;color:#64748b;font-weight:700;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit">&#x1F6D2; Bestellung</button>
+      </div>
       <div class="vl-header">
         <img class="vl-logo" id="vl-logo-img" src="" alt="Hasi">
         <div class="vl-title">
-          <h2>Reparaturauftrag</h2>
+          <h2 id="vl-title-h2">Reparaturauftrag</h2>
           <div class="nr" id="vl-nr">Nr: &mdash;</div>
           <div class="dat-row"><span>Datum:</span><input class="vl-inp" id="f-dat" type="date" style="width:155px;margin:0;padding:6px 10px"></div>
         </div>
@@ -908,7 +914,7 @@ function renderOffeneAuftraege(){
   listEl.innerHTML=offene.map(function(r){
     var col=SC[r.status]||'#33afe2';
     return '<div class="row" style="grid-template-columns:160px 1fr 180px 110px;cursor:pointer" onclick="openDet('+r.id+',\'pg-dash\')">'
-      +'<div class="nr">'+r.nr+'</div>'
+      +'<div class="nr">'+typBadge(r.auftragstyp)+r.nr+'</div>'
       +'<div class="nm">'+(r.k_name||'')
         +'<span class="sub">'+(r.geraet_typ||'')+(r.modell?' &middot; '+r.modell:'')
         +(r.k_telefon?' &middot; &#x1F4DE; '+r.k_telefon:'')+'</span></div>'
@@ -1040,6 +1046,15 @@ function renderStats(){
   document.getElementById('s-fer').textContent=f;
   document.getElementById('s-heu').textContent=h;
 }
+
+// Tip rozeti helper
+function typBadge(typ){
+  var t = typ || 'reparatur';
+  if(t === 'verkauf') return '<span style="display:inline-block;background:#dcfce7;color:#15803d;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;margin-right:6px">📦 VK</span>';
+  if(t === 'bestellung') return '<span style="display:inline-block;background:#fef3c7;color:#a16207;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;margin-right:6px">🛒 BS</span>';
+  return '<span style="display:inline-block;background:#dbeafe;color:#1e40af;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;margin-right:6px">🔧 RA</span>';
+}
+
 function renderList(){
   var q=(document.getElementById('list-q').value||'').toLowerCase();
   var data=reps.filter(function(r){
@@ -1066,7 +1081,7 @@ function renderList(){
     // Fertig → Abgeholt sadece Fall-Akte'den yapılır
     var qsBtn=nextStatus?'<button class="qs-btn" style="background:'+nextColor+'22;color:'+nextColor+';border-color:'+nextColor+'44" data-qid="'+r.id+'" data-qs="'+nextStatus+'">'+nextLabel+'</button>':'';
     return '<div class="row" onclick="openDet('+r.id+')" ontouchend="openDet('+r.id+')" id="row-'+r.id+'">'
-      +'<div class="nr">'+(r.nr||'\u2014')+'</div>'
+      +'<div class="nr">'+typBadge(r.auftragstyp)+(r.nr||'\u2014')+'</div>'
       +'<div class="nm">'+(r.k_name||'\u2014')+'<span class="sub">'+(r.geraet_typ||'')+(r.modell?' \u00b7 '+r.modell:'')+'</span></div>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="dt">'+fmtD(r.datum)+'</div>'+qsBtn+'</div>'
       +'<div>'+sbadge(r.status)+'</div>'
@@ -1220,7 +1235,7 @@ function buildVorlagePdf(r){
     '<style>'+css+'</style></head><body>',
     '<button class="pbtn no-print" onclick="window.print()">Drucken</button>',
     '<div class="page">',
-    '<div class="hdr"><img src="'+L+'" alt="Hasi"><div class="tbox"><h2>Reparaturauftrag</h2><div class="tnr">'+NR+'</div><div class="tdat">Datum: '+fmtD(r.datum)+'</div></div></div>',
+    '<div class="hdr"><img src="'+L+'" alt="Hasi"><div class="tbox"><h2 id="vl-title-h2">Reparaturauftrag</h2><div class="tnr">'+NR+'</div><div class="tdat">Datum: '+fmtD(r.datum)+'</div></div></div>',
     '<div class="notice">Bitte füllen Sie das Formular leserlich aus. Die Rechnung wird auf den angegebenen Namen ausgestellt.</div>',
     '<div class="body">',
     '<div class="cols">',
@@ -2389,6 +2404,51 @@ async function syncAuftragToOutlook(repId){
 
 
 
+
+
+// ==================== AUFTRAGSTYP ====================
+window._selectedTyp = 'reparatur';
+function selectTyp(typ){
+  window._selectedTyp = typ;
+  // Buton stilleri
+  document.querySelectorAll('.typ-btn').forEach(function(btn){
+    if(btn.dataset.typ === typ){
+      btn.style.border = '2px solid var(--hasi)';
+      btn.style.background = 'var(--hasi-soft)';
+      btn.style.color = 'var(--hasi)';
+    } else {
+      btn.style.border = '2px solid #e2e8f0';
+      btn.style.background = '#fff';
+      btn.style.color = '#64748b';
+    }
+  });
+  // Başlık güncelle
+  var h = document.getElementById('vl-title-h2');
+  if(h){
+    if(typ === 'verkauf') h.textContent = 'Verkauf / Neugerät';
+    else if(typ === 'bestellung') h.textContent = 'Bestellung';
+    else h.textContent = 'Reparaturauftrag';
+  }
+  // Notice metnini güncelle
+  var notice = document.querySelector('#ftab-auftrag-content .vl-notice');
+  if(notice){
+    if(typ === 'verkauf') notice.textContent = 'Verkaufsbeleg / Lieferschein für neues Gerät.';
+    else if(typ === 'bestellung') notice.textContent = 'Bestellung — Lieferung erwartet, Status wird nach Eintreffen aktualisiert.';
+    else notice.textContent = 'Bitte füllen Sie das Formular leserlich aus. Die Rechnung wird auf den angegebenen Namen ausgestellt und kann nachträglich nicht geändert werden.';
+  }
+}
+// f-clear'de tip sıfırla
+document.addEventListener('DOMContentLoaded', function(){
+  var fc = document.getElementById('f-clear');
+  if(fc){
+    var oldOnclick = fc.onclick;
+    fc.onclick = function(){
+      selectTyp('reparatur');
+      if(oldOnclick) oldOnclick.call(this);
+    };
+  }
+});
+// ==================== END AUFTRAGSTYP ====================
 
 // KLAVYE KISAYOLLARI
 document.addEventListener('keydown', function(e){
