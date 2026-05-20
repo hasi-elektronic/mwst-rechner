@@ -1196,34 +1196,13 @@ document.getElementById('kal-next').onclick=function(){kalM++;if(kalM>11){kalM=0
 
 
 document.getElementById('f-print').onclick=function(){
-  // Formu direkt yazdır — ayrı sayfa açma
-  // Print CSS ekle
-  var style=document.getElementById('vl-print-style');
-  if(!style){
-    style=document.createElement('style');
-    style.id='vl-print-style';
-    style.textContent='@page{size:A4 portrait;margin:6mm}'
-      +'@media print{'
-      +'html,body{height:auto!important;overflow:visible!important;margin:0!important;padding:0!important;background:white!important}'
-      +'.pg:not(#pg-form){display:none!important}'
-      +'#pg-form{display:block!important}'
-      +'.ftab-row{display:none!important}'
-      +'#ftab-ab-content{display:none!important}'
-      +'.vl-actions{display:none!important}'
-      +'nav,.ni,#notif-bar,#pdf-modal,#del-modal,#kunden-modal{display:none!important}'
-      +'.wrap{padding:0!important;max-width:100%!important;margin:0!important}'
-      +'.vl{box-shadow:none!important;border:none!important;padding:6mm!important;margin:0!important;max-width:100%!important;font-size:9pt!important}'
-      +'.vl h2,.vl h3{font-size:11pt!important;margin:4px 0!important}'
-      +'.vl input,.vl textarea,.vl select{font-size:9pt!important;padding:3px 6px!important;min-height:auto!important}'
-      +'.vl textarea{min-height:30px!important;height:auto!important}'
-      +'.vl label,.vl .lbl{font-size:8pt!important;margin-bottom:1px!important}'
-      +'.vl-card,.vl-box{padding:6px!important;margin:3px 0!important}'
-      +'.vl > *{page-break-inside:avoid!important;break-inside:avoid!important}'
-      +'.vl-footer{font-size:7pt!important;padding-top:4px!important}'
-      +'}';
-    document.head.appendChild(style);
+  // print.html'i yeni sekmede aç — kompakt tek sayfa
+  var id = lastSaved && lastSaved.id;
+  if(!id){
+    msg('f-msg','Erst speichern!',true);
+    return;
   }
-  window.print();
+  window.open('https://tools.hasi-elektronic.de/print.html?id='+id, '_blank');
 };
 
 
