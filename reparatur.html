@@ -403,25 +403,37 @@ tbody tr:last-child td{border-bottom:none}
             <span class="vl-lbl">Ger&auml;te-Typ</span>
             <select class="vl-inp" id="f-typ"><option value="">&mdash; bitte w&auml;hlen &mdash;</option><option>Laptop / Notebook</option><option>Desktop PC</option><option>All-in-One PC</option><option>Tablet</option><option>Smartphone</option><option>Drucker / Scanner</option><option>Monitor</option><option>Sonstiges</option></select>
             <span class="vl-lbl">Modellbezeichnung</span><input class="vl-inp" id="f-mod" placeholder="z.B. Dell Latitude 5510">
-            <span class="vl-lbl" style="color:#d97706">Windows Passwort</span><input class="vl-inp warn" id="f-pw" placeholder="Nur falls erforderlich">
-            <span class="vl-lbl">Allgemeiner Zustand</span>
+            <div class="typ-only-reparatur"><span class="vl-lbl" style="color:#d97706">Windows Passwort</span><input class="vl-inp warn" id="f-pw" placeholder="Nur falls erforderlich"></div>
+            <div class="typ-only-reparatur"><span class="vl-lbl">Allgemeiner Zustand</span>
             <div class="vl-stars" id="vl-stars"><span class="vl-star" data-v="1">&#9733;</span><span class="vl-star" data-v="2">&#9733;</span><span class="vl-star" data-v="3">&#9733;</span><span class="vl-star" data-v="4">&#9733;</span><span class="vl-star" data-v="5">&#9733;</span></div>
-            <div style="font-size:11px;color:var(--m)" id="vl-star-lbl">&mdash; bitte bewerten</div>
+            <div style="font-size:11px;color:var(--m)" id="vl-star-lbl">&mdash; bitte bewerten</div></div>
           </div>
           <div>
-            <div class="vl-sec">
+            <div class="vl-sec typ-only-reparatur">
               <div class="vl-sec-title">Kostenlimit</div>
               <span class="vl-lbl">Maximaler Betrag (&euro;)</span><input class="vl-inp" id="f-limit" type="number" placeholder="z.B. 150">
               <div style="font-size:11px;color:var(--m);margin-top:-4px">Bis zu diesem Betrag wird die Reparatur ohne R&uuml;ckfrage durchgef&uuml;hrt.</div>
             </div>
-            <div class="vl-sec">
+            <div class="vl-sec typ-only-verkauf" style="display:none">
+              <div class="vl-sec-title">Verkaufspreis</div>
+              <span class="vl-lbl">Preis (&euro;)</span><input class="vl-inp" id="f-vk-preis" type="number" placeholder="z.B. 899">
+              <span class="vl-lbl">Garantie (Monate)</span><input class="vl-inp" id="f-vk-garantie" type="number" placeholder="z.B. 24">
+              <span class="vl-lbl">Seriennummer</span><input class="vl-inp" id="f-vk-sn" placeholder="z.B. SN-12345">
+            </div>
+            <div class="vl-sec typ-only-bestellung" style="display:none">
+              <div class="vl-sec-title">Bestelldetails</div>
+              <span class="vl-lbl">Lieferant</span><input class="vl-inp" id="f-bs-lieferant" placeholder="z.B. Wortmann, Bechtle">
+              <span class="vl-lbl">Erwartetes Lieferdatum</span><input class="vl-inp" id="f-bs-liefdatum" type="date">
+              <span class="vl-lbl">Bestellpreis (&euro;)</span><input class="vl-inp" id="f-bs-preis" type="number" placeholder="z.B. 750">
+            </div>
+            <div class="vl-sec typ-only-reparatur">
               <div class="vl-sec-title">Zustand &amp; Sch&auml;den</div>
               <span class="vl-lbl">Sichtbare Sch&auml;den vor der Reparatur</span>
               <textarea class="vl-inp" id="f-schaeden" rows="3" placeholder="z.B. Displayriss, Geh&auml;usekratzer ..."></textarea>
             </div>
           </div>
         </div>
-        <div class="vl-cols">
+        <div class="vl-cols typ-only-reparatur">
           <div class="vl-sec">
             <div class="vl-sec-title">Beigelegtes Zubeh&ouml;r</div>
             <div class="vl-cb-grid">
@@ -1166,7 +1178,7 @@ document.getElementById('f-send').onclick=async function(){
   var sz=document.getElementById('f-zubehoer').value.trim(); if(sz) za.push(sz);
   var btn=this; btn.disabled=true;
   try{
-    var body={k_name:name,k_telefon:document.getElementById('f-tel').value,k_email:document.getElementById('f-mail').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,datum:document.getElementById('f-dat').value,geraet_typ:document.getElementById('f-typ').value||'Sonstiges',modell:document.getElementById('f-mod').value,win_passwort:document.getElementById('f-pw').value,fehler:fa.join(', '),kostenlimit:document.getElementById('f-limit').value,zustand:window._starVal||0,schaeden:document.getElementById('f-schaeden').value,zubehoer:za.join(', ')};
+    var body={k_name:name,k_telefon:document.getElementById('f-tel').value,k_email:document.getElementById('f-mail').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,datum:document.getElementById('f-dat').value,geraet_typ:document.getElementById('f-typ').value||'Sonstiges',modell:document.getElementById('f-mod').value,win_passwort:document.getElementById('f-pw').value,fehler:fa.join(', '),beschreibung:(document.getElementById('f-fehler')?document.getElementById('f-fehler').value:'')+(extraNotes?' | '+extraNotes:''),kostenlimit:document.getElementById('f-limit').value,zustand:window._starVal||0,schaeden:document.getElementById('f-schaeden').value,zubehoer:za.join(', ')};
     var r=await fetch(W+'/api/reparatur',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     var j=await r.json();
     if(j.ok||j.id){
@@ -2436,6 +2448,10 @@ function selectTyp(typ){
     else if(typ === 'bestellung') notice.textContent = 'Bestellung — Lieferung erwartet, Status wird nach Eintreffen aktualisiert.';
     else notice.textContent = 'Bitte füllen Sie das Formular leserlich aus. Die Rechnung wird auf den angegebenen Namen ausgestellt und kann nachträglich nicht geändert werden.';
   }
+  // Alanları göster/gizle
+  document.querySelectorAll('.typ-only-reparatur').forEach(function(el){ el.style.display = (typ === 'reparatur') ? '' : 'none'; });
+  document.querySelectorAll('.typ-only-verkauf').forEach(function(el){ el.style.display = (typ === 'verkauf') ? '' : 'none'; });
+  document.querySelectorAll('.typ-only-bestellung').forEach(function(el){ el.style.display = (typ === 'bestellung') ? '' : 'none'; });
 }
 // f-clear'de tip sıfırla
 document.addEventListener('DOMContentLoaded', function(){
