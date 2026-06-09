@@ -1802,7 +1802,7 @@ document.getElementById('fa-print-auftrag').onclick=function(){
 };
 document.getElementById('fa-print-vorlage').onclick=function(){
   if(!cur) return;
-  buildVorlagePdf(cur);
+  window.open('https://tools.hasi-elektronic.de/print.html?id='+cur.id,'_blank');
 };
 document.getElementById('fa-abschliessen').onclick=async function(){
   if(!cur) return;
