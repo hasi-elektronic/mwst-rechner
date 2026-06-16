@@ -1332,7 +1332,11 @@ document.getElementById('f-send').onclick=async function(){
       btn.textContent='✓ Gespeichert';
       btn.style.background='#6b7585';
       btn.style.borderColor='#6b7585';
-      setTimeout(function(){document.getElementById('f-print').click();},400);
+      // id'yi direkt closure'a al — lastSaved'e güvenme
+      var savedId=j.id;
+      setTimeout(function(){
+        if(savedId) window.open('https://tools.hasi-elektronic.de/print.html?id='+savedId,'_blank');
+      },400);
     } else {
       msg('f-msg','Fehler!',true);
       btn.disabled=false;
@@ -2819,7 +2823,7 @@ window.addEventListener('load',function(){
       var i=e.target.closest('.ac-i');
       if(!i) return;
       acInp.value=i.dataset.n;
-      var t=document.getElementById('f-telefon'),em=document.getElementById('f-email'),ad=document.getElementById('f-adresse'),pl=document.getElementById('f-plz');
+      var t=document.getElementById('f-tel'),em=document.getElementById('f-mail'),ad=document.getElementById('f-adr'),pl=document.getElementById('f-plz');
       if(t) t.value=i.dataset.t;
       if(em) em.value=i.dataset.e;
       if(ad) ad.value=i.dataset.a;
