@@ -74,7 +74,7 @@ tbody tr:hover td{background:var(--hasi-soft)}
 tbody td{padding:12px 14px;border-bottom:1px solid var(--b);font-size:13px}
 tbody td.r{text-align:right;font-family:"DM Mono",monospace}
 tbody tr:last-child td{border-bottom:none}
-.badge{display:inline-flex;font-size:10px;font-family:"DM Mono",monospace;padding:2px 8px;border-radius:100px;font-weight:600}
+.badge{display:inline-flex;font-size:10px;font-family:"DM Mono",monospace;padding:2px 8px;border-radius:100px;font-weight:600;white-space:nowrap}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
 .stat{background:#fff;border:1.5px solid var(--b);border-radius:14px;padding:16px 12px;text-align:center}
 .stat .v{font-size:26px;font-weight:700}
@@ -83,7 +83,7 @@ tbody tr:last-child td{border-bottom:none}
 .fbtn{font-size:11px;font-family:"DM Mono",monospace;padding:5px 13px;border-radius:100px;cursor:pointer;border:1.5px solid var(--b2);color:var(--m);background:#fff}
 .fbtn.on,.fbtn:hover{border-color:var(--hasi);color:var(--hasi);background:var(--hasi-soft)}
 .lw{background:#fff;border:1.5px solid var(--b);border-radius:16px;overflow:hidden}
-.row{display:grid;grid-template-columns:160px 1fr 110px 100px;gap:12px;align-items:center;padding:13px 16px;border-bottom:1.5px solid var(--b);cursor:pointer}
+.row{display:grid;grid-template-columns:160px 1fr 110px 120px;gap:12px;align-items:center;padding:13px 16px;border-bottom:1.5px solid var(--b);cursor:pointer}
 .row:last-child{border-bottom:none}
 .row:hover{background:var(--hasi-soft)}
 .row .nr{font-family:"DM Mono",monospace;font-size:11px;color:var(--hasi);font-weight:500}
@@ -944,7 +944,7 @@ function fmt(n){return Number(n||0).toFixed(2).replace('.',',').replace(/\B(?=(\
 function fmtD(s){if(!s)return '\u2014';var p=s.slice(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function tod(){return new Date().toISOString().split('T')[0];}
 function msg(id,t,err){var e=document.getElementById(id);if(!e)return;e.textContent=t;e.style.color=err?'var(--red)':'var(--green)';if(!err)setTimeout(function(){e.textContent=''},3000);}
-function sbadge(s){var c={Neu:'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa',Fertig:'#34d399',Abgeholt:'#6b7585',Abgelehnt:'#f87171','Erledigt':'#34d399','Abgerechnet':'#6b7585','Verkauft':'#15803d','Bestellt':'#a16207','Eingetroffen':'#f59e0b','In Einrichtung':'#fb923c','Bereit':'#34d399','Storniert':'#f87171','Rückgabe (nicht möglich)':'#dc2626'};var col=c[s]||'#33afe2';return '<span class="badge" style="background:'+col+'22;border:1px solid '+col+'44;color:'+col+'">'+(s||'Neu')+'</span>';}
+function sbadge(s){var c={Neu:'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa',Fertig:'#34d399',Abgeholt:'#6b7585',Abgelehnt:'#f87171','Erledigt':'#34d399','Abgerechnet':'#6b7585','Verkauft':'#15803d','Bestellt':'#a16207','Eingetroffen':'#f59e0b','In Einrichtung':'#fb923c','Bereit':'#34d399','Storniert':'#f87171','Rückgabe (nicht möglich)':'#dc2626'};var labels={'Rückgabe (nicht möglich)':'Rückgabe'};var col=c[s]||'#33afe2';var lbl=labels[s]||s||'Neu';return '<span class="badge" style="background:'+col+'22;border:1px solid '+col+'44;color:'+col+';white-space:nowrap">'+lbl+'</span>';}
 
 function showPg(id){
   document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
