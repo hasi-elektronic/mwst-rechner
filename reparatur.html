@@ -841,6 +841,12 @@ tbody tr:last-child td{border-bottom:none}
 
 <script>
 var W = 'https://hasi-reparatur.hguencavdi.workers.dev';
+
+// Bir auftrag gerçekten kapandı mı? Sadece bunlar offene listesinden çıkar.
+var CLOSED_STATUS = ['Abgeholt','Abgelehnt','Storniert','Erledigt'];
+function isClosed(status){ return CLOSED_STATUS.indexOf(status) >= 0; }
+function isOffen(status){ return !isClosed(status); }
+
 var lastSaved = null;
 var A = 'Bearer 71665';
 var SATZ = 96;
@@ -863,7 +869,7 @@ function renderKal(){
     byDay[d].push(r);
   });
   var alarmReps=reps.filter(function(r){
-    if(r.status==='Fertig'||r.status==='Abgeholt'||r.status==='Abgelehnt') return false;
+    if(isClosed(r.status)) return false;
     var d=new Date((r.datum||r.created_at||'').slice(0,10));
     return (now-d)/(1000*60*60*24)>=7;
   });
@@ -993,12 +999,12 @@ function renderOffeneAuftraege(){
   var countEl=document.getElementById('offen-auf-count');
   if(!wrap||!listEl||!countEl) return;
   var offene=reps.filter(function(r){
-    return r.status==='Neu'||r.status==='In Bearbeitung'||r.status==='Teile bestellt'||r.status==='Warten auf Kunde';
+    return isOffen(r.status);
   });
   if(!offene.length){wrap.style.display='none';return;}
   wrap.style.display='block';
   countEl.textContent=offene.length;
-  var SC={'Neu':'#33afe2','In Bearbeitung':'#0d9f6e','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa'};
+  var SC={'Neu':'#33afe2','In Bearbeitung':'#0d9f6e','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#0d9f6e','Verkauft':'#15803d','Bestellt':'#a16207','Eingetroffen':'#0891b2','In Einrichtung':'#6366f1','Bereit':'#16a34a'};
   listEl.innerHTML=offene.map(function(r){
     var col=SC[r.status]||'#33afe2';
     return '<div class="row" style="grid-template-columns:160px 1fr 180px 110px;cursor:pointer" onclick="openDet('+r.id+',\'pg-dash\')">'
@@ -1127,8 +1133,8 @@ async function loadList(){
 }
 function renderStats(){
   var src = typFlt==='all' ? reps : reps.filter(function(r){return (r.auftragstyp||'reparatur')===typFlt;});
-  var o=src.filter(function(r){return r.status!='Fertig'&&r.status!='Abgeholt'&&r.status!='Abgelehnt';}).length;
-  var f=src.filter(function(r){return r.status=='Fertig'||r.status=='Abgeholt';}).length;
+  var o=src.filter(function(r){return isOffen(r.status);}).length;
+  var f=src.filter(function(r){return isClosed(r.status);}).length;
   var h=src.filter(function(r){return (r.datum||'').slice(0,10)==tod();}).length;
   document.getElementById('s-ges').textContent=src.length;
   document.getElementById('s-off').textContent=o;
@@ -1173,7 +1179,7 @@ function renderList(){
     // Fertig → Abgeholt sadece Fall-Akte'den yapılır
     var qsBtn=nextStatus?'<button class="qs-btn" style="background:'+nextColor+'22;color:'+nextColor+';border-color:'+nextColor+'44" data-qid="'+r.id+'" data-qs="'+nextStatus+'">'+nextLabel+'</button>':'';
     // Lange Wartende kontrolü — açık + 7+ gün
-    var isOpen=(r.status!=='Fertig'&&r.status!=='Abgeholt'&&r.status!=='Abgelehnt'&&r.status!=='Verkauft'&&r.status!=='Storniert');
+    var isOpen=isOffen(r.status);
     var tageOffen=Math.floor((nowMs-new Date((r.datum||r.created_at||'').slice(0,10)).getTime())/(1000*60*60*24));
     var isAlt=isOpen&&tageOffen>=7;
     var rowStyle=isAlt?'border-left:3px solid var(--red);background:rgba(220,38,38,.03)':'';
