@@ -593,6 +593,16 @@ tbody tr:last-child td{border-bottom:none}
       <!-- AKTIONEN -->
       <div class="card" style="padding:18px 20px">
         <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--hasi);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Status &amp; Aktionen</div>
+        <!-- TYP ÄNDERN -->
+        <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+          <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0">Typ:</span>
+          <select class="inp" id="fa-typ" style="flex:1;font-size:12px;padding:6px 10px" onchange="changeFaTyp()">
+            <option value="reparatur">&#x1F527; Reparatur</option>
+            <option value="verkauf">&#x1F4E6; Verkauf / Neuger&auml;t</option>
+            <option value="bestellung">&#x1F6D2; Bestellung</option>
+            <option value="fernwartung">&#x1F4DE; Fernwartung</option>
+          </select>
+        </div>
         <div style="display:flex;gap:8px;margin-bottom:10px">
           <select class="inp" id="fa-status" style="flex:1" onchange="detStatusChanged()">
             <!-- Reparatur seçenekleri (varsayılan) -->
@@ -602,11 +612,13 @@ tbody tr:last-child td{border-bottom:none}
             <option class="opt-reparatur">Warten auf Kunde</option>
             <option class="opt-reparatur">Fertig</option>
             <option class="opt-reparatur">Abgeholt</option>
+            <option class="opt-reparatur">Erledigt</option>
             <option class="opt-reparatur">Abgelehnt</option>
             <!-- Verkauf seçenekleri -->
             <option class="opt-verkauf" style="display:none">Neu</option>
             <option class="opt-verkauf" style="display:none">Verkauft</option>
             <option class="opt-verkauf" style="display:none">Abgeholt</option>
+            <option class="opt-verkauf" style="display:none">Erledigt</option>
             <!-- Bestellung seçenekleri -->
             <option class="opt-bestellung" style="display:none">Bestellt</option>
             <option class="opt-bestellung" style="display:none">Eingetroffen</option>
@@ -1568,6 +1580,8 @@ function renderFallAkte(){
   document.getElementById('fa-geraet').innerHTML=g;
   // Status
   document.getElementById('fa-status').value=cur.status||'Neu';
+  var faTypEl=document.getElementById('fa-typ');
+  if(faTypEl) faTypEl.value=cur.auftragstyp||'reparatur';
   document.getElementById('fa-notiz').value=cur.notizen||'';
   document.getElementById('fa-garantie').value=cur.garantie_monate||'';
   document.getElementById('fa-limit').textContent=cur.kostenlimit?cur.kostenlimit+' €':'—';
@@ -1867,6 +1881,48 @@ document.getElementById('fa-del').onclick=function(){
 // ==================== END FALL-AKTE ====================
 
 // ==================== WHATSAPP ====================
+
+// Fall-Akte'de tip değiştirme
+async function changeFaTyp(){
+  if(!cur) return;
+  var newTyp = document.getElementById('fa-typ').value;
+  if(newTyp === (cur.auftragstyp||'reparatur')) return;
+  // Worker'a PATCH
+  try{
+    var r = await fetch(W+'/api/reparatur/'+cur.id,{
+      method:'PATCH',
+      headers:{Authorization:A,'Content-Type':'application/json'},
+      body:JSON.stringify({auftragstyp:newTyp})
+    });
+    var j = await r.json();
+    if(j.ok || j.id){
+      cur.auftragstyp = newTyp;
+      // Status seçeneklerini yeni tipe göre göster
+      document.querySelectorAll('#fa-status .opt-reparatur').forEach(function(o){o.style.display=(newTyp==='reparatur')?'':'none';});
+      document.querySelectorAll('#fa-status .opt-verkauf').forEach(function(o){o.style.display=(newTyp==='verkauf')?'':'none';});
+      document.querySelectorAll('#fa-status .opt-bestellung').forEach(function(o){o.style.display=(newTyp==='bestellung')?'':'none';});
+      document.querySelectorAll('#fa-status .opt-fernwartung').forEach(function(o){o.style.display=(newTyp==='fernwartung')?'':'none';});
+      // Yeni Bericht buton yazısı
+      var newBtn = document.getElementById('fa-new-ab');
+      if(newBtn){
+        if(newTyp === 'bestellung') newBtn.innerHTML = '+ Einrichtung';
+        else if(newTyp === 'verkauf') newBtn.innerHTML = '+ Lieferschein';
+        else newBtn.innerHTML = '+ Neuer Bericht';
+      }
+      showNotif('&#x2713; Typ geändert','green');
+      // Listeyi de güncelle
+      var idx = reps.findIndex(function(x){return x.id===cur.id;});
+      if(idx>=0) reps[idx].auftragstyp = newTyp;
+    } else {
+      msg('fa-msg','Fehler beim Ändern',true);
+      document.getElementById('fa-typ').value = cur.auftragstyp||'reparatur';
+    }
+  }catch(e){
+    msg('fa-msg',e.message,true);
+    document.getElementById('fa-typ').value = cur.auftragstyp||'reparatur';
+  }
+}
+
 function detStatusChanged(){
   var status=document.getElementById('fa-status')?document.getElementById('fa-status').value:'';
   var wrap=document.getElementById('wa-wrap');
