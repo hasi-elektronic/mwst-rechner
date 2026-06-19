@@ -298,6 +298,17 @@ tbody tr:last-child td{border-bottom:none}
         </div>
         <div id="garantie-list" class="lw"></div>
       </div>
+      <!-- RÜCKGABE UYARISI — Müşteriye iade edilecek cihazlar -->
+      <div id="rueckgabe-wrap" style="margin-bottom:24px;display:none">
+        <div style="background:linear-gradient(135deg,#fff1f1,#ffe4e4);border:2px solid #f87171;border-radius:14px;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="font-size:20px;font-weight:800;color:#dc2626">&#x1F4E6; Zur R&uuml;ckgabe an Kunde</div>
+            <div id="rueckgabe-count" style="background:#dc2626;color:#fff;border-radius:100px;padding:3px 12px;font-size:13px;font-weight:800"></div>
+            <div style="font-size:12px;color:#991b1b;margin-left:4px;font-weight:600">Diagnose erledigt &mdash; Ger&auml;t dem Kunden zur&uuml;ckgeben!</div>
+          </div>
+          <div id="rueckgabe-list" class="lw"></div>
+        </div>
+      </div>
       <!-- JASMIN & SABINE BÖLÜMÜ -->
       <div id="abholbereit-wrap" style="margin-bottom:24px;display:none">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
@@ -610,6 +621,7 @@ tbody tr:last-child td{border-bottom:none}
             <option class="opt-reparatur">In Bearbeitung</option>
             <option class="opt-reparatur">Teile bestellt</option>
             <option class="opt-reparatur">Warten auf Kunde</option>
+            <option class="opt-reparatur">R&uuml;ckgabe (nicht m&ouml;glich)</option>
             <option class="opt-reparatur">Fertig</option>
             <option class="opt-reparatur">Abgeholt</option>
             <option class="opt-reparatur">Erledigt</option>
@@ -932,7 +944,7 @@ function fmt(n){return Number(n||0).toFixed(2).replace('.',',').replace(/\B(?=(\
 function fmtD(s){if(!s)return '\u2014';var p=s.slice(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function tod(){return new Date().toISOString().split('T')[0];}
 function msg(id,t,err){var e=document.getElementById(id);if(!e)return;e.textContent=t;e.style.color=err?'var(--red)':'var(--green)';if(!err)setTimeout(function(){e.textContent=''},3000);}
-function sbadge(s){var c={Neu:'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa',Fertig:'#34d399',Abgeholt:'#6b7585',Abgelehnt:'#f87171','Erledigt':'#34d399','Abgerechnet':'#6b7585','Verkauft':'#15803d','Bestellt':'#a16207','Eingetroffen':'#f59e0b','In Einrichtung':'#fb923c','Bereit':'#34d399','Storniert':'#f87171'};var col=c[s]||'#33afe2';return '<span class="badge" style="background:'+col+'22;border:1px solid '+col+'44;color:'+col+'">'+(s||'Neu')+'</span>';}
+function sbadge(s){var c={Neu:'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa',Fertig:'#34d399',Abgeholt:'#6b7585',Abgelehnt:'#f87171','Erledigt':'#34d399','Abgerechnet':'#6b7585','Verkauft':'#15803d','Bestellt':'#a16207','Eingetroffen':'#f59e0b','In Einrichtung':'#fb923c','Bereit':'#34d399','Storniert':'#f87171','Rückgabe (nicht möglich)':'#dc2626'};var col=c[s]||'#33afe2';return '<span class="badge" style="background:'+col+'22;border:1px solid '+col+'44;color:'+col+'">'+(s||'Neu')+'</span>';}
 
 function showPg(id){
   document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
@@ -990,6 +1002,8 @@ async function loadDash(){
     renderDashTbl(d.history,'');
     // Abholbereit listesi — fertig + AB var
     renderAbholbereit();
+    // Rückgabe listesi — müşteriye iade edilecek
+    renderRueckgabe();
     renderOffeneAuftraege();
     checkOutlookStatus();
     // Offene Rechnungen
@@ -1030,6 +1044,60 @@ function renderOffeneAuftraege(){
       +'</div>'
       +'</div>';
   }).join('');
+}
+
+function renderRueckgabe(){
+  var wrap=document.getElementById('rueckgabe-wrap');
+  var listEl=document.getElementById('rueckgabe-list');
+  var countEl=document.getElementById('rueckgabe-count');
+  if(!wrap||!listEl||!countEl) return;
+  // Rückgabe status'unda olan auftragler
+  var rueck=reps.filter(function(r){return r.status==='Rückgabe (nicht möglich)';});
+  if(!rueck.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  countEl.textContent=rueck.length;
+  listEl.onclick=function(e){
+    var btn=e.target.closest('[data-rueck-id]');
+    if(btn){
+      e.stopPropagation();
+      rueckgabeBestaetigen(parseInt(btn.dataset.rueckId),btn.dataset.rueckNr,btn.dataset.rueckName);
+      return;
+    }
+    var row=e.target.closest('.row[id^="rueckrow-"]');
+    if(row){
+      var rid=row.id.replace('rueckrow-','');
+      openDet(parseInt(rid),'pg-dash');
+    }
+  };
+  listEl.innerHTML=rueck.map(function(r){
+    return '<div class="row" style="grid-template-columns:160px 1fr 140px;cursor:pointer" id="rueckrow-'+r.id+'">'
+      +'<div class="nr">'+typBadge(r.auftragstyp)+(r.nr||'')+'</div>'
+      +'<div class="nm">'+(r.k_name||'')
+        +'<span class="sub">'+(r.geraet_typ||'')+(r.modell?' &middot; '+r.modell:'')
+        +(r.k_telefon?' &middot; &#x1F4DE; '+r.k_telefon:'')+'</span></div>'
+      +'<div style="text-align:right;align-self:center">'
+        +'<button class="qs-btn" style="background:#dc262622;color:#dc2626;border-color:#dc262644" data-rueck-id="'+r.id+'" data-rueck-nr="'+(r.nr||'')+'" data-rueck-name="'+(r.k_name||'')+'">&#x2713; Zur&uuml;ckgegeben</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+async function rueckgabeBestaetigen(id,nr,name){
+  if(!confirm(name+' &mdash; Gerät zurückgegeben?\n\nDer Auftrag wird auf "Abgeholt" gesetzt.')) return;
+  try{
+    var r=await fetch(W+'/api/reparatur/'+id,{
+      method:'PATCH',
+      headers:{Authorization:A,'Content-Type':'application/json'},
+      body:JSON.stringify({status:'Abgeholt',notizen:''})
+    });
+    var j=await r.json();
+    if(j.ok||j.id){
+      showNotif('&#x2713; '+name+' &mdash; Gerät zurückgegeben','green');
+      await loadList();
+      renderStats();
+      renderRueckgabe();
+    } else { showNotif('Fehler','red'); }
+  }catch(e){ showNotif(e.message,'red'); }
 }
 
 async function renderAbholbereit(){
