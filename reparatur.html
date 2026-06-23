@@ -3216,10 +3216,10 @@ function openGerForm(id){
     document.getElementById('ger-kaufdatum').value=new Date().toISOString().slice(0,10);
   }
   document.getElementById('ger-modal').style.display='block';
-  // Barkod okuyucu için Seriennummer'a otomatik focus
+  // Yeni cihazda EAN alanına otomatik focus (iş akışı EAN ile başlar)
   setTimeout(function(){
-    var sn=document.getElementById('ger-sn');
-    if(sn){ sn.focus(); }
+    var startEl=id?document.getElementById('ger-sn'):document.getElementById('ger-ean');
+    if(startEl){ startEl.focus(); }
   },150);
 }
 
