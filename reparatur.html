@@ -3335,6 +3335,11 @@ async function lookupEAN(){
     if(j.ok && j.title){
       var modellEl=document.getElementById('ger-modell');
       if(modellEl && !modellEl.value) modellEl.value=j.title;
+      // Specs otomatik doldur (sadece boşsa, üzerine yazma)
+      if(j.cpu){var c=document.getElementById('ger-cpu');if(c&&!c.value)c.value=j.cpu;}
+      if(j.ram){var rm=document.getElementById('ger-ram');if(rm&&!rm.value)rm.value=j.ram;}
+      if(j.ssd){var s=document.getElementById('ger-ssd');if(s&&!s.value)s.value=j.ssd;}
+      if(j.gpu){var g=document.getElementById('ger-gpu');if(g&&!g.value)g.value=j.gpu;}
       var cat=(j.category||'').toLowerCase();
       var title=(j.title||'').toLowerCase();
       var typEl=document.getElementById('ger-typ');
@@ -3347,7 +3352,9 @@ async function lookupEAN(){
         else if(cat.indexOf('patrone')>=0||cat.indexOf('toner')>=0||title.indexOf('patrone')>=0||title.indexOf('toner')>=0||title.indexOf('cartridge')>=0||cat.indexOf('kabel')>=0||cat.indexOf('zubehör')>=0||cat.indexOf('verbrauch')>=0) typEl.value='Zubehör / Verbrauchsmaterial';
         else if(title.indexOf('drucker')>=0||title.indexOf('printer')>=0||cat.indexOf('printer')>=0||cat.indexOf('drucker')>=0) typEl.value='Drucker';
       }
-      resultEl.innerHTML='<span style="color:var(--green)">✓ '+j.title+(j.brand?' ('+j.brand+')':'')+'</span>'+(j.category?'<br><span style="color:var(--m);font-size:11px">📁 '+j.category+'</span>':'');
+      var specsArr=[];if(j.cpu)specsArr.push(j.cpu);if(j.ram)specsArr.push(j.ram);if(j.ssd)specsArr.push(j.ssd);if(j.gpu)specsArr.push(j.gpu);
+      var specsStr=specsArr.length?'<br><span style="color:var(--hasi);font-size:11px">⚙ '+specsArr.join(' · ')+'</span>':'';
+      resultEl.innerHTML='<span style="color:var(--green)">✓ '+j.title+(j.brand?' ('+j.brand+')':'')+'</span>'+(j.category?'<br><span style="color:var(--m);font-size:11px">📁 '+j.category+'</span>':'')+specsStr;
     } else {
       resultEl.innerHTML='<span style="color:var(--amber)">⚠ Kein Produkt gefunden — bitte manuell eingeben</span>';
     }
