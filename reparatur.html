@@ -865,10 +865,34 @@ tbody tr:last-child td{border-bottom:none}
       <div style="background:var(--soft);border-radius:10px;padding:12px;margin-bottom:12px">
         <div style="font-size:11px;font-family:DM Mono,monospace;color:var(--hasi);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">&#x2699; Spezifikationen</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div><label class="ger-lbl">CPU</label><input class="inp" id="ger-cpu" placeholder="z.B. i5-10210U"></div>
-          <div><label class="ger-lbl">RAM</label><input class="inp" id="ger-ram" placeholder="z.B. 16 GB"></div>
-          <div><label class="ger-lbl">SSD / HDD</label><input class="inp" id="ger-ssd" placeholder="z.B. 512 GB SSD"></div>
-          <div><label class="ger-lbl">GPU</label><input class="inp" id="ger-gpu" placeholder="z.B. Intel UHD / RTX 3050"></div>
+          <div><label class="ger-lbl">CPU</label>
+            <input class="inp" id="ger-cpu" list="cpu-list" placeholder="z.B. Intel Core i5">
+            <datalist id="cpu-list">
+              <option value="Intel Core i3"><option value="Intel Core i5"><option value="Intel Core i7"><option value="Intel Core i9">
+              <option value="AMD Ryzen 3"><option value="AMD Ryzen 5"><option value="AMD Ryzen 7"><option value="AMD Ryzen 9">
+              <option value="Intel Celeron"><option value="Intel Pentium"><option value="Apple M1"><option value="Apple M2"><option value="Apple M3">
+            </datalist>
+          </div>
+          <div><label class="ger-lbl">RAM</label>
+            <input class="inp" id="ger-ram" list="ram-list" placeholder="z.B. 16 GB">
+            <datalist id="ram-list">
+              <option value="4 GB"><option value="8 GB"><option value="16 GB"><option value="32 GB"><option value="64 GB"><option value="128 GB">
+            </datalist>
+          </div>
+          <div><label class="ger-lbl">SSD / HDD</label>
+            <input class="inp" id="ger-ssd" list="ssd-list" placeholder="z.B. 512 GB SSD">
+            <datalist id="ssd-list">
+              <option value="128 GB SSD"><option value="256 GB SSD"><option value="512 GB SSD"><option value="1 TB SSD"><option value="2 TB SSD">
+              <option value="500 GB HDD"><option value="1 TB HDD"><option value="2 TB HDD"><option value="256 GB SSD + 1 TB HDD"><option value="512 GB SSD + 1 TB HDD">
+            </datalist>
+          </div>
+          <div><label class="ger-lbl">GPU</label>
+            <input class="inp" id="ger-gpu" list="gpu-list" placeholder="z.B. Intel UHD">
+            <datalist id="gpu-list">
+              <option value="Intel UHD Graphics"><option value="Intel Iris Xe"><option value="AMD Radeon"><option value="NVIDIA GTX 1650">
+              <option value="NVIDIA RTX 3050"><option value="NVIDIA RTX 4060"><option value="Onboard / Integriert">
+            </datalist>
+          </div>
         </div>
         <div style="margin-top:10px"><label class="ger-lbl">Weitere Specs / Zubeh&ouml;r</label><input class="inp" id="ger-spez" placeholder="z.B. Win11 Pro, Tastatur DE, Netzteil"></div>
       </div>
