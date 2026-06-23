@@ -841,7 +841,15 @@ tbody tr:last-child td{border-bottom:none}
       <button class="fbtn ger-fbtn" data-gf="verfuegbar" onclick="gerFlt='verfuegbar';renderGeraete()">&#x1F7E2; Verf&uuml;gbar</button>
       <button class="fbtn ger-fbtn" data-gf="verkauft" onclick="gerFlt='verkauft';renderGeraete()">&#x2713; Verkauft</button>
     </div>
-    <div class="lw"><div id="ger-list" style="padding:40px;text-align:center;color:var(--m);font-family:DM Mono,monospace">Lade...</div></div>
+    <div class="lw">
+      <div class="ger-head" style="display:grid;grid-template-columns:140px 1fr 160px 130px;gap:8px;padding:10px 14px;border-bottom:2px solid var(--b);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--m)">
+        <div>Seriennummer</div>
+        <div>Gerät / Modell</div>
+        <div style="text-align:right">Preis / Käufer</div>
+        <div style="text-align:right">Status</div>
+      </div>
+      <div id="ger-list" style="padding:40px;text-align:center;color:var(--m);font-family:DM Mono,monospace">Lade...</div>
+    </div>
   </div>
 </div>
 
