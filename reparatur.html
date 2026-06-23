@@ -3362,8 +3362,13 @@ async function lookupEAN(){
       var specsArr=[];if(j.cpu)specsArr.push(j.cpu);if(j.ram)specsArr.push(j.ram);if(j.ssd)specsArr.push(j.ssd);if(j.gpu)specsArr.push(j.gpu);
       var specsStr=specsArr.length?'<br><span style="color:var(--hasi);font-size:11px">⚙ '+specsArr.join(' · ')+'</span>':'';
       resultEl.innerHTML='<span style="color:var(--green)">✓ '+j.title+(j.brand?' ('+j.brand+')':'')+'</span>'+(j.category?'<br><span style="color:var(--m);font-size:11px">📁 '+j.category+'</span>':'')+specsStr;
+      // Otomatik Seriennummer alanına geç (sonraki adım: seri no okut)
+      var snEl=document.getElementById('ger-sn');
+      if(snEl){ setTimeout(function(){ snEl.focus(); }, 100); }
     } else {
       resultEl.innerHTML='<span style="color:var(--amber)">⚠ Kein Produkt gefunden — bitte manuell eingeben</span>';
+      var snEl2=document.getElementById('ger-sn');
+      if(snEl2){ setTimeout(function(){ snEl2.focus(); }, 100); }
     }
   }catch(e){
     resultEl.innerHTML='<span style="color:var(--red)">Fehler: '+e.message+'</span>';
