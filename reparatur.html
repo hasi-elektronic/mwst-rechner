@@ -855,7 +855,7 @@ tbody tr:last-child td{border-bottom:none}
     <div style="padding:20px 22px;max-height:calc(100vh - 200px);overflow-y:auto">
       <input type="hidden" id="ger-id">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div><label class="ger-lbl">Seriennummer</label><input class="inp" id="ger-sn" placeholder="z.B. SN-12345"></div>
+        <div><label class="ger-lbl">Seriennummer <span style="color:var(--hasi);font-size:10px">📷 Scanner-bereit</span></label><input class="inp" id="ger-sn" placeholder="Scannen oder eingeben..." autocomplete="off"></div>
         <div><label class="ger-lbl">Ger&auml;te-Typ</label>
           <select class="inp" id="ger-typ">
             <option>Laptop / Notebook</option><option>Desktop PC</option><option>Monitor</option>
@@ -3205,6 +3205,11 @@ function openGerForm(id){
     document.getElementById('ger-kaufdatum').value=new Date().toISOString().slice(0,10);
   }
   document.getElementById('ger-modal').style.display='block';
+  // Barkod okuyucu için Seriennummer'a otomatik focus
+  setTimeout(function(){
+    var sn=document.getElementById('ger-sn');
+    if(sn){ sn.focus(); }
+  },150);
 }
 
 function closeGerForm(){document.getElementById('ger-modal').style.display='none';}
@@ -3284,6 +3289,28 @@ document.addEventListener('DOMContentLoaded',function(){
   var gq=document.getElementById('ger-q');
   if(gq) gq.addEventListener('input',function(){renderGeraete();});
 });
+
+// Geräte modal — barkod okuyucu Enter'ında form submit olmasın, sonraki alana geç
+document.addEventListener('DOMContentLoaded',function(){
+  var gerModal=document.getElementById('ger-modal');
+  if(gerModal){
+    gerModal.addEventListener('keydown',function(e){
+      if(e.key==='Enter' && e.target.tagName==='INPUT'){
+        e.preventDefault();
+        // Modal içindeki tüm input/select/textarea'ları sırala
+        var fields=Array.prototype.slice.call(gerModal.querySelectorAll('input,select,textarea'));
+        var idx=fields.indexOf(e.target);
+        if(idx>=0 && idx<fields.length-1){
+          fields[idx+1].focus();
+        } else {
+          // Son alandaysa kaydet
+          saveGer();
+        }
+      }
+    });
+  }
+});
+
 // ==================== END GERÄTE ====================
 
 </script>
