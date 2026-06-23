@@ -842,11 +842,11 @@ tbody tr:last-child td{border-bottom:none}
       <button class="fbtn ger-fbtn" data-gf="verkauft" onclick="gerFlt='verkauft';renderGeraete()">&#x2713; Verkauft</button>
     </div>
     <div class="lw">
-      <div class="ger-head" style="display:grid;grid-template-columns:140px 1fr 160px 130px;gap:8px;padding:10px 14px;border-bottom:2px solid var(--b);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--m)">
+      <div class="ger-head" style="display:grid;grid-template-columns:140px 1fr 160px 130px;gap:8px;padding:10px 14px;border-bottom:2px solid var(--b);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--m);text-align:center">
         <div>Seriennummer</div>
         <div>Gerät / Modell</div>
-        <div style="text-align:right">Preis / Käufer</div>
-        <div style="text-align:right">Status</div>
+        <div>Preis / Käufer</div>
+        <div>Status</div>
       </div>
       <div id="ger-list" style="padding:40px;text-align:center;color:var(--m);font-family:DM Mono,monospace">Lade...</div>
     </div>
@@ -3185,12 +3185,12 @@ function renderGeraete(){
     var preisInfo=isVerf
       ? (g.verkaufspreis?'<span style="color:var(--green);font-weight:700">'+Number(g.verkaufspreis).toFixed(0)+' €</span>':'')
       : (g.kaeufer?'<span style="font-size:11px;color:var(--m)">→ '+g.kaeufer+'</span>':'');
-    return '<div class="row" style="grid-template-columns:140px 1fr 160px 130px;cursor:pointer" onclick="openGerForm('+g.id+')">'
-      +'<div class="nr" style="font-family:DM Mono,monospace">'+(g.seriennummer||'—')+'</div>'
-      +'<div class="nm">'+(g.modell||g.geraet_typ||'—')
-        +'<span class="sub">'+(g.geraet_typ||'')+(specStr?' · '+specStr:'')+'</span></div>'
-      +'<div style="text-align:right;align-self:center;font-size:12px">'+preisInfo+'</div>'
-      +'<div style="text-align:right;align-self:center;display:flex;flex-direction:column;gap:5px;align-items:flex-end">'
+    return '<div class="row" style="grid-template-columns:140px 1fr 160px 130px;cursor:pointer;align-items:center" onclick="openGerForm('+g.id+')">'
+      +'<div class="nr" style="font-family:DM Mono,monospace;text-align:center">'+(g.seriennummer||'—')+'</div>'
+      +'<div class="nm" style="text-align:center">'+(g.modell||g.geraet_typ||'—')
+        +'<span class="sub" style="display:block">'+(g.geraet_typ||'')+(specStr?' · '+specStr:'')+'</span></div>'
+      +'<div style="text-align:center;align-self:center;font-size:12px">'+preisInfo+'</div>'
+      +'<div style="align-self:center;display:flex;flex-direction:column;gap:5px;align-items:center">'
         +statusBadge
         +(isVerf?'<button class="qs-btn" style="background:#15803d22;color:#15803d;border-color:#15803d44" onclick="event.stopPropagation();openVerkaufModal('+g.id+')">📦 Verkaufen</button>':'<button class="qs-btn" style="background:#0090c422;color:#0090c4;border-color:#0090c444" onclick="event.stopPropagation();printBeleg('+g.id+')">🖨 Beleg</button>')
       +'</div>'
