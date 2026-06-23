@@ -3381,23 +3381,46 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 
-async function deleteGer(){
+function deleteGer(){
   var id=document.getElementById('ger-id').value;
   if(!id) return;
   var g=geraete.find(function(x){return x.id==id;});
   var name=g?(g.modell||g.seriennummer||'Gerät'):'Gerät';
-  if(!confirm('Gerät wirklich löschen?\n\n'+name+'\n\nDieser Vorgang kann nicht rückgängig gemacht werden.')) return;
-  try{
-    var r=await fetch(W+'/api/geraete/'+id,{method:'DELETE',headers:{Authorization:A}});
-    var j=await r.json();
-    if(j.ok){
-      showNotif('🗑 Gerät gelöscht','green');
-      closeGerForm();
-      loadGeraete();
-    } else {
-      msg('ger-msg','Fehler beim Löschen!',true);
+  var ex=document.getElementById('ger-del-modal');
+  if(ex) ex.remove();
+  var modal=document.createElement('div');
+  modal.id='ger-del-modal';
+  modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML='<div style="background:#fff;border-radius:16px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
+    +'<div style="font-size:32px;text-align:center;margin-bottom:12px">&#x1F5D1;</div>'
+    +'<div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:8px;color:#1a2a3a">Gerät löschen?</div>'
+    +'<div style="font-size:13px;color:#5a7a90;text-align:center;margin-bottom:20px"><b>'+name+'</b><br><span style="color:#dc2626">Dieser Vorgang kann nicht rückgängig gemacht werden!</span></div>'
+    +'<div style="display:flex;gap:10px">'
+    +'<button id="ger-del-cancel" style="flex:1;padding:11px;border:1.5px solid #d6e4f0;border-radius:10px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit">Abbrechen</button>'
+    +'<button id="ger-del-confirm" style="flex:1;padding:11px;border:none;border-radius:10px;background:#dc2626;color:#fff;cursor:pointer;font-size:14px;font-weight:700;font-family:inherit">Ja, löschen</button>'
+    +'</div></div>';
+  document.body.appendChild(modal);
+  document.getElementById('ger-del-cancel').onclick=function(){modal.remove();};
+  modal.onclick=function(e){if(e.target===modal)modal.remove();};
+  document.getElementById('ger-del-confirm').onclick=async function(){
+    var btn=this; btn.disabled=true; btn.textContent='...';
+    try{
+      var r=await fetch(W+'/api/geraete/'+id,{method:'DELETE',headers:{Authorization:A}});
+      var j=await r.json();
+      if(j.ok){
+        modal.remove();
+        closeGerForm();
+        showNotif('🗑 Gerät gelöscht','green',4000);
+        loadGeraete();
+      } else {
+        btn.disabled=false; btn.textContent='Ja, löschen';
+        showNotif('⚠ Fehler beim Löschen','amber');
+      }
+    }catch(e){
+      btn.disabled=false; btn.textContent='Ja, löschen';
+      showNotif('⚠ '+e.message,'amber');
     }
-  }catch(e){msg('ger-msg',e.message,true);}
+  };
 }
 
 // ==================== END GERÄTE ====================
