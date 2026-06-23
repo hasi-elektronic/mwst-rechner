@@ -854,6 +854,15 @@ tbody tr:last-child td{border-bottom:none}
     </div>
     <div style="padding:20px 22px;max-height:calc(100vh - 200px);overflow-y:auto">
       <input type="hidden" id="ger-id">
+      <!-- EAN Scan -->
+      <div style="background:var(--hasi-soft);border-radius:10px;padding:12px;margin-bottom:12px">
+        <label class="ger-lbl">&#x1F4E6; EAN-Code scannen <span style="color:var(--hasi);font-size:10px">&rarr; Modell wird automatisch gesucht</span></label>
+        <div style="display:flex;gap:8px">
+          <input class="inp" id="ger-ean" placeholder="EAN-Code scannen oder eingeben..." autocomplete="off" style="flex:1">
+          <button class="btn p" type="button" onclick="lookupEAN()" style="white-space:nowrap">&#x1F50D; Suchen</button>
+        </div>
+        <div id="ger-ean-result" style="font-size:12px;margin-top:6px;min-height:16px"></div>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
         <div><label class="ger-lbl">Seriennummer <span style="color:var(--hasi);font-size:10px">📷 Scanner-bereit</span></label><input class="inp" id="ger-sn" placeholder="Scannen oder eingeben..." autocomplete="off"></div>
         <div><label class="ger-lbl">Ger&auml;te-Typ</label>
@@ -3200,7 +3209,7 @@ function openGerForm(id){
     document.getElementById('ger-notizen').value=g.notizen||'';
   } else {
     document.getElementById('ger-modal-title').textContent='Neues Gerät';
-    ['ger-id','ger-sn','ger-modell','ger-cpu','ger-ram','ger-ssd','ger-gpu','ger-spez','ger-lieferant','ger-ekpreis','ger-vkpreis','ger-notizen'].forEach(function(i){document.getElementById(i).value='';});
+    ['ger-id','ger-ean','ger-sn','ger-modell','ger-cpu','ger-ram','ger-ssd','ger-gpu','ger-spez','ger-lieferant','ger-ekpreis','ger-vkpreis','ger-notizen'].forEach(function(i){var el=document.getElementById(i);if(el)el.value='';});var er=document.getElementById('ger-ean-result');if(er)er.innerHTML='';
     document.getElementById('ger-typ').value='Laptop / Notebook';
     document.getElementById('ger-kaufdatum').value=new Date().toISOString().slice(0,10);
   }
@@ -3306,6 +3315,51 @@ document.addEventListener('DOMContentLoaded',function(){
           // Son alandaysa kaydet
           saveGer();
         }
+      }
+    });
+  }
+});
+
+
+// EAN lookup — model otomatik doldur
+async function lookupEAN(){
+  var ean=(document.getElementById('ger-ean').value||'').trim();
+  var resultEl=document.getElementById('ger-ean-result');
+  if(!ean){resultEl.innerHTML='<span style="color:var(--m)">Bitte EAN eingeben</span>';return;}
+  resultEl.innerHTML='<span style="color:var(--hasi)">⏳ Suche...</span>';
+  try{
+    var r=await fetch(W+'/api/ean-lookup?ean='+encodeURIComponent(ean),{headers:{Authorization:A}});
+    var j=await r.json();
+    if(j.ok && j.title){
+      var modellEl=document.getElementById('ger-modell');
+      if(modellEl && !modellEl.value) modellEl.value=j.title;
+      var cat=(j.category||'').toLowerCase();
+      var title=(j.title||'').toLowerCase();
+      var typEl=document.getElementById('ger-typ');
+      if(typEl){
+        if(title.indexOf('laptop')>=0||title.indexOf('notebook')>=0||cat.indexOf('laptop')>=0) typEl.value='Laptop / Notebook';
+        else if(title.indexOf('desktop')>=0||cat.indexOf('desktop')>=0) typEl.value='Desktop PC';
+        else if(title.indexOf('monitor')>=0||cat.indexOf('monitor')>=0) typEl.value='Monitor';
+        else if(title.indexOf('tablet')>=0||cat.indexOf('tablet')>=0) typEl.value='Tablet';
+        else if(title.indexOf('phone')>=0||cat.indexOf('phone')>=0||cat.indexOf('mobile')>=0) typEl.value='Smartphone';
+        else if(title.indexOf('drucker')>=0||title.indexOf('printer')>=0||cat.indexOf('printer')>=0) typEl.value='Drucker';
+      }
+      resultEl.innerHTML='<span style="color:var(--green)">✓ '+j.title+(j.brand?' ('+j.brand+')':'')+'</span>';
+    } else {
+      resultEl.innerHTML='<span style="color:var(--amber)">⚠ Kein Produkt gefunden — bitte manuell eingeben</span>';
+    }
+  }catch(e){
+    resultEl.innerHTML='<span style="color:var(--red)">Fehler: '+e.message+'</span>';
+  }
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var eanEl=document.getElementById('ger-ean');
+  if(eanEl){
+    eanEl.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){
+        e.preventDefault();
+        e.stopPropagation();
+        lookupEAN();
       }
     });
   }
