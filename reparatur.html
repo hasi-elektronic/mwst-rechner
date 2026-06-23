@@ -247,6 +247,8 @@ tbody tr:last-child td{border-bottom:none}
 .vl-footer-bar{background:var(--bg);border-top:1.5px solid var(--b);padding:10px 28px;font-size:11px;color:var(--m);display:flex;justify-content:space-between}
 .vl-actions{display:flex;gap:10px;padding:16px 28px;border-top:1.5px solid var(--b);background:#fff;flex-wrap:wrap}
 .kh{padding:8px;text-align:center;font-size:10px;font-family:"DM Mono",monospace;color:var(--m);text-transform:uppercase;font-weight:600}
+.ger-lbl{display:block;font-size:11px;font-family:"DM Mono",monospace;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.ger-fbtn.on{background:var(--hasi);color:#fff;border-color:var(--hasi)}
 </style>
 </head>
 <body>
@@ -261,6 +263,7 @@ tbody tr:last-child td{border-bottom:none}
     <button class="tab" data-pg="pg-kal">&#x1F4C5; Kalender</button>
     <button class="tab" data-pg="pg-kunden">&#x1F465; Kunden</button>
     <button class="tab" data-pg="pg-berichte">&#x1F4C4; Berichte</button>
+    <button class="tab" data-pg="pg-geraete">&#x1F4BB; Ger&auml;te</button>
     <button class="gs-btn" id="gs-open-btn" style="margin-left:auto;flex-shrink:0" title="Suchen (Strg+K)">&#x1F50D; Suchen <span class="gs-kbd">Strg+K</span></button>
   </div>
 </nav>
@@ -812,6 +815,105 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- GERÄTE (Stok + Satış) -->
+<div id="pg-geraete" class="pg">
+  <div class="wrap">
+    <div class="topbar">
+      <h1>Ger&auml;te<span>verwaltung</span></h1>
+      <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap">
+        <input class="inp" id="ger-q" placeholder="&#x1F50D; SN, Modell, Käufer..." style="max-width:240px">
+        <button class="btn p" onclick="openGerForm(null)">&#xFF0B; Neues Ger&auml;t</button>
+        <button class="btn" onclick="loadGeraete()">&#x21BB;</button>
+      </div>
+    </div>
+    <div class="stats" style="margin-bottom:16px">
+      <div class="stat" style="cursor:pointer" onclick="gerFlt='all';renderGeraete()"><div class="v" id="gs-ges" style="color:var(--hasi)">0</div><div class="l">Gesamt</div></div>
+      <div class="stat" style="cursor:pointer" onclick="gerFlt='verfuegbar';renderGeraete()"><div class="v" id="gs-verf" style="color:#16a34a">0</div><div class="l">Verf&uuml;gbar</div></div>
+      <div class="stat" style="cursor:pointer" onclick="gerFlt='verkauft';renderGeraete()"><div class="v" id="gs-verk" style="color:#6b7585">0</div><div class="l">Verkauft</div></div>
+      <div class="stat"><div class="v" id="gs-wert" style="color:var(--green);font-size:14px">0</div><div class="l">Lagerwert</div></div>
+    </div>
+    <!-- Filtre sekmeleri -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="fbtn ger-fbtn on" data-gf="all" onclick="gerFlt='all';renderGeraete()">Alle</button>
+      <button class="fbtn ger-fbtn" data-gf="verfuegbar" onclick="gerFlt='verfuegbar';renderGeraete()">&#x1F7E2; Verf&uuml;gbar</button>
+      <button class="fbtn ger-fbtn" data-gf="verkauft" onclick="gerFlt='verkauft';renderGeraete()">&#x2713; Verkauft</button>
+    </div>
+    <div class="lw"><div id="ger-list" style="padding:40px;text-align:center;color:var(--m);font-family:DM Mono,monospace">Lade...</div></div>
+  </div>
+</div>
+
+<!-- GERÄT FORM MODAL -->
+<div id="ger-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;overflow-y:auto;padding:20px">
+  <div style="max-width:640px;margin:20px auto;background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="background:var(--hasi);color:#fff;padding:16px 22px;display:flex;align-items:center;gap:10px">
+      <span id="ger-modal-title" style="font-size:17px;font-weight:700">Neues Ger&auml;t</span>
+      <button onclick="closeGerForm()" style="margin-left:auto;background:rgba(0,0,0,.2);border:none;color:#fff;padding:5px 13px;border-radius:7px;cursor:pointer;font-size:15px">&#x2715;</button>
+    </div>
+    <div style="padding:20px 22px;max-height:calc(100vh - 200px);overflow-y:auto">
+      <input type="hidden" id="ger-id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div><label class="ger-lbl">Seriennummer</label><input class="inp" id="ger-sn" placeholder="z.B. SN-12345"></div>
+        <div><label class="ger-lbl">Ger&auml;te-Typ</label>
+          <select class="inp" id="ger-typ">
+            <option>Laptop / Notebook</option><option>Desktop PC</option><option>Monitor</option>
+            <option>Tablet</option><option>Drucker</option><option>Smartphone</option>
+            <option>Netzwerk (Router/Switch)</option><option>Sonstiges</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:12px"><label class="ger-lbl">Modell / Bezeichnung</label><input class="inp" id="ger-modell" placeholder="z.B. Dell Latitude 5510"></div>
+      <div style="background:var(--soft);border-radius:10px;padding:12px;margin-bottom:12px">
+        <div style="font-size:11px;font-family:DM Mono,monospace;color:var(--hasi);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">&#x2699; Spezifikationen</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><label class="ger-lbl">CPU</label><input class="inp" id="ger-cpu" placeholder="z.B. i5-10210U"></div>
+          <div><label class="ger-lbl">RAM</label><input class="inp" id="ger-ram" placeholder="z.B. 16 GB"></div>
+          <div><label class="ger-lbl">SSD / HDD</label><input class="inp" id="ger-ssd" placeholder="z.B. 512 GB SSD"></div>
+          <div><label class="ger-lbl">GPU</label><input class="inp" id="ger-gpu" placeholder="z.B. Intel UHD / RTX 3050"></div>
+        </div>
+        <div style="margin-top:10px"><label class="ger-lbl">Weitere Specs / Zubeh&ouml;r</label><input class="inp" id="ger-spez" placeholder="z.B. Win11 Pro, Tastatur DE, Netzteil"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div><label class="ger-lbl">Lieferant</label><input class="inp" id="ger-lieferant" placeholder="z.B. Wortmann"></div>
+        <div><label class="ger-lbl">Kaufdatum</label><input class="inp" id="ger-kaufdatum" type="date"></div>
+        <div><label class="ger-lbl">Einkaufspreis (&euro;)</label><input class="inp" id="ger-ekpreis" type="number" step="0.01" placeholder="450"></div>
+        <div><label class="ger-lbl">Verkaufspreis (&euro;)</label><input class="inp" id="ger-vkpreis" type="number" step="0.01" placeholder="699"></div>
+      </div>
+      <div style="margin-bottom:14px"><label class="ger-lbl">Notizen</label><textarea class="inp" id="ger-notizen" rows="2" placeholder="Interne Notizen..." style="resize:vertical"></textarea></div>
+      <div id="ger-msg" style="font-size:13px;margin-bottom:10px"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn p" onclick="saveGer()" style="flex:1">&#x2713; Speichern</button>
+        <button class="btn" onclick="closeGerForm()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VERKAUF MODAL -->
+<div id="ger-verkauf-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1001;overflow-y:auto;padding:20px">
+  <div style="max-width:480px;margin:40px auto;background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="background:#15803d;color:#fff;padding:16px 22px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:17px;font-weight:700">&#x1F4E6; Ger&auml;t verkaufen</span>
+      <button onclick="closeVerkaufModal()" style="margin-left:auto;background:rgba(0,0,0,.2);border:none;color:#fff;padding:5px 13px;border-radius:7px;cursor:pointer;font-size:15px">&#x2715;</button>
+    </div>
+    <div style="padding:20px 22px">
+      <input type="hidden" id="verkauf-ger-id">
+      <div id="verkauf-ger-info" style="background:var(--soft);border-radius:10px;padding:12px;margin-bottom:14px;font-size:13px"></div>
+      <div style="margin-bottom:12px"><label class="ger-lbl">K&auml;ufer (Name)</label><input class="inp" id="verkauf-kaeufer" placeholder="Kundenname"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div><label class="ger-lbl">Telefon</label><input class="inp" id="verkauf-tel" placeholder="+49 ..."></div>
+        <div><label class="ger-lbl">Verkaufsdatum</label><input class="inp" id="verkauf-datum" type="date"></div>
+        <div><label class="ger-lbl">Verkaufspreis (&euro;)</label><input class="inp" id="verkauf-preis" type="number" step="0.01"></div>
+        <div><label class="ger-lbl">Garantie (Monate)</label><input class="inp" id="verkauf-garantie" type="number" placeholder="24"></div>
+      </div>
+      <div id="verkauf-msg" style="font-size:13px;margin-bottom:10px"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" onclick="confirmVerkauf()" style="flex:1;background:#15803d;color:#fff;border-color:#15803d">&#x2713; Verkauf bestätigen</button>
+        <button class="btn" onclick="closeVerkaufModal()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- KUNDEN -->
 <div id="pg-kunden" class="pg">
   <div class="wrap">
@@ -961,6 +1063,7 @@ document.querySelectorAll('.tab[data-pg]').forEach(function(b){
     if(pid==='pg-kal') renderKal();
     if(pid==='pg-kunden') renderKunden('');
     if(pid==='pg-berichte') loadBerichte();
+    if(pid==='pg-geraete') loadGeraete();
   });
 });
 
@@ -2973,6 +3076,189 @@ window.addEventListener('load',function(){
   }
   }, 30000);
 });
+
+// ==================== GERÄTE (Stok + Satış) ====================
+var geraete=[];
+var gerFlt='all';
+
+async function loadGeraete(){
+  var el=document.getElementById('ger-list');
+  if(el) el.innerHTML='<div style="padding:40px;text-align:center;color:var(--m)">Lade...</div>';
+  try{
+    var r=await fetch(W+'/api/geraete',{headers:{Authorization:A}});
+    geraete=await r.json();
+    if(!Array.isArray(geraete)) geraete=[];
+    renderGeraete();
+  }catch(e){
+    if(el) el.innerHTML='<div style="color:red;padding:20px">Fehler: '+e.message+'</div>';
+  }
+}
+
+function renderGeraete(){
+  var el=document.getElementById('ger-list');
+  if(!el) return;
+  // Filtre butonları
+  document.querySelectorAll('.ger-fbtn').forEach(function(b){
+    b.classList.toggle('on', b.dataset.gf===gerFlt);
+  });
+  // Arama
+  var q=(document.getElementById('ger-q').value||'').toLowerCase().trim();
+  var data=geraete.filter(function(g){
+    if(gerFlt!=='all' && g.status!==gerFlt) return false;
+    if(q){
+      var hay=((g.seriennummer||'')+' '+(g.modell||'')+' '+(g.geraet_typ||'')+' '+(g.kaeufer||'')+' '+(g.cpu||'')).toLowerCase();
+      if(hay.indexOf(q)<0) return false;
+    }
+    return true;
+  });
+  // İstatistik
+  var verf=geraete.filter(function(g){return g.status==='verfuegbar';});
+  var verk=geraete.filter(function(g){return g.status==='verkauft';});
+  var lagerwert=verf.reduce(function(s,g){return s+(Number(g.einkaufspreis)||0);},0);
+  document.getElementById('gs-ges').textContent=geraete.length;
+  document.getElementById('gs-verf').textContent=verf.length;
+  document.getElementById('gs-verk').textContent=verk.length;
+  document.getElementById('gs-wert').textContent=lagerwert.toFixed(0)+' €';
+
+  if(!data.length){
+    el.innerHTML='<div style="padding:40px;text-align:center;color:var(--m)">Keine Geräte gefunden.</div>';
+    return;
+  }
+  el.innerHTML=data.map(function(g){
+    var isVerf=g.status==='verfuegbar';
+    var statusBadge=isVerf
+      ? '<span style="background:#16a34a22;color:#16a34a;border:1px solid #16a34a44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;white-space:nowrap">🟢 Verfügbar</span>'
+      : '<span style="background:#6b758522;color:#6b7585;border:1px solid #6b758544;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;white-space:nowrap">✓ Verkauft</span>';
+    var specs=[];
+    if(g.cpu) specs.push(g.cpu);
+    if(g.ram) specs.push(g.ram);
+    if(g.ssd) specs.push(g.ssd);
+    if(g.gpu) specs.push(g.gpu);
+    var specStr=specs.join(' · ');
+    var preisInfo=isVerf
+      ? (g.verkaufspreis?'<span style="color:var(--green);font-weight:700">'+Number(g.verkaufspreis).toFixed(0)+' €</span>':'')
+      : (g.kaeufer?'<span style="font-size:11px;color:var(--m)">→ '+g.kaeufer+'</span>':'');
+    return '<div class="row" style="grid-template-columns:140px 1fr 160px 130px;cursor:pointer" onclick="openGerForm('+g.id+')">'
+      +'<div class="nr" style="font-family:DM Mono,monospace">'+(g.seriennummer||'—')+'</div>'
+      +'<div class="nm">'+(g.modell||g.geraet_typ||'—')
+        +'<span class="sub">'+(g.geraet_typ||'')+(specStr?' · '+specStr:'')+'</span></div>'
+      +'<div style="text-align:right;align-self:center;font-size:12px">'+preisInfo+'</div>'
+      +'<div style="text-align:right;align-self:center;display:flex;flex-direction:column;gap:5px;align-items:flex-end">'
+        +statusBadge
+        +(isVerf?'<button class="qs-btn" style="background:#15803d22;color:#15803d;border-color:#15803d44" onclick="event.stopPropagation();openVerkaufModal('+g.id+')">📦 Verkaufen</button>':'')
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function openGerForm(id){
+  document.getElementById('ger-msg').textContent='';
+  if(id){
+    var g=geraete.find(function(x){return x.id===id;});
+    if(!g) return;
+    document.getElementById('ger-modal-title').textContent='Gerät bearbeiten';
+    document.getElementById('ger-id').value=g.id;
+    document.getElementById('ger-sn').value=g.seriennummer||'';
+    document.getElementById('ger-typ').value=g.geraet_typ||'Laptop / Notebook';
+    document.getElementById('ger-modell').value=g.modell||'';
+    document.getElementById('ger-cpu').value=g.cpu||'';
+    document.getElementById('ger-ram').value=g.ram||'';
+    document.getElementById('ger-ssd').value=g.ssd||'';
+    document.getElementById('ger-gpu').value=g.gpu||'';
+    document.getElementById('ger-spez').value=g.spezifikationen||'';
+    document.getElementById('ger-lieferant').value=g.lieferant||'';
+    document.getElementById('ger-kaufdatum').value=(g.kaufdatum||'').slice(0,10);
+    document.getElementById('ger-ekpreis').value=g.einkaufspreis||'';
+    document.getElementById('ger-vkpreis').value=g.verkaufspreis||'';
+    document.getElementById('ger-notizen').value=g.notizen||'';
+  } else {
+    document.getElementById('ger-modal-title').textContent='Neues Gerät';
+    ['ger-id','ger-sn','ger-modell','ger-cpu','ger-ram','ger-ssd','ger-gpu','ger-spez','ger-lieferant','ger-ekpreis','ger-vkpreis','ger-notizen'].forEach(function(i){document.getElementById(i).value='';});
+    document.getElementById('ger-typ').value='Laptop / Notebook';
+    document.getElementById('ger-kaufdatum').value=new Date().toISOString().slice(0,10);
+  }
+  document.getElementById('ger-modal').style.display='block';
+}
+
+function closeGerForm(){document.getElementById('ger-modal').style.display='none';}
+
+async function saveGer(){
+  var id=document.getElementById('ger-id').value;
+  var body={
+    seriennummer:document.getElementById('ger-sn').value,
+    geraet_typ:document.getElementById('ger-typ').value,
+    modell:document.getElementById('ger-modell').value,
+    cpu:document.getElementById('ger-cpu').value,
+    ram:document.getElementById('ger-ram').value,
+    ssd:document.getElementById('ger-ssd').value,
+    gpu:document.getElementById('ger-gpu').value,
+    spezifikationen:document.getElementById('ger-spez').value,
+    lieferant:document.getElementById('ger-lieferant').value,
+    kaufdatum:document.getElementById('ger-kaufdatum').value,
+    einkaufspreis:document.getElementById('ger-ekpreis').value,
+    verkaufspreis:document.getElementById('ger-vkpreis').value,
+    notizen:document.getElementById('ger-notizen').value
+  };
+  if(!body.modell && !body.seriennummer){msg('ger-msg','Modell oder Seriennummer erforderlich!',true);return;}
+  try{
+    var url=id?W+'/api/geraete/'+id:W+'/api/geraete';
+    var method=id?'PATCH':'POST';
+    var r=await fetch(url,{method:method,headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var j=await r.json();
+    if(j.ok||j.id){
+      showNotif('✓ Gerät gespeichert','green');
+      closeGerForm();
+      loadGeraete();
+    } else msg('ger-msg','Fehler!',true);
+  }catch(e){msg('ger-msg',e.message,true);}
+}
+
+function openVerkaufModal(id){
+  var g=geraete.find(function(x){return x.id===id;});
+  if(!g) return;
+  document.getElementById('verkauf-msg').textContent='';
+  document.getElementById('verkauf-ger-id').value=g.id;
+  document.getElementById('verkauf-ger-info').innerHTML='<b>'+(g.modell||g.geraet_typ)+'</b>'+(g.seriennummer?'<br>SN: '+g.seriennummer:'');
+  document.getElementById('verkauf-kaeufer').value='';
+  document.getElementById('verkauf-tel').value='';
+  document.getElementById('verkauf-datum').value=new Date().toISOString().slice(0,10);
+  document.getElementById('verkauf-preis').value=g.verkaufspreis||'';
+  document.getElementById('verkauf-garantie').value='24';
+  document.getElementById('ger-verkauf-modal').style.display='block';
+}
+
+function closeVerkaufModal(){document.getElementById('ger-verkauf-modal').style.display='none';}
+
+async function confirmVerkauf(){
+  var id=document.getElementById('verkauf-ger-id').value;
+  var kaeufer=document.getElementById('verkauf-kaeufer').value.trim();
+  if(!kaeufer){msg('verkauf-msg','Käufer-Name erforderlich!',true);return;}
+  var body={
+    aktion:'verkaufen',
+    kaeufer:kaeufer,
+    kaeufer_telefon:document.getElementById('verkauf-tel').value,
+    verkaufsdatum:document.getElementById('verkauf-datum').value,
+    verkaufspreis:document.getElementById('verkauf-preis').value,
+    garantie_monate:document.getElementById('verkauf-garantie').value
+  };
+  try{
+    var r=await fetch(W+'/api/geraete/'+id,{method:'PATCH',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var j=await r.json();
+    if(j.ok){
+      showNotif('✓ '+kaeufer+' — Gerät verkauft','green');
+      closeVerkaufModal();
+      loadGeraete();
+    } else msg('verkauf-msg','Fehler!',true);
+  }catch(e){msg('verkauf-msg',e.message,true);}
+}
+
+// Geräte arama — input event
+document.addEventListener('DOMContentLoaded',function(){
+  var gq=document.getElementById('ger-q');
+  if(gq) gq.addEventListener('input',function(){renderGeraete();});
+});
+// ==================== END GERÄTE ====================
+
 </script>
 </body>
 </html>
