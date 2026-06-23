@@ -918,9 +918,10 @@ tbody tr:last-child td{border-bottom:none}
       </div>
       <div style="margin-bottom:14px"><label class="ger-lbl">Notizen</label><textarea class="inp" id="ger-notizen" rows="2" placeholder="Interne Notizen..." style="resize:vertical"></textarea></div>
       <div id="ger-msg" style="font-size:13px;margin-bottom:10px"></div>
-      <div style="display:flex;gap:10px">
+      <div style="display:flex;gap:10px;align-items:center">
         <button class="btn p" onclick="saveGer()" style="flex:1">&#x2713; Speichern</button>
         <button class="btn" onclick="closeGerForm()">Abbrechen</button>
+        <button class="btn" id="ger-del-btn" onclick="deleteGer()" style="display:none;background:#fee2e2;color:#dc2626;border-color:#fca5a5" title="Gerät löschen">&#x1F5D1; Löschen</button>
       </div>
     </div>
   </div>
@@ -3196,6 +3197,7 @@ function openGerForm(id){
     if(!g) return;
     document.getElementById('ger-modal-title').textContent='Gerät bearbeiten';
     document.getElementById('ger-id').value=g.id;
+    var delBtn=document.getElementById('ger-del-btn');if(delBtn)delBtn.style.display='inline-flex';
     document.getElementById('ger-sn').value=g.seriennummer||'';
     document.getElementById('ger-typ').value=g.geraet_typ||'Laptop / Notebook';
     document.getElementById('ger-modell').value=g.modell||'';
@@ -3211,6 +3213,7 @@ function openGerForm(id){
     document.getElementById('ger-notizen').value=g.notizen||'';
   } else {
     document.getElementById('ger-modal-title').textContent='Neues Gerät';
+    var delBtn2=document.getElementById('ger-del-btn');if(delBtn2)delBtn2.style.display='none';
     ['ger-id','ger-ean','ger-sn','ger-modell','ger-cpu','ger-ram','ger-ssd','ger-gpu','ger-spez','ger-lieferant','ger-ekpreis','ger-vkpreis','ger-notizen'].forEach(function(i){var el=document.getElementById(i);if(el)el.value='';});var er=document.getElementById('ger-ean-result');if(er)er.innerHTML='';
     document.getElementById('ger-typ').value='Laptop / Notebook';
     document.getElementById('ger-kaufdatum').value=new Date().toISOString().slice(0,10);
@@ -3376,6 +3379,26 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   }
 });
+
+
+async function deleteGer(){
+  var id=document.getElementById('ger-id').value;
+  if(!id) return;
+  var g=geraete.find(function(x){return x.id==id;});
+  var name=g?(g.modell||g.seriennummer||'Gerät'):'Gerät';
+  if(!confirm('Gerät wirklich löschen?\n\n'+name+'\n\nDieser Vorgang kann nicht rückgängig gemacht werden.')) return;
+  try{
+    var r=await fetch(W+'/api/geraete/'+id,{method:'DELETE',headers:{Authorization:A}});
+    var j=await r.json();
+    if(j.ok){
+      showNotif('🗑 Gerät gelöscht','green');
+      closeGerForm();
+      loadGeraete();
+    } else {
+      msg('ger-msg','Fehler beim Löschen!',true);
+    }
+  }catch(e){msg('ger-msg',e.message,true);}
+}
 
 // ==================== END GERÄTE ====================
 
