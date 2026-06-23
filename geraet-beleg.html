@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verkauf-Beleg</title>
+<style>
+@page{size:A4 portrait;margin:10mm}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:Arial,Helvetica,sans-serif;color:#222;font-size:10pt;line-height:1.4}
+body{background:#f0f0f0;padding:20px}
+.no-print{position:fixed;top:10px;right:10px;display:flex;gap:8px;z-index:99}
+.no-print button{padding:8px 14px;border:0;border-radius:6px;cursor:pointer;font-weight:600;font-size:11pt}
+.btn-print{background:#15803d;color:#fff}
+.btn-close{background:#fff;color:#222;border:1px solid #ccc !important}
+.page{max-width:190mm;margin:0 auto;background:#fff;padding:10mm 12mm;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #15803d;padding-bottom:8px;margin-bottom:10px}
+.hdr .logo{height:54px}
+.hdr h1{font-size:17pt;color:#15803d;font-weight:800;letter-spacing:1px}
+.hdr .meta{text-align:right;font-size:9pt}
+.hdr .meta .nr{font-weight:700;color:#15803d;font-size:11pt}
+.notice{background:#dcfce7;border-left:3px solid #15803d;padding:5px 10px;font-size:9pt;margin-bottom:10px;border-radius:2px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.sec{margin-bottom:10px}
+.sec-t{background:#15803d;color:#fff;padding:3px 10px;font-size:9pt;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:inline-block;border-radius:2px;margin-bottom:5px}
+.f{margin-bottom:5px}
+.f .lbl{font-size:8pt;color:#666;text-transform:uppercase;letter-spacing:.3px}
+.f .val{font-size:10pt;font-weight:600;border-bottom:1px solid #15803d;padding-bottom:2px;min-height:15px;color:#1a1a2e}
+.specbox{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:4px;padding:8px 10px;font-size:9.5pt}
+.specbox table{width:100%;border-collapse:collapse}
+.specbox td{padding:2px 4px;vertical-align:top}
+.specbox td.k{color:#666;width:35%;font-size:8.5pt;text-transform:uppercase;letter-spacing:.3px}
+.specbox td.v{font-weight:600}
+.preistab{width:100%;border-collapse:collapse;margin-top:4px}
+.preistab td{padding:5px 10px;font-size:10pt;border-bottom:1px solid #e5e7eb}
+.preistab td.lbl{color:#444}
+.preistab td.amt{text-align:right;font-weight:600;font-family:monospace}
+.preistab tr.brutto td{font-size:12pt;font-weight:800;color:#15803d;border-top:2px solid #15803d;border-bottom:none;padding-top:8px}
+.garantie{background:#fffbeb;border-left:3px solid #f59e0b;padding:6px 10px;font-size:9pt;margin:10px 0;border-radius:2px}
+.foot{background:#15803d;color:#fff;padding:6px 12px;font-size:8pt;display:flex;justify-content:space-between;margin-top:14px;border-radius:2px}
+.agb{font-size:8pt;color:#666;margin-top:10px;line-height:1.5}
+#loading{text-align:center;padding:60px;color:#888}
+@media print{body{background:#fff;padding:0}.no-print{display:none}.page{box-shadow:none;max-width:100%;padding:0}}
+</style>
+</head>
+<body>
+<div class="no-print">
+  <button class="btn-print" onclick="window.print()">🖨 Drucken</button>
+  <button class="btn-close" onclick="window.close()">Schließen</button>
+</div>
+<div class="page" id="content">
+  <div id="loading">Lade Beleg...</div>
+</div>
+
+<script>
+var W='https://hasi-reparatur.hguencavdi.workers.dev';
+var A='Bearer 71665';
+var MWST=0.19;
+
+function esc(s){return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmtPreis(n){return (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
+function fmtDatum(s){if(!s)return '—';var d=new Date(s);if(isNaN(d))return s;return d.toLocaleDateString('de-DE');}
+
+function garantieBis(verkaufsdatum, monate){
+  if(!verkaufsdatum||!monate)return '—';
+  var d=new Date(verkaufsdatum);
+  if(isNaN(d))return '—';
+  d.setMonth(d.getMonth()+Number(monate));
+  return d.toLocaleDateString('de-DE');
+}
+
+async function load(){
+  var id=new URLSearchParams(location.search).get('id');
+  if(!id){document.getElementById('content').innerHTML='<div id="loading">Keine Geräte-ID angegeben.</div>';return;}
+  try{
+    var r=await fetch(W+'/api/geraete/'+id,{headers:{Authorization:A}});
+    var g=await r.json();
+    if(g.error){document.getElementById('content').innerHTML='<div id="loading">Gerät nicht gefunden.</div>';return;}
+    render(g);
+  }catch(e){
+    document.getElementById('content').innerHTML='<div id="loading">Fehler: '+e.message+'</div>';
+  }
+}
+
+function render(g){
+  // Fiyat hesabı (Brutto -> Netto + MwSt)
+  var brutto=Number(g.verkaufspreis)||0;
+  var netto=brutto/(1+MWST);
+  var mwst=brutto-netto;
+
+  // Specs satırları
+  var specRows='';
+  if(g.cpu) specRows+='<tr><td class="k">Prozessor</td><td class="v">'+esc(g.cpu)+'</td></tr>';
+  if(g.ram) specRows+='<tr><td class="k">Arbeitsspeicher</td><td class="v">'+esc(g.ram)+'</td></tr>';
+  if(g.ssd) specRows+='<tr><td class="k">Speicher</td><td class="v">'+esc(g.ssd)+'</td></tr>';
+  if(g.gpu) specRows+='<tr><td class="k">Grafik</td><td class="v">'+esc(g.gpu)+'</td></tr>';
+  if(g.spezifikationen) specRows+='<tr><td class="k">Weitere</td><td class="v">'+esc(g.spezifikationen)+'</td></tr>';
+  if(g.zubehoer) specRows+='<tr><td class="k">Zubehör</td><td class="v">'+esc(g.zubehoer)+'</td></tr>';
+
+  var belegNr='VB-'+(g.verkaufsdatum?g.verkaufsdatum.replace(/-/g,''):new Date().toISOString().slice(0,10).replace(/-/g,''))+'-'+g.id;
+
+  var html=
+    '<div class="hdr">'
+      +'<img src="logo.jpg" class="logo" alt="Hasi Elektronic" onerror="this.style.display=\'none\'">'
+      +'<div class="meta"><div class="nr">'+belegNr+'</div>'
+        +'<div>Verkaufsdatum: '+fmtDatum(g.verkaufsdatum||new Date().toISOString())+'</div></div>'
+    +'</div>'
+    +'<h1 style="color:#15803d;font-size:15pt;margin-bottom:2px">Verkauf-Beleg / Übergabeprotokoll</h1>'
+    +'<div class="notice">Hiermit wird der Verkauf und die Übergabe des nachfolgend aufgeführten Gerätes bestätigt.</div>'
+
+    +'<div class="cols">'
+      +'<div class="sec">'
+        +'<div class="sec-t">Käufer</div>'
+        +'<div class="f"><div class="lbl">Name</div><div class="val">'+esc(g.kaeufer||'—')+'</div></div>'
+        +'<div class="f"><div class="lbl">Telefon</div><div class="val">'+esc(g.kaeufer_telefon||'—')+'</div></div>'
+      +'</div>'
+      +'<div class="sec">'
+        +'<div class="sec-t">Verkäufer</div>'
+        +'<div class="f"><div class="lbl">Firma</div><div class="val">Hasi Elektronic</div></div>'
+        +'<div class="f"><div class="lbl">Anschrift</div><div class="val">Grabenstraße 18, 71665 Vaihingen/Enz</div></div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="sec">'
+      +'<div class="sec-t">Gerät</div>'
+      +'<div class="f"><div class="lbl">Modell / Bezeichnung</div><div class="val">'+esc(g.modell||g.geraet_typ||'—')+'</div></div>'
+      +'<div class="cols" style="margin-top:5px;margin-bottom:5px">'
+        +'<div class="f"><div class="lbl">Geräte-Typ</div><div class="val">'+esc(g.geraet_typ||'—')+'</div></div>'
+        +'<div class="f"><div class="lbl">Seriennummer</div><div class="val">'+esc(g.seriennummer||'—')+'</div></div>'
+      +'</div>'
+      +(specRows?'<div class="specbox"><table>'+specRows+'</table></div>':'')
+    +'</div>'
+
+    +'<div class="sec">'
+      +'<div class="sec-t">Preis</div>'
+      +'<table class="preistab">'
+        +'<tr><td class="lbl">Nettobetrag</td><td class="amt">'+fmtPreis(netto)+'</td></tr>'
+        +'<tr><td class="lbl">zzgl. MwSt. 19 %</td><td class="amt">'+fmtPreis(mwst)+'</td></tr>'
+        +'<tr class="brutto"><td class="lbl">Gesamtbetrag (Brutto)</td><td class="amt">'+fmtPreis(brutto)+'</td></tr>'
+      +'</table>'
+    +'</div>'
+
+    +(g.garantie_monate?'<div class="garantie">🛡 <b>Garantie:</b> '+esc(g.garantie_monate)+' Monate · gültig bis <b>'+garantieBis(g.verkaufsdatum, g.garantie_monate)+'</b></div>':'')
+
+    +'<div class="agb">Das Gerät wurde vom Käufer geprüft und in einwandfreiem Zustand übernommen. Mit der Übergabe gehen Nutzung und Verantwortung auf den Käufer über. Die gesetzliche Gewährleistung bleibt unberührt.</div>'
+
+    +'<div class="foot">'
+      +'<span>Hasi Elektronic · Grabenstraße 18 · 71665 Vaihingen/Enz</span>'
+      +'<span>Tel. 07042 16391 · info@hasi-elektronic.de</span>'
+    +'</div>';
+
+  document.getElementById('content').innerHTML=html;
+}
+
+load();
+</script>
+</body>
+</html>
