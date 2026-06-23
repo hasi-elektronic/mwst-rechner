@@ -3184,7 +3184,7 @@ function renderGeraete(){
       +'<div style="text-align:right;align-self:center;font-size:12px">'+preisInfo+'</div>'
       +'<div style="text-align:right;align-self:center;display:flex;flex-direction:column;gap:5px;align-items:flex-end">'
         +statusBadge
-        +(isVerf?'<button class="qs-btn" style="background:#15803d22;color:#15803d;border-color:#15803d44" onclick="event.stopPropagation();openVerkaufModal('+g.id+')">📦 Verkaufen</button>':'')
+        +(isVerf?'<button class="qs-btn" style="background:#15803d22;color:#15803d;border-color:#15803d44" onclick="event.stopPropagation();openVerkaufModal('+g.id+')">📦 Verkaufen</button>':'<button class="qs-btn" style="background:#0090c422;color:#0090c4;border-color:#0090c444" onclick="event.stopPropagation();printBeleg('+g.id+')">🖨 Beleg</button>')
       +'</div>'
       +'</div>';
   }).join('');
@@ -3294,6 +3294,8 @@ async function confirmVerkauf(){
       showNotif('✓ '+kaeufer+' — Gerät verkauft','green');
       closeVerkaufModal();
       loadGeraete();
+      // Beleg otomatik aç
+      setTimeout(function(){ printBeleg(id); }, 400);
     } else msg('verkauf-msg','Fehler!',true);
   }catch(e){msg('verkauf-msg',e.message,true);}
 }
@@ -3421,6 +3423,11 @@ function deleteGer(){
       showNotif('⚠ '+e.message,'amber');
     }
   };
+}
+
+
+function printBeleg(id){
+  window.open('geraet-beleg.html?id='+id,'_blank');
 }
 
 // ==================== END GERÄTE ====================
