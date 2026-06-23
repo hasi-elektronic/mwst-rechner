@@ -3307,9 +3307,11 @@ document.addEventListener('DOMContentLoaded',function(){
   if(gerModal){
     gerModal.addEventListener('keydown',function(e){
       if(e.key==='Enter' && e.target.tagName==='INPUT'){
+        // EAN alanı kendi Enter handler'ını kullanır (lookup), navigasyona karışma
+        if(e.target.id==='ger-ean') return;
         e.preventDefault();
-        // Modal içindeki tüm input/select/textarea'ları sırala
-        var fields=Array.prototype.slice.call(gerModal.querySelectorAll('input,select,textarea'));
+        // Modal içindeki tüm input/select/textarea'ları sırala (EAN hariç)
+        var fields=Array.prototype.slice.call(gerModal.querySelectorAll('input,select,textarea')).filter(function(f){return f.id!=='ger-ean';});
         var idx=fields.indexOf(e.target);
         if(idx>=0 && idx<fields.length-1){
           fields[idx+1].focus();
