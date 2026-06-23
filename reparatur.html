@@ -12,8 +12,11 @@
 /* DARK MODE */
 .dark-mode{
   --bg:#0f172a;--bg2:#1e293b;--t:#e2e8f0;--m:#94a3b8;--b:#334155;--b2:#475569;
+  --s:#1e293b;--card:#1e293b;--soft:#0f172a;
   --hasi-soft:rgba(51,175,226,.12);
 }
+.dark-mode #ger-modal .inp,.dark-mode #ger-verkauf-modal .inp{background:#0f172a;border-color:#334155;color:#e2e8f0}
+.dark-mode #ger-modal [style*="background:var(--soft)"]{background:#0f172a !important}
 .dark-mode .card{background:#1e293b;border-color:#334155}
 .dark-mode .lw{background:#1e293b;border-color:#334155}
 .dark-mode .inp{background:#0f172a;border-color:#334155;color:#e2e8f0}
@@ -25,7 +28,7 @@
 .dark-mode .vl{background:#1e293b;border-color:#334155}
 .dark-mode #notif-bar{background:#1e293b}
 /* END DARK MODE */
-:root{--bg:#eef4fb;--s:#fff;--b:#d6e4f0;--b2:#c2d6ea;--hasi:#33afe2;--hasi-d:#1d8fbe;--hasi-soft:#e8f5fc;--t:#1a2a3a;--m:#5a7a90;--green:#0d9f6e;--amber:#d97706;--red:#dc2626;--purple:#7c3aed}
+:root{--bg:#eef4fb;--s:#fff;--card:#fff;--soft:#f1f5f9;--b:#d6e4f0;--b2:#c2d6ea;--hasi:#33afe2;--hasi-d:#1d8fbe;--hasi-soft:#e8f5fc;--t:#1a2a3a;--m:#5a7a90;--green:#0d9f6e;--amber:#d97706;--red:#dc2626;--purple:#7c3aed}
 body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--t);min-height:100vh}
 nav{background:#fff;border-bottom:2px solid var(--b);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(51,175,226,.07)}
 .ni{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
@@ -247,7 +250,7 @@ tbody tr:last-child td{border-bottom:none}
 .vl-footer-bar{background:var(--bg);border-top:1.5px solid var(--b);padding:10px 28px;font-size:11px;color:var(--m);display:flex;justify-content:space-between}
 .vl-actions{display:flex;gap:10px;padding:16px 28px;border-top:1.5px solid var(--b);background:#fff;flex-wrap:wrap}
 .kh{padding:8px;text-align:center;font-size:10px;font-family:"DM Mono",monospace;color:var(--m);text-transform:uppercase;font-weight:600}
-.ger-lbl{display:block;font-size:11px;font-family:"DM Mono",monospace;color:#475569;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.ger-lbl{display:block;font-size:11px;font-family:"DM Mono",monospace;color:var(--t);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;opacity:.75}
 .ger-fbtn.on{background:var(--hasi);color:#fff;border-color:var(--hasi)}
 </style>
 </head>
@@ -844,7 +847,7 @@ tbody tr:last-child td{border-bottom:none}
 
 <!-- GERÄT FORM MODAL -->
 <div id="ger-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;overflow-y:auto;padding:20px">
-  <div style="max-width:640px;margin:20px auto;background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+  <div style="max-width:640px;margin:20px auto;background:var(--s);border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
     <div style="background:var(--hasi);color:#fff;padding:16px 22px;display:flex;align-items:center;gap:10px">
       <span id="ger-modal-title" style="font-size:17px;font-weight:700">Neues Ger&auml;t</span>
       <button onclick="closeGerForm()" style="margin-left:auto;background:rgba(0,0,0,.2);border:none;color:#fff;padding:5px 13px;border-radius:7px;cursor:pointer;font-size:15px">&#x2715;</button>
@@ -914,7 +917,7 @@ tbody tr:last-child td{border-bottom:none}
 
 <!-- VERKAUF MODAL -->
 <div id="ger-verkauf-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1001;overflow-y:auto;padding:20px">
-  <div style="max-width:480px;margin:40px auto;background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+  <div style="max-width:480px;margin:40px auto;background:var(--s);border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
     <div style="background:#15803d;color:#fff;padding:16px 22px;display:flex;align-items:center;gap:10px">
       <span style="font-size:17px;font-weight:700">&#x1F4E6; Ger&auml;t verkaufen</span>
       <button onclick="closeVerkaufModal()" style="margin-left:auto;background:rgba(0,0,0,.2);border:none;color:#fff;padding:5px 13px;border-radius:7px;cursor:pointer;font-size:15px">&#x2715;</button>
