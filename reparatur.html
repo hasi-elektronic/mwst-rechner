@@ -869,7 +869,9 @@ tbody tr:last-child td{border-bottom:none}
           <select class="inp" id="ger-typ">
             <option>Laptop / Notebook</option><option>Desktop PC</option><option>Monitor</option>
             <option>Tablet</option><option>Drucker</option><option>Smartphone</option>
-            <option>Netzwerk (Router/Switch)</option><option>Sonstiges</option>
+            <option>Netzwerk (Router/Switch)</option>
+            <option>Zubehör / Verbrauchsmaterial</option>
+            <option>Sonstiges</option>
           </select>
         </div>
       </div>
@@ -3342,9 +3344,10 @@ async function lookupEAN(){
         else if(title.indexOf('monitor')>=0||cat.indexOf('monitor')>=0) typEl.value='Monitor';
         else if(title.indexOf('tablet')>=0||cat.indexOf('tablet')>=0) typEl.value='Tablet';
         else if(title.indexOf('phone')>=0||cat.indexOf('phone')>=0||cat.indexOf('mobile')>=0) typEl.value='Smartphone';
-        else if(title.indexOf('drucker')>=0||title.indexOf('printer')>=0||cat.indexOf('printer')>=0) typEl.value='Drucker';
+        else if(cat.indexOf('patrone')>=0||cat.indexOf('toner')>=0||title.indexOf('patrone')>=0||title.indexOf('toner')>=0||title.indexOf('cartridge')>=0||cat.indexOf('kabel')>=0||cat.indexOf('zubehör')>=0||cat.indexOf('verbrauch')>=0) typEl.value='Zubehör / Verbrauchsmaterial';
+        else if(title.indexOf('drucker')>=0||title.indexOf('printer')>=0||cat.indexOf('printer')>=0||cat.indexOf('drucker')>=0) typEl.value='Drucker';
       }
-      resultEl.innerHTML='<span style="color:var(--green)">✓ '+j.title+(j.brand?' ('+j.brand+')':'')+'</span>';
+      resultEl.innerHTML='<span style="color:var(--green)">✓ '+j.title+(j.brand?' ('+j.brand+')':'')+'</span>'+(j.category?'<br><span style="color:var(--m);font-size:11px">📁 '+j.category+'</span>':'');
     } else {
       resultEl.innerHTML='<span style="color:var(--amber)">⚠ Kein Produkt gefunden — bitte manuell eingeben</span>';
     }
