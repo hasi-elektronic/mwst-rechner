@@ -3088,24 +3088,49 @@ window.addEventListener('load',function(){
   var acInp=document.getElementById('f-name');
   var acDd=document.getElementById('f-name-dd');
   if(acInp&&acDd){
+    var acTimer=null;
     acInp.addEventListener('input',function(){
-      var q=this.value.trim().toLowerCase();
+      var q=this.value.trim();
+      var ql=q.toLowerCase();
       acDd.style.display='none';
-      if(q.length<2||!reps.length) return;
+      if(ql.length<2) return;
+      // 1. Geçmiş Aufträge'den (anında)
       var seen={},matches=[];
       reps.forEach(function(r){
         if(!r.k_name) return;
-        if(r.k_name.toLowerCase().indexOf(q)>=0&&!seen[r.k_name]){seen[r.k_name]=true;matches.push(r);}
+        if(r.k_name.toLowerCase().indexOf(ql)>=0&&!seen[r.k_name.toLowerCase()]){seen[r.k_name.toLowerCase()]=true;matches.push({n:r.k_name,t:r.k_telefon||'',e:r.k_email||'',a:r.k_adresse||'',p:r.k_plz_ort||'',src:'auftrag',extra:r.geraet_typ||''});}
       });
-      if(!matches.length) return;
-      acDd.innerHTML=matches.slice(0,6).map(function(r){
-        return '<div class="ac-i" data-n="'+(r.k_name||'')+'" data-t="'+(r.k_telefon||'')+'" data-e="'+(r.k_email||'')+'" data-a="'+(r.k_adresse||'')+'" data-p="'+(r.k_plz_ort||'')+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--b)">'
-          +'<div style="font-size:13px;font-weight:600">'+(r.k_name||'')+'</div>'
-          +'<div style="font-size:11px;color:var(--m)">'+(r.k_telefon||'')+(r.geraet_typ?' &middot; '+r.geraet_typ:'')+'</div>'
+      // Anında geçmiş işleri göster
+      renderAcDd(matches, q);
+      // 2. Stammdaten DB'den (debounce 250ms)
+      if(acTimer) clearTimeout(acTimer);
+      acTimer=setTimeout(async function(){
+        try{
+          var r=await fetch(W+'/api/kunden-stamm/search?q='+encodeURIComponent(q),{headers:{Authorization:A}});
+          var stamm=await r.json();
+          if(Array.isArray(stamm)){
+            stamm.forEach(function(k){
+              var key=(k.name||'').toLowerCase();
+              if(key&&!seen[key]){seen[key]=true;matches.push({n:k.name,t:k.telefon||'',e:k.email||'',a:k.strasse||'',p:((k.plz||'')+' '+(k.ort||'')).trim(),src:'stamm',extra:k.ort||''});}
+            });
+            renderAcDd(matches, q);
+          }
+        }catch(e){}
+      },250);
+    });
+    function renderAcDd(matches, q){
+      if(!matches.length){acDd.style.display='none';return;}
+      acDd.innerHTML=matches.slice(0,10).map(function(m){
+        var badge=m.src==='stamm'?'<span style="font-size:9px;background:var(--hasi-soft);color:var(--hasi);padding:1px 5px;border-radius:4px;margin-left:6px">Stamm</span>':'';
+        var sub=m.t||m.p||m.extra||'';
+        return '<div class="ac-i" data-n="'+esc(m.n)+'" data-t="'+esc(m.t)+'" data-e="'+esc(m.e)+'" data-a="'+esc(m.a)+'" data-p="'+esc(m.p)+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--b)">'
+          +'<div style="font-size:13px;font-weight:600">'+esc(m.n)+badge+'</div>'
+          +'<div style="font-size:11px;color:var(--m)">'+esc(sub)+'</div>'
           +'</div>';
       }).join('');
       acDd.style.display='block';
-    });
+    }
+    function esc(s){return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
     acDd.addEventListener('click',function(e){
       var i=e.target.closest('.ac-i');
       if(!i) return;
