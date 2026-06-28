@@ -75,7 +75,7 @@ table.main tbody td.r{text-align:right}
 
 <script>
 var W='https://hasi-reparatur.hguencavdi.workers.dev';
-var A='Bearer 71665';
+var A='Bearer '+(new URLSearchParams(location.search).get('t')||localStorage.getItem('hasi_tok')||'');
 var SATZ=96;
 var FIRMA={name:'Hasi Elektronic',str:'Gra\u00dfenstra\u00dfe 18',plz:'71665 Vaihingen an der Enz',tel:'07042 163914',mail:'info@hasi-elektronic.de',web:'www.hasi-elektronic.de',ust:'DE367591246',iban:'DE71 6045 0050 0030 2488 01',inhaber:'Hamdi G\u00fcncavdi'};
 var LOGO_URL='https://tools.hasi-elektronic.de/logo.jpg';
