@@ -54,7 +54,7 @@ body{background:#f0f0f0;padding:20px}
 
 <script>
 var W='https://hasi-reparatur.hguencavdi.workers.dev';
-var A='Bearer 71665';
+var A='Bearer '+(new URLSearchParams(location.search).get('t')||localStorage.getItem('hasi_tok')||'');
 var MWST=0.19;
 
 function esc(s){return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
