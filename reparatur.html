@@ -30,8 +30,8 @@
 /* END DARK MODE */
 :root{--bg:#eef4fb;--s:#fff;--card:#fff;--soft:#f1f5f9;--b:#d6e4f0;--b2:#c2d6ea;--hasi:#33afe2;--hasi-d:#1d8fbe;--hasi-soft:#e8f5fc;--t:#1a2a3a;--m:#5a7a90;--green:#0d9f6e;--amber:#d97706;--red:#dc2626;--purple:#7c3aed}
 body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--t);min-height:100vh}
-nav{background:#fff;border-bottom:2px solid var(--b);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(51,175,226,.07)}
-.ni{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav{background:#fff;border-bottom:2px solid var(--b);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(51,175,226,.07);display:flex;align-items:center}
+.ni{flex:1;min-width:0;padding:0 16px;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
 .ni img{height:36px;margin-right:12px;flex-shrink:0}
 .tab{padding:14px 18px;font-size:13px;font-weight:600;color:var(--m);background:none;border:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;font-family:inherit}
 .tab:hover{color:var(--hasi)}
@@ -87,6 +87,9 @@ tbody tr:last-child td{border-bottom:none}
 .fbtn.on,.fbtn:hover{border-color:var(--hasi);color:var(--hasi);background:var(--hasi-soft)}
 .lw{background:#fff;border:1.5px solid var(--b);border-radius:16px;overflow:hidden}
 .row{display:grid;grid-template-columns:160px 1fr 110px 120px;gap:12px;align-items:center;padding:13px 16px;border-bottom:1.5px solid var(--b);cursor:pointer}
+.rec-in{width:100%;padding:9px 11px;border:1.5px solid var(--b,#e2e8f0);border-radius:8px;font-size:13px;margin-top:4px;box-sizing:border-box;background:var(--card,#fff);color:inherit;font-family:inherit}
+.rec-lbl{font-size:12px;font-weight:600;color:var(--m,#64748b);display:block;margin-bottom:12px}
+@media(max-width:680px){.rec-grid2{grid-template-columns:1fr!important;gap:0!important}}
 .row:last-child{border-bottom:none}
 .row:hover{background:var(--hasi-soft)}
 .row .nr{font-family:"DM Mono",monospace;font-size:11px;color:var(--hasi);font-weight:500}
@@ -162,6 +165,9 @@ tbody tr:last-child td{border-bottom:none}
 .kal-dot.s-off{background:#d9770622;color:#d97706;border:1px solid #d9770644}
 .kal-dot.s-fer{background:#0d9f6e22;color:#0d9f6e;border:1px solid #0d9f6e44}
 .kal-dot.s-alarm{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+.kal-layer-btn{font-size:13px;font-weight:600;padding:7px 14px;border-radius:9px;border:1.5px solid var(--b);background:#fff;color:var(--m);cursor:pointer;transition:all .15s}
+.kal-layer-btn:hover{border-color:#33afe2;color:#33afe2}
+.kal-layer-btn.on{background:#33afe2;border-color:#33afe2;color:#fff;box-shadow:0 2px 8px rgba(51,175,226,.3)}
 /* WHATSAPP */
 .wa-btn{background:#25d366;color:#fff;border:none;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:inherit}
 .wa-btn:hover{background:#1ebe57}
@@ -255,6 +261,41 @@ tbody tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
+<div id="hasi-login" style="position:fixed;inset:0;z-index:999999;background:linear-gradient(135deg,#0d1b2a,#1a5f75);display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,sans-serif">
+  <div style="background:#fff;padding:38px 34px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.4);width:340px;max-width:90vw">
+    <div style="text-align:center;margin-bottom:22px">
+      <img src="logo.jpg" style="height:46px;margin-bottom:10px" onerror="this.style.display='none'">
+      <h2 style="margin:0;color:#0d1b2a;font-size:20px;font-weight:700">Reparatur-System</h2>
+      <p style="margin:4px 0 0;color:#64748b;font-size:13px">Bitte anmelden</p>
+    </div>
+    <input id="li-email" type="email" placeholder="E-Mail" autocomplete="username" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:11px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none">
+    <input id="li-pw" type="password" placeholder="Passwort" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:8px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none">
+    <div id="li-err" style="color:#dc2626;font-size:13px;min-height:18px;margin-bottom:6px"></div>
+    <button id="li-btn" onclick="doLogin()" style="width:100%;padding:12px;background:#33afe2;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer">Anmelden</button>
+  </div>
+</div>
+<div id="um-modal" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.55);align-items:center;justify-content:center;font-family:system-ui,-apple-system,sans-serif">
+  <div style="background:#fff;border-radius:14px;padding:24px;width:600px;max-width:94vw;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+    <div style="display:flex;align-items:center;margin-bottom:18px">
+      <h2 style="margin:0;font-size:19px;color:#0d1b2a">&#x1F465; Benutzerverwaltung</h2>
+      <button onclick="closeUserMgmt()" style="margin-left:auto;background:#f1f5f9;border:none;width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;color:#334155">&#x2715;</button>
+    </div>
+    <div id="um-list"></div>
+    <div style="border-top:1px solid #e2e8f0;margin-top:18px;padding-top:16px">
+      <h3 style="margin:0 0 12px;font-size:15px;color:#0d1b2a">&#xFF0B; Neuer Benutzer</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <input id="um-new-name" placeholder="Name" style="flex:1;min-width:120px;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px">
+        <input id="um-new-email" type="email" placeholder="E-Mail" style="flex:2;min-width:160px;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px">
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="um-new-pw" type="text" placeholder="Passwort (min. 6)" style="flex:1;min-width:140px;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px">
+        <select id="um-new-role" style="padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px"><option value="user">Mitarbeiter</option><option value="admin">Admin</option></select>
+        <button onclick="umCreate()" style="padding:9px 18px;background:#33afe2;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Erstellen</button>
+      </div>
+    </div>
+    <div id="um-msg" style="margin-top:12px;font-size:13px;min-height:18px"></div>
+  </div>
+</div>
 <div id="notif-bar"></div>
 <div id="kunden-modal"><div id="kunden-modal-box"></div></div>
 <nav>
@@ -267,9 +308,145 @@ tbody tr:last-child td{border-bottom:none}
     <button class="tab" data-pg="pg-kunden">&#x1F465; Kunden</button>
     <button class="tab" data-pg="pg-berichte">&#x1F4C4; Berichte</button>
     <button class="tab" data-pg="pg-geraete">&#x1F4BB; Ger&auml;te</button>
+    <button class="tab" data-pg="pg-rechnungen" id="tab-rechnungen" style="display:none">&#x1F4B6; Rechnungen</button>
     <button class="gs-btn" id="gs-open-btn" style="margin-left:auto;flex-shrink:0" title="Suchen (Strg+K)">&#x1F50D; Suchen <span class="gs-kbd">Strg+K</span></button>
   </div>
+  <div id="hdr-auth" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 14px;margin-left:12px;border-left:1px solid var(--b,#e2e8f0)">
+    <span id="hdr-user" style="font-size:13px;color:var(--m,#64748b);white-space:nowrap"></span>
+    <button id="hdr-admin" onclick="openUserMgmt()" style="display:none;padding:6px 12px;border:1px solid #33afe2;background:#fff;color:#33afe2;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap" title="Benutzerverwaltung">&#x1F465; Benutzer</button>
+    <button id="hdr-logout" onclick="doLogout()" style="padding:6px 12px;border:1px solid #dc2626;background:#fff;color:#dc2626;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">&#x21AA; Abmelden</button>
+  </div>
 </nav>
+
+<!-- RECHNUNGEN / DEBITOREN -->
+<div id="pg-rechnungen" class="pg">
+  <div style="padding:20px;max-width:1120px;margin:0 auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+      <h2 style="margin:0;font-size:20px">&#x1F4B6; Rechnungen / Debitoren</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button onclick="openDashboard()" style="background:none;border:1.5px solid #33afe2;color:#33afe2;padding:10px 18px;border-radius:9px;font-weight:600;cursor:pointer;font-size:14px">&#x1F4CA; Statistik</button>
+        <button onclick="openBankAbgleich()" style="background:#16a34a;color:#fff;border:none;padding:10px 18px;border-radius:9px;font-weight:600;cursor:pointer;font-size:14px">&#x1F3E6; Bank-Abgleich</button>
+        <button onclick="openRecModal(0)" style="background:#33afe2;color:#fff;border:none;padding:10px 18px;border-radius:9px;font-weight:600;cursor:pointer;font-size:14px">&#xFF0B; Neue Rechnung</button>
+      </div>
+    </div>
+    <div id="rec-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center">
+      <select id="rec-f-jahr" onchange="loadRechnungen()" style="padding:9px 12px;border:1.5px solid var(--b,#e2e8f0);border-radius:9px;font-size:13px;background:var(--card,#fff);color:inherit;font-family:inherit">
+        <option value="">Alle Jahre</option><option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option>
+      </select>
+      <select id="rec-f-status" onchange="loadRechnungen()" style="padding:9px 12px;border:1.5px solid var(--b,#e2e8f0);border-radius:9px;font-size:13px;background:var(--card,#fff);color:inherit;font-family:inherit">
+        <option value="">Alle Status</option><option value="Offen">Nur Offen</option><option value="__ueber">&#x1F534; &Uuml;berf&auml;llig</option><option value="Bezahlt">Nur Bezahlt</option>
+      </select>
+      <input id="rec-f-q" oninput="recApplyFilter()" placeholder="&#x1F50D; Kunde / Nr suchen..." style="padding:9px 12px;border:1.5px solid var(--b,#e2e8f0);border-radius:9px;font-size:13px;flex:1;min-width:160px;background:var(--card,#fff);color:inherit;font-family:inherit">
+      <button onclick="exportRechnungen()" style="padding:9px 14px;border:1.5px solid #16a34a;background:none;color:#16a34a;border-radius:9px;font-size:13px;cursor:pointer;font-weight:600;white-space:nowrap">&#x1F4E4; CSV</button>
+    </div>
+    <div id="rec-loading" style="padding:30px;text-align:center;color:var(--m,#64748b)">L&auml;dt&hellip;</div>
+    <div id="rec-liste"></div>
+  </div>
+</div>
+<div id="bank-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px">
+  <div style="background:var(--card,#fff);color:inherit;border-radius:14px;max-width:720px;width:100%;padding:24px;margin:20px 0;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h3 style="margin:0;font-size:17px">&#x1F3E6; Bank-Abgleich</h3>
+      <button onclick="closeBankModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--m,#64748b);line-height:1">&times;</button>
+    </div>
+    <p style="margin:0 0 14px;font-size:12.5px;color:var(--m,#64748b)">Eingehende &Uuml;berweisungen werden mit offenen Rechnungen abgeglichen (Rechnungs-Nr. im Verwendungszweck).</p>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+      <label style="font-size:12.5px;color:var(--m,#64748b)">Zeitraum:</label>
+      <select id="bank-days" onchange="openBankAbgleich()" style="padding:7px 10px;border:1.5px solid var(--b,#e2e8f0);border-radius:8px;font-size:13px;background:var(--card,#fff);color:inherit;font-family:inherit">
+        <option value="30">30 Tage</option><option value="90" selected>90 Tage</option><option value="180">180 Tage</option>
+      </select>
+      <button onclick="bankSelectExakt()" style="background:none;border:1.5px solid #16a34a;color:#16a34a;padding:7px 12px;border-radius:8px;font-size:12.5px;cursor:pointer;font-weight:600">Alle exakten ausw&auml;hlen</button>
+      <button id="bank-sync-btn" onclick="bankSync()" style="background:#33afe2;border:none;color:#fff;padding:7px 12px;border-radius:8px;font-size:12.5px;cursor:pointer;font-weight:600" title="Neueste Bankbuchungen jetzt abrufen">&#x1F504; Bank-Sync</button>
+    </div>
+    <div id="bank-loading" style="padding:30px;text-align:center;color:var(--m,#64748b)">L&auml;dt&hellip;</div>
+    <div id="bank-liste" style="max-height:50vh;overflow-y:auto"></div>
+    <div id="bank-result" style="display:none;padding:12px;border-radius:9px;background:rgba(22,163,74,.1);color:#16a34a;font-size:13px;font-weight:600;margin-top:12px;text-align:center"></div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;border-top:1px solid var(--b,#e2e8f0);padding-top:16px">
+      <button onclick="closeBankModal()" style="background:none;border:1.5px solid var(--b,#e2e8f0);color:inherit;padding:10px 18px;border-radius:9px;font-size:14px;cursor:pointer">Schlie&szlig;en</button>
+      <button id="bank-submit" onclick="bankMatchSelected()" style="background:#16a34a;color:#fff;border:none;padding:10px 18px;border-radius:9px;font-weight:600;cursor:pointer;font-size:14px">Ausgew&auml;hlte als bezahlt markieren</button>
+    </div>
+  </div>
+</div>
+<div id="stat-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px">
+  <div style="background:var(--card,#fff);color:inherit;border-radius:14px;max-width:780px;width:100%;padding:24px;margin:20px 0;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="margin:0;font-size:17px">&#x1F4CA; Umsatz-Statistik</h3>
+      <button onclick="document.getElementById('stat-modal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--m,#64748b);line-height:1">&times;</button>
+    </div>
+    <select id="stat-jahr" onchange="openDashboard()" style="padding:8px 12px;border:1.5px solid var(--b,#e2e8f0);border-radius:9px;font-size:13px;background:var(--card,#fff);color:inherit;font-family:inherit">
+      <option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="">Alle Jahre</option>
+    </select>
+    <div id="stat-body" style="margin-top:16px"><div style="padding:30px;text-align:center;color:var(--m,#64748b)">L&auml;dt&hellip;</div></div>
+  </div>
+</div>
+<div id="rec-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:99999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px">
+  <div style="background:var(--card,#fff);color:inherit;border-radius:16px;max-width:900px;width:100%;padding:24px 28px;margin:20px 0;box-shadow:0 24px 70px rgba(0,0,0,.35)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--b,#e2e8f0)">
+      <h3 id="rec-m-title" style="margin:0;font-size:20px;font-weight:700">Rechnung erstellen</h3>
+      <button onclick="closeRecModal()" style="background:none;border:none;font-size:28px;line-height:1;cursor:pointer;color:var(--m,#64748b)">&times;</button>
+    </div>
+    <input type="hidden" id="rec-m-id">
+    <div id="rec-bank-info" style="display:none;margin-bottom:16px;padding:12px 14px;border-radius:10px;background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.3)"></div>
+    <div id="rec-mahn-info" style="display:none;margin-bottom:16px"></div>
+    <div class="rec-grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-bottom:8px">
+      <div>
+        <div style="position:relative">
+          <label class="rec-lbl">Kunde<input id="rec-m-kunde" class="rec-in" placeholder="Name eingeben..." oninput="recKundeSearch(this.value)" autocomplete="off"></label>
+          <div id="rec-kunde-dd" style="display:none;position:absolute;top:60px;left:0;right:0;background:var(--card,#fff);border:1.5px solid var(--b,#e2e8f0);border-radius:10px;box-shadow:0 12px 36px rgba(0,0,0,.18);z-index:40;max-height:264px;overflow-y:auto"></div>
+        </div>
+        <label class="rec-lbl">Ansprechpartner<input id="rec-m-ansprech" class="rec-in" placeholder="optional"></label>
+        <label class="rec-lbl">Stra&szlig;e<input id="rec-m-strasse" class="rec-in" placeholder="optional"></label>
+        <div style="display:grid;grid-template-columns:100px 1fr;gap:10px">
+          <label class="rec-lbl">PLZ<input id="rec-m-plz" class="rec-in"></label>
+          <label class="rec-lbl">Ort<input id="rec-m-ort" class="rec-in"></label>
+        </div>
+      </div>
+      <div>
+        <label class="rec-lbl">Rechnungsnummer<input id="rec-m-nr" class="rec-in" placeholder="automatisch"></label>
+        <label class="rec-lbl">Kundennummer<input id="rec-m-kundennr" class="rec-in" placeholder="optional"></label>
+        <label class="rec-lbl">Datum<input id="rec-m-datum" type="date" class="rec-in"></label>
+        <label class="rec-lbl">Lieferdatum<input id="rec-m-lieferdatum" type="date" class="rec-in"></label>
+      </div>
+    </div>
+    <div id="rec-pos-section" style="margin:6px 0 14px;border:1.5px solid var(--b,#e2e8f0);border-radius:10px;padding:12px;background:var(--bg,#f8fafc)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <strong style="font-size:13px">&#x1F4CB; Positionen</strong>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;position:relative">
+          <button type="button" onclick="recPosAdd()" style="background:#33afe2;border:none;color:#fff;padding:6px 11px;border-radius:7px;font-size:12px;cursor:pointer;font-weight:600">+ Position</button>
+          <button type="button" onclick="recKatalogToggle(event)" style="background:none;border:1.5px solid #33afe2;color:#33afe2;padding:6px 11px;border-radius:7px;font-size:12px;cursor:pointer;font-weight:600">Katalog &#x25BE;</button>
+          <div id="rec-katalog-menu" style="display:none;position:absolute;right:0;top:34px;background:var(--card,#fff);border:1.5px solid var(--b,#e2e8f0);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:10;min-width:290px;max-height:340px;overflow-y:auto;padding:6px"></div>
+        </div>
+      </div>
+      <div id="rec-pos-list"></div>
+      <div id="rec-pos-sum" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--b,#e2e8f0);font-size:13px;text-align:right;color:var(--m,#64748b)"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <label class="rec-lbl">Betrag &euro;<input id="rec-m-betrag" type="number" step="0.01" class="rec-in" oninput="recCalcOffen()"></label>
+      <label class="rec-lbl">Bezahlt &euro;<input id="rec-m-bezahlt" type="number" step="0.01" class="rec-in" oninput="recCalcOffen()"></label>
+    </div>
+    <div style="font-size:12px;color:var(--m,#64748b);margin:-4px 0 12px">Offen: <strong id="rec-m-offen" style="color:#dc2626">0,00 &euro;</strong></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <label class="rec-lbl">Status<select id="rec-m-status" class="rec-in"><option value="Offen">Offen</option><option value="Bezahlt">Bezahlt</option></select></label>
+      <label class="rec-lbl">Bezahl-Datum<input id="rec-m-bdatum" type="date" class="rec-in"></label>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <label class="rec-lbl">Zahlungsart<input id="rec-m-art" class="rec-in" list="rec-art-list"></label>
+      <label class="rec-lbl">Zahlungsziel (Tage)<input id="rec-m-ziel" type="number" class="rec-in"></label>
+    </div>
+    <datalist id="rec-art-list"><option>&Uuml;berweisung</option><option>ec</option><option>bar</option><option>PayPal</option><option>Lastschrift</option></datalist>
+    <label class="rec-lbl">Garantie<input id="rec-m-garantie" class="rec-in" placeholder="z.B. 24 Monate / Website"></label>
+    <label class="rec-lbl">Notiz<textarea id="rec-m-notiz" class="rec-in" rows="2"></textarea></label>
+    <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;align-items:center">
+      <button id="rec-m-del" onclick="delRec()" style="display:none;padding:10px 14px;border:1.5px solid #dc2626;background:#fff;color:#dc2626;border-radius:9px;font-weight:600;cursor:pointer">&#x1F5D1; L&ouml;schen</button>
+      <button onclick="recMarkPaid()" style="padding:10px 14px;border:1.5px solid #059669;background:#fff;color:#059669;border-radius:9px;font-weight:600;cursor:pointer">&#x2705; Als bezahlt</button>
+      <button onclick="druckeRechnung()" style="padding:10px 14px;border:1.5px solid #33afe2;background:#fff;color:#33afe2;border-radius:9px;font-weight:600;cursor:pointer">&#x1F441;&#xFE0F; Vorschau</button>
+      <div style="flex:1"></div>
+      <button onclick="closeRecModal()" style="padding:10px 16px;border:1.5px solid var(--b,#e2e8f0);background:var(--card,#fff);color:inherit;border-radius:9px;font-weight:600;cursor:pointer">Abbrechen</button>
+      <button onclick="saveRec()" style="padding:10px 20px;border:none;background:#33afe2;color:#fff;border-radius:9px;font-weight:700;cursor:pointer">Speichern</button>
+    </div>
+  </div>
+</div>
 
 <!-- DASHBOARD -->
 <div id="pg-dash" class="pg on">
@@ -280,6 +457,22 @@ tbody tr:last-child td{border-bottom:none}
     </div>
     <div id="dash-loading" style="text-align:center;padding:60px;color:var(--m);font-family:'DM Mono',monospace;font-size:13px">Lade...</div>
     <div id="dash-content" style="display:none">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:28px">
+        <button onclick="showPg('pg-form')" style="display:flex;align-items:center;gap:13px;padding:18px 20px;border:none;border-radius:15px;background:linear-gradient(135deg,#33afe2,#1c92c4);color:#fff;cursor:pointer;font-size:15px;font-weight:700;box-shadow:0 8px 22px rgba(51,175,226,.32);transition:transform .12s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"><span style="font-size:25px;line-height:1">&#x2795;</span> Neuer Auftrag</button>
+        <button onclick="openRecModal(0)" style="display:flex;align-items:center;gap:13px;padding:18px 20px;border:none;border-radius:15px;background:linear-gradient(135deg,#0d9f6e,#0a7d57);color:#fff;cursor:pointer;font-size:15px;font-weight:700;box-shadow:0 8px 22px rgba(13,159,110,.3);transition:transform .12s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"><span style="font-size:23px;line-height:1">&#x1F9FE;</span> Neue Rechnung</button>
+        <button onclick="showPg('pg-kunden')" style="display:flex;align-items:center;gap:13px;padding:18px 20px;border:1.5px solid var(--b,#e2e8f0);border-radius:15px;background:var(--card,#fff);color:inherit;cursor:pointer;font-size:15px;font-weight:600;transition:transform .12s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"><span style="font-size:23px;line-height:1">&#x1F465;</span> Kunden</button>
+        <button onclick="showPg('pg-rechnungen');loadRechnungen()" style="display:flex;align-items:center;gap:13px;padding:18px 20px;border:1.5px solid var(--b,#e2e8f0);border-radius:15px;background:var(--card,#fff);color:inherit;cursor:pointer;font-size:15px;font-weight:600;transition:transform .12s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"><span style="font-size:23px;line-height:1">&#x1F4B6;</span> Rechnungen</button>
+        <button onclick="showPg('pg-geraete');loadGeraete()" style="display:flex;align-items:center;gap:13px;padding:18px 20px;border:1.5px solid var(--b,#e2e8f0);border-radius:15px;background:var(--card,#fff);color:inherit;cursor:pointer;font-size:15px;font-weight:600;transition:transform .12s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"><span style="font-size:23px;line-height:1">&#x1F4BB;</span> Ger&auml;te</button>
+      </div>
+      <!-- ABHOLBEREIT — en üstte -->
+      <div id="abholbereit-wrap" style="margin-bottom:24px;display:none">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="font-size:18px;font-weight:700">&#x1F4CB; Abholbereit</div>
+          <div id="abholbereit-count" style="background:var(--red);color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div>
+          <div style="font-size:12px;color:var(--m);margin-left:4px">Fertig &amp; Arbeitsbericht vorhanden &mdash; bitte abholen lassen</div>
+        </div>
+        <div id="abholbereit-list" class="lw"></div>
+      </div>
       <!-- OFFENE AUFTRÄGE -->
       <div id="offen-auf-wrap" style="margin-bottom:24px;display:none">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
@@ -315,15 +508,6 @@ tbody tr:last-child td{border-bottom:none}
           <div id="rueckgabe-list" class="lw"></div>
         </div>
       </div>
-      <!-- JASMIN & SABINE BÖLÜMÜ -->
-      <div id="abholbereit-wrap" style="margin-bottom:24px;display:none">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-          <div style="font-size:18px;font-weight:700">&#x1F4CB; Abholbereit</div>
-          <div id="abholbereit-count" style="background:var(--red);color:#fff;border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700"></div>
-          <div style="font-size:12px;color:var(--m);margin-left:4px">Fertig &amp; Arbeitsbericht vorhanden &mdash; bitte abholen lassen</div>
-        </div>
-        <div id="abholbereit-list" class="lw"></div>
-      </div>
       <div class="kpi-grid">
         <div class="kpi" style="--kc:#33afe2"><div>&#x1F4CB;</div><div class="v" id="k-ges">0</div><div class="l">Gesamt</div></div>
         <div class="kpi" style="--kc:#0d9f6e"><div>&#x1F4B6;</div><div class="v" id="k-ums">0</div><div class="l">Umsatz Netto</div></div>
@@ -335,6 +519,14 @@ tbody tr:last-child td{border-bottom:none}
         <div class="kpi" style="--kc:#15803d;cursor:pointer" onclick="typFlt='verkauf';flt='all';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F4E6;</div><div class="v" id="k-typ-vk">0</div><div class="l">Verk&auml;ufe &#x2192;</div></div>
         <div class="kpi" style="--kc:#a16207;cursor:pointer" onclick="typFlt='bestellung';flt='all';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F6D2;</div><div class="v" id="k-typ-bs">0</div><div class="l">Bestellungen &#x2192;</div></div>
         <div class="kpi" style="--kc:#6d28d9;cursor:pointer" onclick="typFlt='fernwartung';flt='all';showPg('pg-list');updateTypFltButtons();updateStatusFltButtons();renderStats();renderList()"><div>&#x1F4DE;</div><div class="v" id="k-typ-fw">0</div><div class="l">Fernwartung &#x2192;</div></div>
+      </div>
+      <div style="margin:34px 0 8px;border-top:2px solid var(--b,#e2e8f0);padding-top:26px">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap">
+          <div style="font-size:20px;font-weight:800">&#x1F4B6; Finanzen</div>
+          <select id="fin-jahr" onchange="loadFinanzen()" style="padding:8px 14px;border:1.5px solid var(--b,#e2e8f0);border-radius:10px;font-size:14px;background:var(--card,#fff);color:inherit;font-family:inherit;font-weight:600"></select>
+        </div>
+        <div id="fin-kpi" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;margin-bottom:22px"></div>
+        <div class="card" style="margin-bottom:24px"><div class="ct">Monatsumsatz (bezahlt / offen)</div><canvas id="ch-fin" height="200"></canvas></div>
       </div>
       <div class="charts-row">
         <div class="card"><div class="ct">Monatliche Auftr&auml;ge</div><canvas id="ch-m" height="200"></canvas></div>
@@ -378,6 +570,7 @@ tbody tr:last-child td{border-bottom:none}
       <button class="fbtn" data-f="Teile bestellt">Teile bestellt</button>
       <button class="fbtn" data-f="Warten auf Kunde">Warten</button>
       <button class="fbtn" data-f="Fertig">Fertig</button>
+      <button class="fbtn" data-f="Abholbereit">Abholbereit</button>
       <button class="fbtn" data-f="Abgeholt">Abgeholt</button>
     </div>
     <div class="lw"><div id="list-body" style="padding:40px;text-align:center;color:var(--m);font-family:'DM Mono',monospace">Lade...</div></div>
@@ -415,7 +608,7 @@ tbody tr:last-child td{border-bottom:none}
         <div class="vl-cols">
           <div class="vl-sec">
             <div class="vl-sec-title">Auftragnehmer</div>
-            <div class="vl-auftnehmer"><b>Hasi Elektronic</b><br>Gra&szlig;enstra&szlig;e 18 &middot; 71665 Vaihingen/Enz<br>Tel: +49 7042 163914<br>info@hasi-elektronic.de<br>www.hasi-elektronic.de</div>
+            <div class="vl-auftnehmer"><b>Hasi Elektronic</b><br>Gra&szlig;enstra&szlig;e 18 &middot; 71665 Vaihingen/Enz<br>Tel: +49 7042 163914<br><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c8a1a6aea788a0a9bba1e5ada4ada3bcbaa7a6a1abe6acad">[email&#160;protected]</a><br>www.hasi-elektronic.de</div>
           </div>
           <div class="vl-sec">
             <div class="vl-sec-title">Auftraggeber</div>
@@ -516,8 +709,35 @@ tbody tr:last-child td{border-bottom:none}
         </div>
       </div>
       <div class="vl-footer-bar">
-        <span>Hasi Elektronic &middot; Gra&szlig;enstra&szlig;e 18 &middot; 71665 Vaihingen/Enz &middot; +49 7042 163914 &middot; info@hasi-elektronic.de</span>
+        <span>Hasi Elektronic &middot; Gra&szlig;enstra&szlig;e 18 &middot; 71665 Vaihingen/Enz &middot; +49 7042 163914 &middot; <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e58c8b838aa58d84968cc88089808e91978a8b8c86cb8180">[email&#160;protected]</a></span>
         <span id="vl-nr-footer"></span>
+      </div>
+      <!-- VOR-ORT-TERMIN (Neuer Auftrag) -->
+      <div class="card" id="fn-termin-card" style="margin:14px 0;padding:18px 20px">
+        <div style="font-size:10px;font-family:'DM Mono',monospace;color:#7c3aed;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">&#x1F4C5; Vor-Ort-Termin (optional)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Datum</div>
+            <input type="date" class="inp" id="fn-termin-datum" style="font-size:13px;padding:7px 10px">
+          </div>
+          <div>
+            <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Uhrzeit</div>
+            <div style="display:flex;gap:6px;align-items:center"><select class="inp" id="fn-termin-std" style="font-size:13px;padding:7px 8px;flex:1"></select><span style="color:var(--m);font-weight:700">:</span><select class="inp" id="fn-termin-min" style="font-size:13px;padding:7px 8px;flex:1"></select></div>
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Adresse</div>
+          <input type="text" class="inp" id="fn-termin-adr" style="font-size:13px;padding:7px 10px" placeholder="Stra&szlig;e, PLZ Ort" oninput="updateNeuTerminMap()">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+          <button class="btn" type="button" onclick="openNeuAppleMaps()" style="font-size:12px;padding:7px 14px">&#x1F34E; Apple Karten</button>
+          <button class="btn" type="button" onclick="openNeuGoogleMaps()" style="font-size:12px;padding:7px 14px">&#x1F5FA;&#xFE0F; Google Maps</button>
+          <button class="btn" type="button" onclick="neuTeamsKalender()" style="font-size:12px;padding:7px 14px;border-color:#7c3aed;color:#7c3aed">&#x1F4C5; Teams-Kalender</button>
+        </div>
+        <div id="fn-termin-msg" style="font-size:11px;color:var(--m);margin-bottom:8px;min-height:14px">&#x2713; Wird beim Speichern automatisch in den Kalender eingetragen</div>
+        <div id="fn-termin-map" style="display:none;border-radius:10px;overflow:hidden;border:1px solid var(--b)">
+          <iframe id="fn-termin-iframe" width="100%" height="240" style="border:0;display:block" loading="lazy"></iframe>
+        </div>
       </div>
       <div class="vl-actions">
         <button class="btn" id="f-clear">Eingabe l&ouml;schen</button>
@@ -601,10 +821,32 @@ tbody tr:last-child td{border-bottom:none}
 
       <!-- KUNDE -->
       <div class="card" style="padding:18px 20px">
-        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--hasi);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Kunde &amp; Ger&auml;t</div>
+        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--hasi);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+          Kunde &amp; Ger&auml;t
+          <button onclick="toggleKundeEdit()" id="kunde-edit-btn" style="font-size:11px;padding:3px 10px;border:1px solid var(--hasi);border-radius:6px;background:transparent;color:var(--hasi);cursor:pointer;font-weight:600">&#x270F; Bearbeiten</button>
+        </div>
+        <!-- Ansicht -->
         <div id="fa-kunde" style="font-size:13px;line-height:2;margin-bottom:10px"></div>
         <div style="height:1px;background:var(--b);margin-bottom:10px"></div>
         <div id="fa-geraet" style="font-size:13px;line-height:1.7"></div>
+        <!-- Edit Form (versteckt) -->
+        <div id="kunde-edit-form" style="display:none;margin-top:4px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <div><div style="font-size:10px;color:var(--m);margin-bottom:2px">NAME</div><input class="inp" id="ke-name" style="font-size:13px;padding:6px 9px" placeholder="Vor- und Nachname"></div>
+            <div><div style="font-size:10px;color:var(--m);margin-bottom:2px">TELEFON</div><input class="inp" id="ke-tel" style="font-size:13px;padding:6px 9px" placeholder="07042..."></div>
+            <div><div style="font-size:10px;color:var(--m);margin-bottom:2px">E-MAIL</div><input class="inp" id="ke-email" style="font-size:13px;padding:6px 9px" placeholder="email@..."></div>
+            <div><div style="font-size:10px;color:var(--m);margin-bottom:2px">PLZ ORT</div><input class="inp" id="ke-plz" style="font-size:13px;padding:6px 9px" placeholder="71665 Vaihingen"></div>
+          </div>
+          <div style="margin-bottom:8px"><div style="font-size:10px;color:var(--m);margin-bottom:2px">ADRESSE</div><input class="inp" id="ke-adr" style="font-size:13px;padding:6px 9px;width:100%" placeholder="Straße, Nr."></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <div><div style="font-size:10px;color:var(--m);margin-bottom:2px">GERÄT</div><input class="inp" id="ke-geraet" style="font-size:13px;padding:6px 9px" placeholder="Desktop PC, Laptop..."></div>
+            <div><div style="font-size:10px;color:var(--m);margin-bottom:2px">MODELL</div><input class="inp" id="ke-modell" style="font-size:13px;padding:6px 9px" placeholder="Modellbezeichnung"></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onclick="saveKundeEdit()" style="flex:1;padding:8px;border:none;border-radius:8px;background:#33afe2;color:#fff;font-weight:700;cursor:pointer;font-size:13px">&#x2713; Speichern</button>
+            <button onclick="toggleKundeEdit()" style="padding:8px 14px;border:1.5px solid var(--b);border-radius:8px;background:transparent;cursor:pointer;font-size:13px">Abbrechen</button>
+          </div>
+        </div>
       </div>
 
       <!-- AKTIONEN -->
@@ -625,10 +867,12 @@ tbody tr:last-child td{border-bottom:none}
             <!-- Reparatur seçenekleri (varsayılan) -->
             <option class="opt-reparatur">Neu</option>
             <option class="opt-reparatur">In Bearbeitung</option>
+            <option class="opt-reparatur">Vor-Ort-Termin</option>
             <option class="opt-reparatur">Teile bestellt</option>
             <option class="opt-reparatur">Warten auf Kunde</option>
             <option class="opt-reparatur">R&uuml;ckgabe (nicht m&ouml;glich)</option>
             <option class="opt-reparatur">Fertig</option>
+            <option class="opt-reparatur">Abholbereit</option>
             <option class="opt-reparatur">Abgeholt</option>
             <option class="opt-reparatur">Erledigt</option>
             <option class="opt-reparatur">Abgelehnt</option>
@@ -648,6 +892,7 @@ tbody tr:last-child td{border-bottom:none}
             <!-- Fernwartung seçenekleri -->
             <option class="opt-fernwartung" style="display:none">Neu</option>
             <option class="opt-fernwartung" style="display:none">In Bearbeitung</option>
+            <option class="opt-fernwartung" style="display:none">Vor-Ort-Termin</option>
             <option class="opt-fernwartung" style="display:none">Erledigt</option>
             <option class="opt-fernwartung" style="display:none">Abgerechnet</option>
             <option class="opt-fernwartung" style="display:none">Abgelehnt</option>
@@ -657,6 +902,7 @@ tbody tr:last-child td{border-bottom:none}
         <div id="wa-wrap" style="display:none;margin-bottom:10px">
           <button class="wa-btn" id="det-wa" style="width:100%;justify-content:center">&#x1F4F1; WhatsApp: Ger&auml;t fertig</button>
         </div>
+        <button class="btn" id="det-rechnung" onclick="rechnungAusAuftrag()" style="width:100%;justify-content:center;background:#33afe2;color:#fff;border:none;margin-bottom:10px;gap:6px;font-weight:600">&#x1F4C4; Rechnung erstellen</button>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
           <div>
             <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Garantie</div>
@@ -677,6 +923,35 @@ tbody tr:last-child td{border-bottom:none}
         <textarea class="inp" id="fa-notiz" rows="2" style="font-size:12px;resize:none" placeholder="Nur intern sichtbar..."></textarea>
         <div id="fa-msg" style="font-size:12px;font-weight:600;margin-top:6px;min-height:16px"></div>
       </div>
+    </div>
+
+    <!-- VOR-ORT-TERMIN -->
+    <div class="card" style="margin-bottom:14px;padding:18px 20px">
+      <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--hasi);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">&#x1F4C5; Vor-Ort-Termin</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Datum</div>
+          <input type="date" class="inp" id="fa-termin-datum" style="font-size:13px;padding:7px 10px">
+        </div>
+        <div>
+          <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Uhrzeit</div>
+          <div style="display:flex;gap:6px;align-items:center"><select class="inp" id="fa-termin-std" style="font-size:13px;padding:7px 8px;flex:1"></select><span style="color:var(--m);font-weight:700">:</span><select class="inp" id="fa-termin-min" style="font-size:13px;padding:7px 8px;flex:1"></select></div>
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--m);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Adresse</div>
+        <input type="text" class="inp" id="fa-termin-adr" style="font-size:13px;padding:7px 10px" placeholder="Stra&szlig;e, PLZ Ort" oninput="updateTerminMap()">
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <button class="btn" onclick="openAppleMaps()" style="font-size:12px;padding:7px 14px">&#x1F34E; Apple Karten</button>
+        <button class="btn" onclick="openGoogleMaps()" style="font-size:12px;padding:7px 14px">&#x1F5FA;&#xFE0F; Google Maps</button>
+        <button class="btn" onclick="terminToKalender()" style="font-size:12px;padding:7px 14px;border-color:#7c3aed;color:#7c3aed">&#x1F4C5; Teams-Kalender</button>
+        <button class="btn p" onclick="saveTermin()" style="font-size:12px;padding:7px 16px;margin-left:auto">&#x2713; Termin speichern</button>
+      </div>
+      <div id="fa-termin-map" style="display:none;border-radius:10px;overflow:hidden;border:1px solid var(--b)">
+        <iframe id="fa-termin-iframe" width="100%" height="240" style="border:0;display:block" loading="lazy"></iframe>
+      </div>
+      <div id="fa-termin-msg" style="font-size:12px;font-weight:600;margin-top:8px;min-height:16px"></div>
     </div>
 
     <!-- VERLAUF TIMELINE -->
@@ -984,6 +1259,11 @@ tbody tr:last-child td{border-bottom:none}
         <button class="btn" onclick="var n=new Date();kalY=n.getFullYear();kalM=n.getMonth();renderKal()">Heute</button>
       </div>
     </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="kal-layer-btn on" data-layer="auftraege" onclick="setKalLayer('auftraege')">&#x1F4CB; Auftr&auml;ge</button>
+      <button class="kal-layer-btn" data-layer="termine" onclick="setKalLayer('termine')">&#x1F4C5; Termine</button>
+      <button class="kal-layer-btn" data-layer="faellig" onclick="setKalLayer('faellig')">&#x1F4B6; F&auml;lligkeiten</button>
+    </div>
     <div id="alarm-box" style="display:none;background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.3);border-radius:12px;padding:12px 16px;margin-bottom:16px">
       <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--red);font-weight:700;margin-bottom:8px">&#x26A0; SEIT 7+ TAGEN OFFEN</div>
       <div id="alarm-list"></div>
@@ -1004,7 +1284,7 @@ tbody tr:last-child td{border-bottom:none}
   <div id="gs-box">
     <div id="gs-input-wrap">
       <span class="icon">&#x1F50D;</span>
-      <input id="gs-inp" placeholder="Kunde, Auftrag, Ger&auml;t, Modell, Telefon..." autocomplete="off" spellcheck="false">
+      <input id="gs-inp" placeholder="Kunde, Auftrag, Ger&auml;t, Rechnung-Nr, Telefon..." autocomplete="off" spellcheck="false">
       <button id="gs-close">ESC</button>
     </div>
     <div id="gs-results"><div class="gs-empty"><div class="big">&#x1F50D;</div>Tippen um zu suchen...</div></div>
@@ -1012,7 +1292,7 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 var W = 'https://hasi-reparatur.hguencavdi.workers.dev';
 
 // Bir auftrag gerçekten kapandı mı? Sadece bunlar offene listesinden çıkar.
@@ -1021,10 +1301,144 @@ function isClosed(status){ return CLOSED_STATUS.indexOf(status) >= 0; }
 function isOffen(status){ return !isClosed(status); }
 
 var lastSaved = null;
-var A = 'Bearer 71665';
+var A = 'Bearer ' + (localStorage.getItem('hasi_tok') || '');
+function doLogin(){
+  var email=(document.getElementById('li-email').value||'').trim();
+  var pw=document.getElementById('li-pw').value||'';
+  var err=document.getElementById('li-err'), btn=document.getElementById('li-btn');
+  err.textContent='';
+  if(!email||!pw){err.textContent='E-Mail und Passwort eingeben';return;}
+  btn.disabled=true;btn.textContent='...';
+  fetch(W+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pw})})
+    .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+    .then(function(res){
+      if(res.ok&&res.d.token){
+        localStorage.setItem('hasi_tok',res.d.token);
+        localStorage.setItem('hasi_user',res.d.name||res.d.email);
+        localStorage.setItem('hasi_role',res.d.role||'user');
+        location.reload();
+      }else{
+        err.textContent=(res.d&&res.d.error)||'Anmeldung fehlgeschlagen';
+        btn.disabled=false;btn.textContent='Anmelden';
+      }
+    }).catch(function(){err.textContent='Verbindungsfehler';btn.disabled=false;btn.textContent='Anmelden';});
+}
+function doLogout(){
+  var t=localStorage.getItem('hasi_tok');
+  if(t){fetch(W+'/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+t}}).catch(function(){});}
+  localStorage.removeItem('hasi_tok');localStorage.removeItem('hasi_user');localStorage.removeItem('hasi_role');
+  location.reload();
+}
+function checkAuth(){
+  var t=localStorage.getItem('hasi_tok');
+  var ov=document.getElementById('hasi-login');
+  if(!t){if(ov)ov.style.display='flex';return;}
+  fetch(W+'/api/auth/me',{headers:{'Authorization':'Bearer '+t}})
+    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(me){
+      if(ov)ov.style.display='none';
+      if(me&&me.role)localStorage.setItem('hasi_role',me.role);
+      fillHeader(me);
+    })
+    .catch(function(){localStorage.removeItem('hasi_tok');if(ov)ov.style.display='flex';});
+}
+function fillHeader(me){
+  var name=localStorage.getItem('hasi_user')||(me&&me.email)||'';
+  var role=(me&&me.role)||localStorage.getItem('hasi_role')||'user';
+  var el=document.getElementById('hdr-user');if(el)el.textContent='👤 '+name;
+  var ab=document.getElementById('hdr-admin');if(ab)ab.style.display=(role==='admin')?'':'none';
+  var rt=document.getElementById('tab-rechnungen');if(rt)rt.style.display='';
+  window._recIsAdmin=true;
+}
+function openUserMgmt(){var m=document.getElementById('um-modal');if(m){m.style.display='flex';umLoadUsers();}}
+function closeUserMgmt(){var m=document.getElementById('um-modal');if(m)m.style.display='none';var msg=document.getElementById('um-msg');if(msg)msg.textContent='';}
+function umMsg(t,ok){var el=document.getElementById('um-msg');if(el){el.textContent=t;el.style.color=ok?'#16a34a':'#dc2626';}}
+function umLoadUsers(){
+  fetch(W+'/api/auth/users',{headers:{'Authorization':A}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var list=document.getElementById('um-list');
+      if(!d.users){list.innerHTML='<div style="color:#dc2626">Fehler beim Laden</div>';return;}
+      var meName=localStorage.getItem('hasi_user')||'';
+      var h='';
+      d.users.forEach(function(u){
+        var sid=u.email.replace(/[^a-z0-9]/gi,'_');
+        var badge=u.role==='admin'
+          ?'<span style="background:#33afe2;color:#fff;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600">Admin</span>'
+          :'<span style="background:#e2e8f0;color:#475569;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600">Mitarbeiter</span>';
+        h+='<div style="border:1px solid #e2e8f0;border-radius:10px;padding:12px;margin-bottom:8px">';
+        h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+        h+='<div style="flex:1;min-width:150px"><strong>'+(u.name||'—')+'</strong> '+badge+'<br><small style="color:#64748b">'+u.email+'</small></div>';
+        h+='<button onclick="umPwToggle(\''+sid+'\')" style="padding:6px 10px;border:1px solid #cbd5e1;background:#fff;border-radius:7px;font-size:12px;cursor:pointer">🔑 Passwort</button>';
+        h+='<button onclick="umDelete(\''+u.email+'\',this)" style="padding:6px 10px;border:1px solid #dc2626;background:#fff;color:#dc2626;border-radius:7px;font-size:12px;cursor:pointer">🗑</button>';
+        h+='</div>';
+        h+='<div id="umpw-'+sid+'" style="display:none;margin-top:8px">';
+        h+='<input type="text" id="umpwin-'+sid+'" placeholder="Neues Passwort (min. 6)" style="padding:7px 10px;border:1px solid #cbd5e1;border-radius:7px;font-size:13px;width:210px">';
+        h+='<button onclick="umPwSave(\''+u.email+'\',\''+sid+'\')" style="padding:7px 14px;background:#33afe2;color:#fff;border:none;border-radius:7px;font-size:13px;cursor:pointer;margin-left:6px">Speichern</button>';
+        h+='</div>';
+        h+='</div>';
+      });
+      list.innerHTML=h;
+    }).catch(function(){document.getElementById('um-list').innerHTML='<div style="color:#dc2626">Verbindungsfehler</div>';});
+}
+function umPwToggle(sid){var el=document.getElementById('umpw-'+sid);if(el)el.style.display=(el.style.display==='none')?'block':'none';}
+function umPwSave(email,sid){
+  var inp=document.getElementById('umpwin-'+sid);var pw=inp?inp.value:'';
+  if(pw.length<6){umMsg('Passwort min. 6 Zeichen',false);return;}
+  fetch(W+'/api/auth/users/password',{method:'POST',headers:{'Authorization':A,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pw})})
+    .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+    .then(function(res){if(res.ok){umMsg('Passwort geändert: '+email,true);umPwToggle(sid);if(inp)inp.value='';}else umMsg(res.d.error||'Fehler',false);})
+    .catch(function(){umMsg('Verbindungsfehler',false);});
+}
+function umCreate(){
+  var name=document.getElementById('um-new-name').value.trim();
+  var email=document.getElementById('um-new-email').value.trim();
+  var pw=document.getElementById('um-new-pw').value;
+  var role=document.getElementById('um-new-role').value;
+  if(!email||!pw){umMsg('E-Mail und Passwort erforderlich',false);return;}
+  if(pw.length<6){umMsg('Passwort min. 6 Zeichen',false);return;}
+  fetch(W+'/api/auth/users',{method:'POST',headers:{'Authorization':A,'Content-Type':'application/json'},body:JSON.stringify({name:name,email:email,password:pw,role:role})})
+    .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+    .then(function(res){
+      if(res.ok){umMsg('Benutzer erstellt: '+email,true);document.getElementById('um-new-name').value='';document.getElementById('um-new-email').value='';document.getElementById('um-new-pw').value='';umLoadUsers();}
+      else umMsg(res.d.error||'Fehler',false);
+    }).catch(function(){umMsg('Verbindungsfehler',false);});
+}
+function umDelete(email,btn){
+  if(btn.getAttribute('data-cf')!=='1'){
+    btn.setAttribute('data-cf','1');btn.textContent='Sicher?';btn.style.background='#dc2626';btn.style.color='#fff';
+    setTimeout(function(){if(btn.getAttribute('data-cf')==='1'){btn.setAttribute('data-cf','0');btn.innerHTML='🗑';btn.style.background='#fff';btn.style.color='#dc2626';}},3000);
+    return;
+  }
+  fetch(W+'/api/auth/users',{method:'DELETE',headers:{'Authorization':A,'Content-Type':'application/json'},body:JSON.stringify({email:email})})
+    .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+    .then(function(res){if(res.ok){umMsg('Benutzer gelöscht: '+email,true);umLoadUsers();}else umMsg(res.d.error||'Fehler',false);})
+    .catch(function(){umMsg('Verbindungsfehler',false);});
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  checkAuth();
+  ['li-pw','li-email'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  });
+});
 var SATZ = 96;
 var reps=[], cur=null, curAb=null, flt='all', typFlt='all', abId=0, chM=null, chS=null, allDash=null;
 var kalY=new Date().getFullYear(), kalM=new Date().getMonth(), kalSel=null;
+var kalLayer='auftraege', kalRechnungen=null, kalRecLoading=false;
+function setKalLayer(l){
+  kalLayer=l;
+  var btns=document.querySelectorAll('.kal-layer-btn');
+  for(var i=0;i<btns.length;i++){btns[i].classList.toggle('on',btns[i].getAttribute('data-layer')===l);}
+  if(l==='faellig'&&kalRechnungen===null&&!kalRecLoading){
+    kalRecLoading=true;
+    fetch(W+'/api/rechnungen?status=Offen',{headers:{Authorization:A}})
+      .then(function(r){return r.json();})
+      .then(function(d){kalRechnungen=Array.isArray(d)?d:((d&&d.results)||[]);kalRecLoading=false;renderKal();})
+      .catch(function(){kalRechnungen=[];kalRecLoading=false;renderKal();});
+  } else { renderKal(); }
+}
 function renderKal(){
   var now=new Date();
   var todayStr=now.toISOString().slice(0,10);
@@ -1036,11 +1450,35 @@ function renderKal(){
   var lastDay=new Date(kalY,kalM+1,0);
   var startDow=(firstDay.getDay()+6)%7;
   var byDay={};
-  reps.forEach(function(r){
-    var d=(r.datum||r.created_at||'').slice(0,10);
-    if(!byDay[d]) byDay[d]=[];
-    byDay[d].push(r);
-  });
+  if(kalLayer==='termine'){
+    reps.forEach(function(r){
+      if(!r.termin_datum)return;
+      var d=String(r.termin_datum).slice(0,10);
+      if(!byDay[d]) byDay[d]=[];
+      byDay[d].push({kind:'termin',r:r,
+        label:(r.k_name||r.nr||'')+(r.termin_zeit?' '+String(r.termin_zeit).slice(0,5):''),
+        title:(r.k_name||'')+' '+(r.termin_zeit||'')+(r.termin_adresse?' \u00b7 '+r.termin_adresse:'')});
+    });
+  } else if(kalLayer==='faellig'){
+    (kalRechnungen||[]).forEach(function(rc){
+      var basis=rc.rechnung_datum;if(!basis)return;
+      var ziel=parseInt(rc.zahlungsziel_tage)||14;
+      var fd=new Date(String(basis).slice(0,10));fd.setDate(fd.getDate()+ziel);
+      var d=fd.toISOString().slice(0,10);
+      if(!byDay[d]) byDay[d]=[];
+      var off=(rc.offen!=null?rc.offen:rc.betrag);
+      byDay[d].push({kind:'faellig',rc:rc,
+        label:(rc.kunde||'')+' \u00b7 '+recEur(off),
+        title:(rc.kunde||'')+' '+(rc.rechnung_nr||'')});
+    });
+  } else {
+    reps.forEach(function(r){
+      var d=(r.datum||r.created_at||'').slice(0,10);
+      if(!byDay[d]) byDay[d]=[];
+      byDay[d].push({kind:'auftrag',r:r,
+        label:(r.k_name||r.nr||''),title:r.k_name});
+    });
+  }
   var alarmReps=reps.filter(function(r){
     if(isClosed(r.status)) return false;
     var d=new Date((r.datum||r.created_at||'').slice(0,10));
@@ -1072,11 +1510,22 @@ function renderKal(){
     var cls='kal-day'+(isToday?' today':'')+(c.curr?'':' other')+(isSel?' sel':'');
     var dots='';
     if(c.ds&&byDay[c.ds]){
-      dots=byDay[c.ds].slice(0,3).map(function(r){
+      dots=byDay[c.ds].slice(0,3).map(function(it){
+        if(it.kind==='termin'){
+          var df=(new Date(c.ds)-new Date(todayStr))/(86400000);
+          var cc=df>0?'#0d9f6e':df===0?'#33afe2':'#94a3b8';
+          return '<div class="kal-dot" style="background:'+cc+'22;color:'+cc+';border:1px solid '+cc+'44" title="'+recEsc(it.title)+'" onclick="event.stopPropagation();openDet('+it.r.id+')">'+recEsc(it.label)+'</div>';
+        }
+        if(it.kind==='faellig'){
+          var df2=(new Date(c.ds)-new Date(todayStr))/(86400000);
+          var cc2=df2<0?'#dc2626':df2===0?'#ea580c':'#d97706';
+          return '<div class="kal-dot" style="background:'+cc2+'22;color:'+cc2+';border:1px solid '+cc2+'44" title="'+recEsc(it.title)+'" onclick="event.stopPropagation();openRecModal('+it.rc.id+')">'+recEsc(it.label)+'</div>';
+        }
+        var r=it.r;
         var dayDiff=(now-new Date(c.ds))/(1000*60*60*24);
-        var sc=r.status==='Fertig'||r.status==='Abgeholt'?'s-fer':r.status==='Neu'?'s-neu':'s-off';
+        var sc=r.status==='Fertig'||r.status==='Abholbereit'||r.status==='Abgeholt'?'s-fer':r.status==='Neu'?'s-neu':'s-off';
         if(sc!=='s-fer'&&dayDiff>=7) sc='s-alarm';
-        return '<div class="kal-dot '+sc+'" title="'+r.k_name+'">'+(r.k_name||r.nr||'')+'</div>';
+        return '<div class="kal-dot '+sc+'" title="'+recEsc(it.title)+'" onclick="event.stopPropagation();openDet('+r.id+')">'+recEsc(it.label)+'</div>';
       }).join('');
       if(byDay[c.ds].length>3) dots+='<div style="font-size:8px;color:var(--m)">+'+(byDay[c.ds].length-3)+' mehr</div>';
     }
@@ -1093,7 +1542,485 @@ function fmt(n){return Number(n||0).toFixed(2).replace('.',',').replace(/\B(?=(\
 function fmtD(s){if(!s)return '\u2014';var p=s.slice(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function tod(){return new Date().toISOString().split('T')[0];}
 function msg(id,t,err){var e=document.getElementById(id);if(!e)return;e.textContent=t;e.style.color=err?'var(--red)':'var(--green)';if(!err)setTimeout(function(){e.textContent=''},3000);}
-function sbadge(s){var c={Neu:'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa',Fertig:'#34d399',Abgeholt:'#6b7585',Abgelehnt:'#f87171','Erledigt':'#34d399','Abgerechnet':'#6b7585','Verkauft':'#15803d','Bestellt':'#a16207','Eingetroffen':'#f59e0b','In Einrichtung':'#fb923c','Bereit':'#34d399','Storniert':'#f87171','Rückgabe (nicht möglich)':'#dc2626'};var labels={'Rückgabe (nicht möglich)':'Rückgabe'};var col=c[s]||'#33afe2';var lbl=labels[s]||s||'Neu';return '<span class="badge" style="background:'+col+'22;border:1px solid '+col+'44;color:'+col+';white-space:nowrap">'+lbl+'</span>';}
+function sbadge(s){var c={Neu:'#33afe2','In Bearbeitung':'#2563eb','Vor-Ort-Termin':'#7c3aed','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa',Fertig:'#16a34a',Abholbereit:'#15803d',Abgeholt:'#6b7585',Abgelehnt:'#ef4444','Erledigt':'#059669','Abgerechnet':'#6b7585','Verkauft':'#0d9488','Bestellt':'#a16207','Eingetroffen':'#0891b2','In Einrichtung':'#6366f1','Bereit':'#65a30d','Storniert':'#ef4444','Rückgabe (nicht möglich)':'#dc2626'};var labels={'Rückgabe (nicht möglich)':'Rückgabe'};var col=c[s]||'#33afe2';var lbl=labels[s]||s||'Neu';return '<span class="badge" style="background:'+col+'22;border:1px solid '+col+'44;color:'+col+';white-space:nowrap">'+lbl+'</span>';}
+
+// ===== RECHNUNGEN / DEBITOREN MODÜL =====
+var _recRows=[], _recT, _recDelArm=false;
+function recGv(id){var e=document.getElementById(id);return e?e.value:'';}
+function recEur(n){return (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20AC';}
+function recDat(s){if(!s)return'';var p=String(s).slice(0,10).split('-');return p.length===3?p[2]+'.'+p[1]+'.'+p[0]:s;}
+function recEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function recApplyFilter(){clearTimeout(_recT);_recT=setTimeout(loadRechnungen,250);}
+function recCalcOffen(){var b=parseFloat(recGv('rec-m-betrag'))||0,z=parseFloat(recGv('rec-m-bezahlt'))||0;var o=Math.round((b-z)*100)/100;var el=document.getElementById('rec-m-offen');if(el)el.textContent=recEur(o);}
+var REC_KATALOG=[
+  {bez:'IT-Service / Arbeitszeit (Std)',preis:96,mwst:19},
+  {bez:'Vor-Ort-Service (Std)',preis:96,mwst:19},
+  {bez:'Fernwartung (Std)',preis:96,mwst:19},
+  {bez:'PC-Reparatur',preis:0,mwst:19},
+  {bez:'Laptop-Reparatur',preis:0,mwst:19},
+  {bez:'Datenrettung',preis:0,mwst:19},
+  {bez:'Virenentfernung / Systembereinigung',preis:0,mwst:19},
+  {bez:'Netzwerk-Installation',preis:0,mwst:19},
+  {bez:'Windows-Neuinstallation',preis:0,mwst:19},
+  {bez:'Backup-Einrichtung',preis:0,mwst:19},
+  {bez:'Pauschale',preis:0,mwst:19}
+];
+function recPosRender(){
+  var box=document.getElementById('rec-pos-list'); if(!box)return;
+  var pos=window._recPos||[];
+  if(!pos.length){box.innerHTML='<div style="text-align:center;color:var(--m,#64748b);font-size:12px;padding:8px">Keine Positionen &ndash; manueller Betrag unten</div>';recPosCalc();return;}
+  box.innerHTML=pos.map(function(p,i){
+    var ges=(Number(p.menge)||0)*(Number(p.preis)||0);
+    return '<div style="background:var(--card,#fff);border:1px solid var(--b,#e2e8f0);border-radius:8px;padding:8px;margin-bottom:8px">'
+      +'<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><input value="'+recEsc(p.bez||'')+'" oninput="recPosUpd('+i+',&quot;bez&quot;,this.value)" placeholder="Bezeichnung" style="flex:1;padding:6px 8px;border:1px solid var(--b,#e2e8f0);border-radius:6px;font-size:13px;background:var(--card,#fff);color:inherit"><button type="button" onclick="recPosDel('+i+')" title="Entfernen" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:15px;padding:2px 4px">\uD83D\uDDD1</button></div>'
+      +'<div style="display:grid;grid-template-columns:58px 92px 66px 1fr;gap:6px;align-items:center">'
+      +'<input type="number" step="0.5" value="'+(p.menge!=null?p.menge:1)+'" oninput="recPosUpd('+i+',&quot;menge&quot;,this.value)" title="Menge" style="padding:5px 6px;border:1px solid var(--b,#e2e8f0);border-radius:6px;font-size:12px;background:var(--card,#fff);color:inherit">'
+      +'<input type="number" step="0.01" value="'+(p.preis!=null&&p.preis!==''?p.preis:'')+'" oninput="recPosUpd('+i+',&quot;preis&quot;,this.value)" placeholder="Preis &euro;" title="Einzelpreis netto" style="padding:5px 6px;border:1px solid var(--b,#e2e8f0);border-radius:6px;font-size:12px;background:var(--card,#fff);color:inherit">'
+      +'<select onchange="recPosUpd('+i+',&quot;mwst&quot;,this.value)" title="MwSt" style="padding:5px 2px;border:1px solid var(--b,#e2e8f0);border-radius:6px;font-size:12px;background:var(--card,#fff);color:inherit">'+[19,7,0].map(function(m){return '<option value="'+m+'"'+((Number(p.mwst)||19)===m?' selected':'')+'>'+m+'%</option>';}).join('')+'</select>'
+      +'<div id="rec-pos-ges-'+i+'" style="text-align:right;font-weight:600;font-size:13px">'+recEur(ges)+'</div>'
+      +'</div></div>';
+  }).join('');
+  recPosCalc();
+}
+function recPosAdd(bez,preis,mwst,menge){
+  if(!window._recPos)window._recPos=[];
+  window._recPos.push({bez:bez||'',menge:menge!=null?menge:1,preis:(preis!=null?preis:''),mwst:mwst!=null?mwst:19});
+  recPosRender();
+}
+function recPosDel(i){if(window._recPos){window._recPos.splice(i,1);recPosRender();}}
+function recPosUpd(i,k,v){
+  if(!window._recPos||!window._recPos[i])return;
+  window._recPos[i][k]=(k==='bez')?v:(v===''?'':Number(v));
+  if(k!=='bez')recPosCalc();
+}
+function recPosCalc(){
+  var pos=window._recPos||[]; var netto=0,mwstSum=0;
+  pos.forEach(function(p,i){
+    var ges=(Number(p.menge)||0)*(Number(p.preis)||0);
+    var mw=ges*((Number(p.mwst)||0)/100);
+    netto+=ges; mwstSum+=mw;
+    var ge=document.getElementById('rec-pos-ges-'+i); if(ge)ge.textContent=recEur(ges);
+  });
+  var brutto=Math.round((netto+mwstSum)*100)/100;
+  var sum=document.getElementById('rec-pos-sum');
+  if(sum)sum.innerHTML=pos.length?('Netto: <b>'+recEur(netto)+'</b> &nbsp;&middot;&nbsp; MwSt: <b>'+recEur(mwstSum)+'</b> &nbsp;&middot;&nbsp; <span style="color:#33afe2;font-size:15px;font-weight:700">Brutto: '+recEur(brutto)+'</span>'):'';
+  var bf=document.getElementById('rec-m-betrag');
+  if(pos.length){
+    if(bf){bf.value=brutto.toFixed(2);bf.readOnly=true;bf.style.opacity='.65';}
+    window._recNetto=Math.round(netto*100)/100; window._recMwst=Math.round(mwstSum*100)/100;
+  }else{
+    if(bf){bf.readOnly=false;bf.style.opacity='1';}
+    window._recNetto=null; window._recMwst=null;
+  }
+  recCalcOffen();
+}
+function recKatalogToggle(e){
+  if(e)e.stopPropagation();
+  var m=document.getElementById('rec-katalog-menu'); if(!m)return;
+  if(m.style.display==='block'){m.style.display='none';return;}
+  m.innerHTML='<div style="padding:8px 8px 6px"><input id="rec-art-search" oninput="recArtikelSearch(this.value)" placeholder="Artikel suchen (Name / Nr / EAN)..." autocomplete="off" style="width:100%;padding:8px 10px;border:1.5px solid var(--b,#e2e8f0);border-radius:7px;font-size:12.5px;box-sizing:border-box;background:var(--card,#fff);color:inherit"></div><div id="rec-art-results"></div><div style="border-top:1px solid var(--b,#eef1f5);margin-top:2px;padding-top:4px"><div style="font-size:10px;color:var(--m,#64748b);padding:2px 12px 4px;text-transform:uppercase;letter-spacing:.5px">Schnell-Leistungen</div>'+REC_KATALOG.map(function(k,i){return '<div onclick="recKatalogPick('+i+')" style="padding:8px 12px;border-radius:6px;cursor:pointer;font-size:12.5px;display:flex;justify-content:space-between;gap:10px" onmouseover="this.style.background=&quot;rgba(51,175,226,.1)&quot;" onmouseout="this.style.background=&quot;&quot;"><span>'+recEsc(k.bez)+'</span>'+(k.preis?'<span style="color:var(--m,#64748b)">'+recEur(k.preis)+'</span>':'')+'</div>';}).join('')+'</div>';
+  m.style.display='block';
+  var si=document.getElementById('rec-art-search'); if(si)setTimeout(function(){si.focus();},60);
+}
+function recArtikelSearch(q){
+  clearTimeout(window._recArtT);
+  var box=document.getElementById('rec-art-results'); if(!box)return;
+  if(!q||q.length<2){box.innerHTML='';return;}
+  window._recArtT=setTimeout(function(){
+    fetch(W+'/api/artikel/search?q='+encodeURIComponent(q),{headers:{Authorization:A}}).then(function(r){return r.json();}).then(function(st){
+      if(!box)return;
+      if(!Array.isArray(st)||!st.length){box.innerHTML='<div style="padding:8px 12px;font-size:12px;color:var(--m,#64748b)">Keine Treffer</div>';return;}
+      window._recArtCache=st;
+      box.innerHTML=st.map(function(a,i){return '<div onclick="recArtikelPick('+i+')" style="padding:8px 12px;cursor:pointer;font-size:12.5px;display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--b,#f1f5f9)" onmouseover="this.style.background=&quot;rgba(51,175,226,.1)&quot;" onmouseout="this.style.background=&quot;&quot;"><span style="flex:1;line-height:1.35">'+recEsc(a.bezeichnung)+'</span><span style="color:#33afe2;font-weight:600;white-space:nowrap">'+recEur(a.preis)+'</span></div>';}).join('');
+    }).catch(function(){});
+  },220);
+}
+function recArtikelPick(i){
+  var a=(window._recArtCache||[])[i]; if(!a)return;
+  recPosAdd(a.bezeichnung,a.preis,a.mwst||19,1);
+  var m=document.getElementById('rec-katalog-menu'); if(m)m.style.display='none';
+}
+function recKatalogPick(i){var k=REC_KATALOG[i];if(k)recPosAdd(k.bez,k.preis,k.mwst,1);var m=document.getElementById('rec-katalog-menu');if(m)m.style.display='none';}
+document.addEventListener('click',function(e){var m=document.getElementById('rec-katalog-menu');if(m&&m.style.display==='block'&&!e.target.closest('#rec-katalog-menu')&&!(e.target.getAttribute&&e.target.getAttribute('onclick')&&e.target.getAttribute('onclick').indexOf('recKatalogToggle')>=0))m.style.display='none';});
+
+var _bankVors=[];
+function openBankAbgleich(){
+  var m=document.getElementById('bank-modal'); if(m)m.style.display='flex';
+  var ld=document.getElementById('bank-loading'); if(ld){ld.style.display='block';ld.textContent='L\u00e4dt\u2026';}
+  document.getElementById('bank-liste').innerHTML='';
+  document.getElementById('bank-result').style.display='none';
+  var days=(document.getElementById('bank-days')||{}).value||'90';
+  fetch(W+'/api/rechnungen/bank-vorschlaege?days_back='+days,{headers:{Authorization:A}})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d.error){ld.innerHTML='<div style="color:#dc2626">Fehler: '+(d.detail||d.error)+'</div>';return;}
+      _bankVors=d.vorschlaege||[]; renderBankVors();
+    }).catch(function(e){if(ld)ld.innerHTML='<div style="color:#dc2626">Fehler: '+e.message+'</div>';});
+}
+function renderBankVors(){
+  var ld=document.getElementById('bank-loading'); if(ld)ld.style.display='none';
+  var box=document.getElementById('bank-liste');
+  if(!_bankVors.length){box.innerHTML='<div style="padding:24px;text-align:center;color:var(--m,#64748b)">Keine offenen Rechnungen mit passender \u00dcberweisung gefunden.</div>';return;}
+  var nE=0; _bankVors.forEach(function(v){if(v.confidence==='exakt')nE++;});
+  var h='<div style="font-size:12px;color:var(--m,#64748b);margin-bottom:10px">'+_bankVors.length+' Vorschl\u00e4ge ('+nE+' exakt). Exakte sind vorausgew\u00e4hlt.</div>';
+  _bankVors.forEach(function(v,i){
+    var ex=v.confidence==='exakt';
+    var badge=ex?'<span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">EXAKT</span>':(v.confidence==='name'?'<span style="background:#f97316;color:#fff;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">NAME+Betrag</span>':'<span style="background:#eab308;color:#fff;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">nur Nr.</span>');
+    h+='<label style="display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1px solid var(--b,#e2e8f0);border-radius:10px;margin-bottom:8px;cursor:pointer">'
+      +'<input type="checkbox" class="bank-cb" data-i="'+i+'" '+(ex?'checked':'')+' style="margin-top:3px;width:17px;height:17px;cursor:pointer">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:3px">'+badge+'<b style="font-size:13.5px">Rg '+recEsc(v.rechnung_nr)+'</b> <span style="font-size:13px;color:var(--m,#64748b)">'+recEsc(v.kunde||'')+'</span></div>'
+      +'<div style="font-size:12.5px">Rechnung: <b>'+recEur(v.betrag)+'</b> &nbsp;&#x2194;&nbsp; \u00dcberweisung: <b style="color:#16a34a">+'+recEur(v.tx_amount)+'</b> am '+recDat(v.tx_datum)+'</div>'
+      +'<div style="font-size:11px;color:var(--m,#64748b);margin-top:2px;word-break:break-word">'+recEsc(v.tx_name||'')+' \u00b7 '+recEsc(v.tx_zweck||'')+'</div>'
+      +'</div></label>';
+  });
+  box.innerHTML=h;
+}
+function bankSelectExakt(){
+  var cbs=document.querySelectorAll('.bank-cb');
+  for(var i=0;i<cbs.length;i++){var v=_bankVors[+cbs[i].getAttribute('data-i')];cbs[i].checked=(v&&v.confidence==='exakt');}
+}
+function bankMatchSelected(){
+  var items=[];var cbs=document.querySelectorAll('.bank-cb');
+  for(var i=0;i<cbs.length;i++){if(cbs[i].checked){var v=_bankVors[+cbs[i].getAttribute('data-i')];if(v)items.push({rechnung_id:v.rechnung_id,tx_datum:v.tx_datum,tx_id:v.tx_id});}}
+  if(!items.length){return;}
+  var btn=document.getElementById('bank-submit'); if(btn){btn.disabled=true;btn.textContent='Speichert\u2026';}
+  fetch(W+'/api/rechnungen/bank-match',{method:'POST',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify({items:items})})
+    .then(function(r){return r.json();}).then(function(d){
+      var res=document.getElementById('bank-result');
+      if(d.ok){res.style.display='block';res.style.background='rgba(22,163,74,.1)';res.style.color='#16a34a';res.textContent='\u2713 '+d.matched+' Rechnung(en) als bezahlt markiert.';
+        if(btn){btn.disabled=false;btn.textContent='Ausgew\u00e4hlte als bezahlt markieren';}
+        setTimeout(function(){closeBankModal();loadRechnungen();},1200);
+      } else {res.style.display='block';res.style.background='rgba(220,38,38,.1)';res.style.color='#dc2626';res.textContent='Fehler: '+(d.error||'unbekannt');
+        if(btn){btn.disabled=false;btn.textContent='Ausgew\u00e4hlte als bezahlt markieren';}}
+    }).catch(function(e){if(btn){btn.disabled=false;btn.textContent='Ausgew\u00e4hlte als bezahlt markieren';}});
+}
+function closeBankModal(){var m=document.getElementById('bank-modal');if(m)m.style.display='none';}
+function bankSync(){
+  var btn=document.getElementById('bank-sync-btn'); if(btn){btn.disabled=true;btn.innerHTML='\u23F3 Synchronisiert\u2026';}
+  fetch(W+'/api/bank/sync',{method:'POST',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify({days_back:90})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(res.error){if(btn){btn.disabled=false;btn.innerHTML='\uD83D\uDD04 Bank-Sync';}alert('Sync-Fehler: '+(res.error==='no_active_connection'?'Keine aktive Bankverbindung (evtl. Zugriff abgelaufen)':res.error));return;}
+      var n=res.total_inserted||0;
+      openBankAbgleich();
+      if(btn){btn.disabled=false;btn.innerHTML=(n>0?'\u2705 '+n+' neu':'\u2713 Aktuell');setTimeout(function(){if(btn)btn.innerHTML='\uD83D\uDD04 Bank-Sync';},3500);}
+    })
+    .catch(function(e){if(btn){btn.disabled=false;btn.innerHTML='\uD83D\uDD04 Bank-Sync';}alert('Sync-Fehler: '+e.message);});
+}
+function loadRechnungen(){
+  var ld=document.getElementById('rec-loading'); if(ld)ld.style.display='block';
+  fetch(W+'/api/rechnungen/stats',{headers:{Authorization:A}}).then(function(r){return r.json();}).then(renderRecStats).catch(function(){});
+  var jahr=recGv('rec-f-jahr'),status=recGv('rec-f-status'),q=recGv('rec-f-q');
+  var nurUeber=(status==='__ueber'); if(nurUeber)status='Offen';
+  var u=W+'/api/rechnungen?';
+  if(jahr)u+='jahr='+encodeURIComponent(jahr)+'&';
+  if(status)u+='status='+encodeURIComponent(status)+'&';
+  if(q)u+='q='+encodeURIComponent(q)+'&';
+  fetch(u,{headers:{Authorization:A}}).then(function(r){return r.json();}).then(function(rows){
+    _recRows=Array.isArray(rows)?rows:[]; renderRecListe(nurUeber?_recRows.filter(function(r){return recOverdue(r)>0;}):_recRows);
+    if(ld)ld.style.display='none';
+  }).catch(function(e){if(ld)ld.innerHTML='<div style="color:#dc2626">Fehler: '+e.message+'</div>';});
+}
+function renderRecStats(s){
+  var box=document.getElementById('rec-stats'); if(!box)return; s=s||{};
+  function card(label,val,col){return '<div style="background:var(--card,#fff);border:1.5px solid var(--b,#e2e8f0);border-radius:12px;padding:14px 16px"><div style="font-size:12px;color:var(--m,#64748b);margin-bottom:6px">'+label+'</div><div style="font-size:21px;font-weight:700;color:'+col+'">'+val+'</div></div>';}
+  box.innerHTML=card('&#x1F534; Offen gesamt',recEur(s.sumOffen),'#dc2626')+card('&#x26A0;&#xFE0F; &Uuml;berf&auml;llig',recEur(s.sumUeberfaellig||0)+' <span style="font-size:13px;font-weight:400">('+(s.anzUeberfaellig||0)+')</span>','#ea580c')+card('Anzahl offen',(s.anzOffen||0)+' Rg.','#dc2626')+card('&#x2705; Bezahlt gesamt',recEur(s.sumBezahlt),'#059669')+card('Umsatz gesamt',recEur(s.sumBetrag),'#33afe2');
+}
+function recOverdue(r){
+  if(String(r.status||'').toLowerCase()!=='offen')return 0;
+  if(!r.rechnung_datum)return 0;
+  var zd=parseInt(r.zahlungsziel_tage)||14;
+  var f=new Date(String(r.rechnung_datum).slice(0,10)); if(isNaN(f.getTime()))return 0;
+  f.setDate(f.getDate()+zd);
+  var d=Math.floor((Date.now()-f.getTime())/86400000);
+  return d>0?d:0;
+}
+function _zahlart(r){
+  if(r.bank_tx_id) return '\uD83C\uDFE6 \u00DCberweisung';
+  var z=String(r.zahlungsart||'').toLowerCase().trim();
+  if(!z||z==='?'||z==='storniert')return '';
+  if(z.indexOf('\u00FCberweis')>=0||z.indexOf('ueberweis')>=0) return '\uD83C\uDFE6 \u00DCberweisung';
+  if(z.indexOf('ec')===0||z.indexOf('karte')>=0||z.indexOf('kart')>=0) return '\uD83D\uDCB3 EC-Karte';
+  if(z.indexOf('bar')===0||z==='bar') return '\uD83D\uDCB5 Bar';
+  return '';
+}
+function recFaelligStr(r){
+  if(!r.rechnung_datum)return '';
+  var zd=parseInt(r.zahlungsziel_tage)||14;
+  var f=new Date(String(r.rechnung_datum).slice(0,10)); if(isNaN(f.getTime()))return '';
+  f.setDate(f.getDate()+zd);
+  return f.toLocaleDateString('de-DE');
+}
+function renderRecListe(rows){
+  var box=document.getElementById('rec-liste'); if(!box)return;
+  if(!rows.length){box.innerHTML='<div style="padding:40px;text-align:center;color:var(--m,#64748b)">Keine Rechnungen gefunden.</div>';return;}
+  var gc='grid-template-columns:78px 80px 2fr 1.4fr 102px 98px 86px';
+  var head='<div style="display:grid;'+gc+';gap:10px;padding:10px 14px;font-size:11px;font-weight:700;color:var(--m,#64748b);text-transform:uppercase;border-bottom:2px solid var(--b,#e2e8f0)"><div>Nr.</div><div>Datum</div><div>Kunde</div><div>Zahlung</div><div style="text-align:right">Betrag</div><div style="text-align:right">Offen</div><div style="text-align:center">Status</div></div>';
+  var body=rows.map(function(r){
+    var off=(String(r.status).toLowerCase()==='offen');
+    var od=off?recOverdue(r):0;
+    var zCell;
+    if(off){var fs=recFaelligStr(r);zCell=fs?'<span style="font-size:11.5px;color:'+(od>0?'#ea580c;font-weight:600':'var(--m,#64748b)')+'">F\u00E4llig: '+fs+'</span>':'';}
+    else{var za=_zahlart(r);zCell=(za?'<span style="font-size:11.5px;font-weight:600">'+za+'</span>':'')+(r.bezahl_datum?'<span style="display:block;font-size:10px;color:var(--m,#64748b)">'+recDat(r.bezahl_datum)+'</span>':'');}
+    var badge=off?(od>0?'<span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#fed7aa;color:#c2410c">&#x1F534; '+od+'T</span>':'<span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#fef3c7;color:#a16207">Offen</span>'):'<span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#d1fae5;color:#047857">'+recEsc(r.status)+'</span>';
+    return '<div onclick="openRecModal('+r.id+')" style="display:grid;'+gc+';gap:10px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--b,#e2e8f0);cursor:pointer;font-size:13px" onmouseover="this.style.background=\'rgba(51,175,226,.05)\'" onmouseout="this.style.background=\'\'">'
+      +'<div style="font-family:monospace;font-size:12px;color:#33afe2;font-weight:600">'+recEsc(r.rechnung_nr)+'</div>'
+      +'<div style="font-size:12px;color:var(--m,#64748b)">'+recDat(r.rechnung_datum)+'</div>'
+      +'<div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+recEsc(r.kunde)+(r.garantie?'<span style="display:block;font-size:10px;color:var(--m,#64748b);font-weight:400">'+recEsc(r.garantie)+'</span>':'')+(parseInt(r.mahnstufe)>0?'<span style="display:block;font-size:10px;color:#ea580c;font-weight:600">\u26A0 '+(['','Erinnerung','1. Mahnung','2. Mahnung'][parseInt(r.mahnstufe)]||'')+(r.mahn_datum?' \u00B7 '+recDat(r.mahn_datum):'')+'</span>':'')+'</div>'
+      +'<div style="overflow:hidden">'+zCell+'</div>'
+      +'<div style="text-align:right;font-weight:600">'+recEur(r.betrag)+'</div>'
+      +'<div style="text-align:right;font-weight:700;color:'+(off?'#dc2626':'var(--m,#64748b)')+'">'+recEur(r.offen)+'</div>'
+      +'<div style="text-align:center">'+badge+'</div></div>';
+  }).join('');
+  box.innerHTML='<div style="overflow-x:auto"><div style="min-width:720px;max-width:1080px;margin:0 auto;border:1.5px solid var(--b,#e2e8f0);border-radius:12px;overflow:hidden">'+head+body+'</div></div><div style="padding:10px 4px;font-size:12px;color:var(--m,#64748b);max-width:1080px;margin:0 auto">'+rows.length+' Rechnung(en)</div>';
+}
+var _recKundeT;
+function recKundeSearch(q){
+  clearTimeout(_recKundeT);
+  var dd=document.getElementById('rec-kunde-dd');
+  if(!q||q.length<2){if(dd)dd.style.display='none';return;}
+  _recKundeT=setTimeout(function(){
+    fetch(W+'/api/kunden-stamm/search?q='+encodeURIComponent(q),{headers:{Authorization:A}}).then(function(r){return r.json();}).then(function(st){
+      if(!dd)return;
+      if(Array.isArray(st)&&st.length){
+        window._recKundeCache=st;
+        dd.innerHTML=st.map(function(k,i){
+          var sub=[k.ort,k.kundennummer?'Nr. '+k.kundennummer:''].filter(Boolean).join(' \u00B7 ');
+          return '<div onclick="recKundePick('+i+')" style="padding:10px 13px;cursor:pointer;border-bottom:1px solid var(--b,#eef1f5)" onmouseover="this.style.background=&quot;rgba(51,175,226,.08)&quot;" onmouseout="this.style.background=&quot;&quot;"><div style="font-weight:600;font-size:13.5px">'+recEsc(k.firma||k.name||'')+'</div>'+(sub?'<div style="font-size:11.5px;color:var(--m,#64748b);margin-top:1px">'+recEsc(sub)+'</div>':'')+'</div>';
+        }).join('');
+        dd.style.display='block';
+      } else { dd.style.display='none'; }
+    }).catch(function(){});
+  },200);
+}
+function recKundePick(i){
+  var k=(window._recKundeCache||[])[i]; if(!k)return;
+  var sv=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
+  sv('rec-m-kunde',k.firma||k.name);
+  sv('rec-m-kundennr',k.kundennummer);
+  sv('rec-m-ansprech',(k.ansprechpartner&&k.ansprechpartner!==k.name&&k.ansprechpartner!==k.firma)?k.ansprechpartner:'');
+  sv('rec-m-strasse',k.strasse||k.adresse);
+  sv('rec-m-plz',k.plz); sv('rec-m-ort',k.ort);
+  var dd=document.getElementById('rec-kunde-dd'); if(dd)dd.style.display='none';
+}
+document.addEventListener('click',function(e){var dd=document.getElementById('rec-kunde-dd');if(dd&&dd.style.display==='block'&&!e.target.closest('#rec-kunde-dd')&&e.target.id!=='rec-m-kunde')dd.style.display='none';});
+function openRecModal(id){
+  var r=id?(_recRows.filter(function(x){return x.id==id;})[0]||(window._recCacheAll||[]).filter(function(x){return x.id==id;})[0]||{}):{};
+  document.getElementById('rec-m-id').value=r.id||'';
+  document.getElementById('rec-m-nr').value=r.rechnung_nr||'';
+  document.getElementById('rec-m-datum').value=(r.rechnung_datum||'').slice(0,10);
+  document.getElementById('rec-m-kunde').value=r.kunde||'';
+  document.getElementById('rec-m-betrag').value=(r.betrag!=null&&r.betrag!=='')?r.betrag:'';
+  document.getElementById('rec-m-bezahlt').value=(r.bezahlt!=null&&r.bezahlt!=='')?r.bezahlt:'';
+  document.getElementById('rec-m-status').value=r.status||'Offen';
+  document.getElementById('rec-m-bdatum').value=(r.bezahl_datum||'').slice(0,10);
+  document.getElementById('rec-m-art').value=r.zahlungsart||'';
+  document.getElementById('rec-m-ziel').value=r.zahlungsziel_tage||'';
+  document.getElementById('rec-m-garantie').value=r.garantie||'';
+  document.getElementById('rec-m-notiz').value=r.notiz||'';
+  var lf=document.getElementById('rec-m-lieferdatum'); if(lf)lf.value=(r.lieferdatum||'').slice(0,10);
+  window._recAuftragId=r.auftrag_id||null;
+  window._recPos=r.positionen?(function(){try{return JSON.parse(r.positionen)||[];}catch(e){return [];}})():[];
+  recPosRender();
+  ['rec-m-kundennr','rec-m-ansprech','rec-m-strasse','rec-m-plz','rec-m-ort'].forEach(function(idd){var e=document.getElementById(idd);if(e)e.value='';});
+  if(id&&r.kunde){fetch(W+'/api/kunden-stamm/search?q='+encodeURIComponent(r.kunde),{headers:{Authorization:A}}).then(function(rp){return rp.json();}).then(function(st){if(Array.isArray(st)&&st.length){var k=st[0];var sv=function(idd,v){var e=document.getElementById(idd);if(e&&!e.value)e.value=v||'';};sv('rec-m-kundennr',k.kundennummer);sv('rec-m-ansprech',(k.ansprechpartner&&k.ansprechpartner!==k.name&&k.ansprechpartner!==k.firma)?k.ansprechpartner:'');sv('rec-m-strasse',k.strasse||k.adresse);sv('rec-m-plz',k.plz);sv('rec-m-ort',k.ort);}}).catch(function(){});}
+  document.getElementById('rec-m-title').textContent=id?('Rechnung '+(r.rechnung_nr||'')):'Neue Rechnung';
+  var db=document.getElementById('rec-m-del'); db.style.display=id?'inline-block':'none'; db.textContent='\uD83D\uDDD1 L\u00F6schen'; db.style.background='#fff'; db.style.color='#dc2626'; _recDelArm=false;
+  recCalcOffen();
+  if(!id){
+    var dE=document.getElementById('rec-m-datum'); if(dE&&!dE.value)dE.value=new Date().toISOString().slice(0,10);
+    var lfE=document.getElementById('rec-m-lieferdatum'); if(lfE&&!lfE.value&&dE)lfE.value=dE.value;
+    var nrE=document.getElementById('rec-m-nr');
+    if(nrE&&!nrE.value){ fetch(W+'/api/rechnungen/next-re-nr',{headers:{Authorization:A}}).then(function(r){return r.json();}).then(function(d){if(d.nr&&!nrE.value)nrE.value=d.nr;}).catch(function(){}); }
+  }
+  var bi=document.getElementById('rec-bank-info');
+  if(bi){
+    bi.style.display='none'; bi.innerHTML='';
+    if(id&&r.bank_tx_id){
+      fetch(W+'/api/bank/tx?id='+encodeURIComponent(r.bank_tx_id),{headers:{Authorization:A}}).then(function(rp){return rp.json();}).then(function(d){
+        if(d.tx){
+          var t=d.tx;
+          bi.innerHTML='<div style="font-size:12px;font-weight:700;color:#16a34a;margin-bottom:6px">\uD83C\uDFE6 Zahlungseingang (Bank)</div>'
+            +'<div style="font-size:12.5px;line-height:1.75">'
+            +'<b>'+recEur(t.amount)+'</b> am '+recDat(t.buchungsdatum)+'<br>'
+            +'Von: '+recEsc(t.counter_name||'-')+'<br>'
+            +(t.counter_iban?('IBAN: <span style="font-family:monospace;font-size:11.5px">'+recEsc(t.counter_iban)+'</span><br>'):'')
+            +'Art: '+recEsc(t.buchungsart||'-')+'<br>'
+            +'<span style="color:var(--m,#64748b)">'+recEsc(t.verwendungszweck||'')+'</span>'
+            +'</div>';
+          bi.style.display='block';
+        }
+      }).catch(function(){});
+    }
+  }
+  _fillMahnInfo(r);
+  document.getElementById('rec-modal').style.display='flex';
+}
+function closeRecModal(){document.getElementById('rec-modal').style.display='none';}
+function rechnungAusAuftrag(){
+  if(!cur)return; var c=cur;
+  openRecModal(0);
+  setTimeout(function(){
+    var sv=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
+    sv('rec-m-kunde',c.k_name);
+    if(c.k_adresse)sv('rec-m-strasse',c.k_adresse);
+    if(c.k_plz_ort){var m=String(c.k_plz_ort).match(/^\s*(\d{5})\s*(.*)$/);if(m){sv('rec-m-plz',m[1]);sv('rec-m-ort',m[2]);}else{sv('rec-m-ort',c.k_plz_ort);}}
+    var bez='Reparatur'+(c.geraet_typ?' '+c.geraet_typ:'')+(c.modell?' '+c.modell:'');
+    if(c.fehler)bez+=' \u2013 '+c.fehler;
+    window._recPos=[{bez:bez,menge:1,preis:'',mwst:19}];
+    recPosRender();
+    window._recAuftragId=c.id;
+    var kn=document.getElementById('rec-m-kunde'); if(kn)recKundeSearch(c.k_name);
+    var dd=document.getElementById('rec-kunde-dd'); if(dd)dd.style.display='none';
+  },70);
+}
+function druckeRechnung(){
+  var nr=recGv('rec-m-nr'),datum=recGv('rec-m-datum'),lief=recGv('rec-m-lieferdatum')||datum,kunde=recGv('rec-m-kunde');
+  var ziel=parseInt(recGv('rec-m-ziel'))||14;
+  var ansprech=recGv('rec-m-ansprech'),strasse=recGv('rec-m-strasse'),plz=recGv('rec-m-plz'),ort=recGv('rec-m-ort'),kundennr=recGv('rec-m-kundennr');
+  var adrBlock=recEsc(kunde||'')+(ansprech?'<br>'+recEsc(ansprech):'')+(strasse?'<br>'+recEsc(strasse):'')+((plz||ort)?'<br>'+recEsc((plz+' '+ort).trim()):'');
+  var pos=window._recPos||[]; var hasPos=pos.length>0;
+  var netto=0,mwstSum=0,mwstGroups={};
+  pos.forEach(function(p){var g=(Number(p.menge)||0)*(Number(p.preis)||0);var o=Number(p.mwst)||0;netto+=g;var mw=g*o/100;mwstSum+=mw;mwstGroups[o]=(mwstGroups[o]||0)+mw;});
+  var brutto=hasPos?Math.round((netto+mwstSum)*100)/100:(parseFloat(recGv('rec-m-betrag'))||0);
+  var dStr=datum?new Date(datum).toLocaleDateString('de-DE'):'';
+  var lStr=lief?new Date(lief).toLocaleDateString('de-DE'):dStr;
+  var hStr=new Date().toLocaleDateString('de-DE');
+  var C='#33afe2';
+  var posTbl=hasPos?('<table class="pt"><thead><tr><th style="width:30px;text-align:center">Pos</th><th>Bezeichnung</th><th style="width:50px;text-align:center">Menge</th><th style="width:90px;text-align:right">Einzelpreis</th><th style="width:50px;text-align:center">MwSt</th><th style="width:95px;text-align:right">Gesamt</th></tr></thead><tbody>'
+    +pos.map(function(p,i){var g=(Number(p.menge)||0)*(Number(p.preis)||0);return '<tr><td style="text-align:center">'+(i+1)+'</td><td>'+recEsc(p.bez||'')+'</td><td style="text-align:center">'+(Number(p.menge)||0)+'</td><td style="text-align:right">'+recEur(Number(p.preis)||0)+'</td><td style="text-align:center">'+(Number(p.mwst)||0)+'%</td><td style="text-align:right">'+recEur(g)+'</td></tr>';}).join('')
+    +'</tbody></table>'
+    +'<div class="sumbox"><div class="sl"><span>Netto</span><b>'+recEur(netto)+'</b></div>'
+    +Object.keys(mwstGroups).sort().map(function(o){return '<div class="sl"><span>zzgl. '+o+'% MwSt</span><b>'+recEur(mwstGroups[o])+'</b></div>';}).join('')
+    +'<div class="sl tot"><span>Gesamtbetrag</span><b>'+recEur(brutto)+'</b></div></div>')
+    :('<div class="sumbox"><div class="sl tot"><span>Rechnungsbetrag</span><b>'+recEur(brutto)+'</b></div></div>');
+  var html='<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>Rechnung '+recEsc(nr||'')+'</title><style>@page{size:A4;margin:18mm}*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,Helvetica,sans-serif;color:#222;font-size:11pt;line-height:1.5;background:#f0f0f0;padding:20px}.no-print{position:fixed;top:10px;right:10px;display:flex;gap:8px}.no-print button{padding:9px 16px;border:0;border-radius:6px;cursor:pointer;font-weight:600;font-size:11pt}.bp{background:'+C+';color:#fff}.bc{background:#fff;color:#222;border:1px solid #ccc!important}.page{max-width:180mm;margin:0 auto;background:#fff;padding:18mm 20mm;box-shadow:0 2px 12px rgba(0,0,0,.1);min-height:260mm;position:relative}.top{font-size:7.5pt;color:#666;border-bottom:1px solid #ccc;padding-bottom:2px;margin-bottom:26px}.anschrift{margin-bottom:26px;font-size:11pt;line-height:1.6}.right{text-align:right;font-size:9.5pt;color:#444;margin-bottom:20px}.betreff{font-weight:700;font-size:14pt;color:'+C+';margin-bottom:6px}.meta{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:9.5pt}.meta th{text-align:left;color:#555;font-weight:600;padding:5px 8px;border-bottom:1.5px solid '+C+'}.meta td{padding:5px 8px;border-bottom:1px solid #e5e7eb}.pt{width:100%;border-collapse:collapse;margin:6px 0}.pt th{background:'+C+';color:#fff;text-align:left;padding:7px 9px;font-size:9pt}.pt td{padding:7px 9px;border-bottom:1px solid #e5e7eb;font-size:10pt}.sumbox{display:flex;flex-direction:column;align-items:flex-end;margin:14px 0 22px}.sl{display:flex;justify-content:space-between;gap:30px;min-width:230px;padding:4px 0;font-size:10.5pt}.sl span{color:#555}.sl.tot{border-top:2px solid '+C+';margin-top:4px;padding-top:8px;font-size:13pt;color:'+C+'}.sl.tot b{color:'+C+'}.pay{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px 16px;font-size:10pt;margin:16px 0}.foot{position:absolute;bottom:14mm;left:20mm;right:20mm;font-size:7.5pt;color:#888;border-top:1px solid #ccc;padding-top:6px;display:flex;justify-content:space-between;gap:14px}@media print{.no-print{display:none}body{background:#fff;padding:0}.page{box-shadow:none;margin:0}}</style></head><body><div class="no-print"><button class="bp" onclick="window.print()">\uD83D\uDDA8 Drucken / PDF</button><button class="bc" onclick="window.close()">Schlie\u00DFen</button></div><div class="page"><div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid '+C+';padding-bottom:8px;margin-bottom:6px"><div><img src="https://tools.hasi-elektronic.de/logo.jpg" style="height:52px;width:auto;display:block" alt="HASI elektronic"></div><div style="text-align:right;font-size:8.5pt;color:#555">Hasi Elektronic<br>Grabenstra\u00DFe 18<br>71665 Vaihingen an der Enz<br>Tel. 07042 16391<br>info@hasi-elektronic.de</div></div><div class="top">Hasi Elektronic \u00B7 Grabenstra\u00DFe 18 \u00B7 71665 Vaihingen an der Enz</div><div class="anschrift">'+adrBlock+'</div><div class="right">Vaihingen, '+hStr+'</div><div class="betreff">Rechnung</div><p style="font-size:10.5pt;color:#444;margin-bottom:4px">Unsere Lieferungen / Leistungen stellen wir Ihnen wie folgt in Rechnung.</p><table class="meta"><thead><tr><th>Rechnungsnr.</th><th>Kundennr.</th><th>Datum</th><th>Lieferdatum</th></tr></thead><tbody><tr><td><b>'+recEsc(nr||'-')+'</b></td><td>'+recEsc(kundennr||'-')+'</td><td>'+dStr+'</td><td>'+lStr+'</td></tr></tbody></table>'+posTbl+'<div class="pay"><b>Zahlbar innerhalb von '+ziel+' Tagen ohne Abzug.</b><br>Kontoinhaber: Hasi Elektronic \u00B7 Kreissparkasse Ludwigsburg<br>IBAN: DE71 6045 0050 0030 2488 01<br>Verwendungszweck: '+recEsc(nr||'')+'</div><p style="margin-top:14px;font-size:10.5pt">Vielen Dank f\u00FCr die gute Zusammenarbeit.</p><div class="foot"><span>Hasi Elektronic<br>Grabenstra\u00DFe 18<br>71665 Vaihingen Enz</span><span>USt-IdNr.: DE367591246<br>Steuernummer: 55158/58035</span><span>Hamdi G\u00FCncavdi<br>Kreissparkasse Ludwigsburg<br>IBAN: DE71 6045 0050 0030 2488 01</span></div></div></body></html>';
+  var w=window.open('','_blank'); if(!w){alert('Bitte Popup-Blocker deaktivieren');return;} w.document.write(html); w.document.close();
+}
+function druckeMahnung(id,stufe){
+  var r=_recRows.filter(function(x){return x.id==id;})[0]||(window._recCacheAll||[]).filter(function(x){return x.id==id;})[0];
+  if(!r){alert('Rechnung nicht gefunden');return;}
+  stufe=stufe||1;
+  fetch(W+'/api/kunden-stamm/search?q='+encodeURIComponent(r.kunde||''),{headers:{Authorization:A}}).then(function(rp){return rp.json();}).then(function(st){
+    var k=(Array.isArray(st)&&st.length)?st[0]:{};
+    _renderMahnung(r,stufe,k);
+    fetch(W+'/api/rechnungen/mahnstufe',{method:'POST',headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify({id:r.id,stufe:stufe})}).then(function(){loadRechnungen();var mi=document.getElementById('rec-mahn-info');if(mi&&document.getElementById('rec-m-id').value==id)_fillMahnInfo(Object.assign({},r,{mahnstufe:stufe,mahn_datum:new Date().toISOString().slice(0,10)}));}).catch(function(){});
+  }).catch(function(){_renderMahnung(r,stufe,{});});
+}
+function _renderMahnung(r,stufe,k){
+  var titel=stufe===1?'Zahlungserinnerung':(stufe===2?'1. Mahnung':'2. Mahnung');
+  var frist=new Date(); frist.setDate(frist.getDate()+(stufe===3?7:14));
+  var fStr=frist.toLocaleDateString('de-DE'); var hStr=new Date().toLocaleDateString('de-DE');
+  var text=stufe===1?'sicher haben Sie die nachstehend aufgef\u00FChrte Rechnung nur versehentlich noch nicht beglichen. Wir m\u00F6chten Sie freundlich daran erinnern und bitten um Ausgleich des offenen Betrages bis zum <b>'+fStr+'</b>. Sollten Sie die Zahlung zwischenzeitlich bereits veranlasst haben, betrachten Sie dieses Schreiben bitte als gegenstandslos.':(stufe===2?'trotz unserer Zahlungserinnerung konnten wir bis heute keinen Zahlungseingang feststellen. Wir fordern Sie hiermit auf, den offenen Betrag bis zum <b>'+fStr+'</b> auszugleichen.':'trotz mehrfacher Aufforderung ist die nachstehende Rechnung weiterhin offen. Wir setzen Ihnen hiermit eine letzte Frist bis zum <b>'+fStr+'</b>. Nach fruchtlosem Ablauf behalten wir uns weitere rechtliche Schritte sowie die Berechnung von Mahn- und Verzugskosten vor.');
+  var adr=(k.firma?recEsc(k.firma)+'<br>':'')+(k.ansprechpartner&&k.ansprechpartner!==k.name?recEsc(k.ansprechpartner)+'<br>':'')+recEsc(k.name||r.kunde||'')+'<br>'+(k.strasse?recEsc(k.strasse)+'<br>':'')+((k.plz||k.ort)?recEsc(((k.plz||'')+' '+(k.ort||'')).trim()):'');
+  var betrag=recEur(r.offen||r.betrag);
+  var farbe=stufe===3?'#dc2626':(stufe===2?'#ea580c':'#0090c4');
+  var html='<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>'+titel+' '+recEsc(r.rechnung_nr||'')+'</title><style>@page{size:A4;margin:18mm}*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,Helvetica,sans-serif;color:#222;font-size:11pt;line-height:1.5;background:#f0f0f0;padding:20px}.no-print{position:fixed;top:10px;right:10px;display:flex;gap:8px}.no-print button{padding:9px 16px;border:0;border-radius:6px;cursor:pointer;font-weight:600;font-size:11pt}.bp{background:'+farbe+';color:#fff}.bc{background:#fff;color:#222;border:1px solid #ccc!important}.page{max-width:180mm;margin:0 auto;background:#fff;padding:18mm 20mm;box-shadow:0 2px 12px rgba(0,0,0,.1);min-height:260mm}.top{font-size:7.5pt;color:#666;border-bottom:1px solid #ccc;padding-bottom:2px;margin-bottom:28px}.anschrift{margin-bottom:30px;font-size:11pt}.right{text-align:right;font-size:9.5pt;color:#444;margin-bottom:24px}.betreff{font-weight:700;font-size:12pt;color:'+farbe+';margin-bottom:18px}.tbl{width:100%;border-collapse:collapse;margin:18px 0}.tbl th{background:'+farbe+';color:#fff;text-align:left;padding:7px 10px;font-size:9.5pt}.tbl td{padding:7px 10px;border-bottom:1px solid #e5e7eb;font-size:10.5pt}.sum{text-align:right;font-weight:700;font-size:12pt;margin:10px 0 24px;color:'+farbe+'}.pay{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px 16px;font-size:10pt;margin:20px 0}.foot{margin-top:40px;font-size:8pt;color:#888;border-top:1px solid #ccc;padding-top:6px;display:flex;justify-content:space-between}@media print{.no-print{display:none}body{background:#fff;padding:0}.page{box-shadow:none;margin:0}}</style></head><body><div class="no-print"><button class="bp" onclick="window.print()">\uD83D\uDDA8 Drucken / PDF</button><button class="bc" onclick="window.close()">Schlie\u00DFen</button></div><div class="page"><div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid '+farbe+';padding-bottom:8px;margin-bottom:6px"><div><span style="font-size:20pt;font-weight:800;color:'+farbe+';letter-spacing:1px">HASI</span> <span style="font-size:13pt;font-style:italic;color:#555">elektronic</span></div><div style="text-align:right;font-size:8.5pt;color:#555">Inhaber Hamdi G\u00FCncavd\u0131<br>Grabenstra\u00DFe 18 \u00B7 71665 Vaihingen/Enz<br>Tel. 07042 16391 \u00B7 info@hasi-elektronic.de</div></div><div class="top">HASI elektronic \u00B7 Grabenstra\u00DFe 18 \u00B7 71665 Vaihingen an der Enz</div><div class="anschrift">'+adr+'</div><div class="right">Vaihingen, '+hStr+'</div><div class="betreff">'+titel+(r.rechnung_nr?' \u2013 Rechnung Nr. '+recEsc(r.rechnung_nr):'')+'</div><p>Sehr geehrte Damen und Herren,</p><p style="margin-top:8px">'+text+'</p><table class="tbl"><thead><tr><th>Rechnung-Nr.</th><th>Rechnungsdatum</th><th style="text-align:right">Betrag</th><th style="text-align:right">Offen</th></tr></thead><tbody><tr><td>'+recEsc(r.rechnung_nr||'-')+'</td><td>'+recDat(r.rechnung_datum)+'</td><td style="text-align:right">'+recEur(r.betrag)+'</td><td style="text-align:right;font-weight:700">'+betrag+'</td></tr></tbody></table><div class="sum">Offener Betrag: '+betrag+'</div><div class="pay"><b>Bitte \u00FCberweisen Sie auf folgendes Konto:</b><br>Kontoinhaber: HASI elektronic \u00B7 Kreissparkasse Ludwigsburg<br>IBAN: DE71 6045 0050 0030 2488 01<br>Verwendungszweck: Rechnung '+recEsc(r.rechnung_nr||'')+'</div><p style="margin-top:18px">Mit freundlichen Gr\u00FC\u00DFen<br><br>Hamdi G\u00FCncavd\u0131<br>HASI elektronic</p><div class="foot"><span>HASI elektronic \u00B7 Inhaber Hamdi G\u00FCncavd\u0131</span><span>Grabenstra\u00DFe 18 \u00B7 71665 Vaihingen/Enz</span></div></div></body></html>';
+  var w=window.open('','_blank'); if(!w){alert('Bitte Popups erlauben');return;} w.document.write(html); w.document.close();
+}
+function _fillMahnInfo(r){
+  var mi=document.getElementById('rec-mahn-info'); if(!mi)return;
+  var off=String(r.status||'').toLowerCase()==='offen';
+  if(!off||!r.id){mi.style.display='none';mi.innerHTML='';return;}
+  var ms=parseInt(r.mahnstufe)||0, od=recOverdue(r);
+  var lbl=['Keine','Zahlungserinnerung','1. Mahnung','2. Mahnung'][ms]||'Keine';
+  var line=ms>0?('Letzte: <b>'+lbl+'</b>'+(r.mahn_datum?' am '+recDat(r.mahn_datum):'')):(od>0?('<b style="color:#ea580c">'+od+' Tage \u00FCberf\u00E4llig</b>'):'Noch nicht f\u00E4llig');
+  mi.innerHTML='<div style="padding:12px 14px;border-radius:10px;background:rgba(234,88,12,.07);border:1px solid rgba(234,88,12,.25)">'
+    +'<div style="font-size:12px;font-weight:700;color:#ea580c;margin-bottom:6px">\u26A0\uFE0F Mahnwesen</div>'
+    +'<div style="font-size:12.5px;margin-bottom:10px">'+line+'</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +'<button type="button" onclick="druckeMahnung('+r.id+',1)" style="background:#fff;border:1.5px solid #0090c4;color:#0090c4;padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600">Erinnerung</button>'
+    +'<button type="button" onclick="druckeMahnung('+r.id+',2)" style="background:#fff;border:1.5px solid #ea580c;color:#ea580c;padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600">1. Mahnung</button>'
+    +'<button type="button" onclick="druckeMahnung('+r.id+',3)" style="background:#fff;border:1.5px solid #dc2626;color:#dc2626;padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600">2. Mahnung</button>'
+    +'</div></div>';
+  mi.style.display='block';
+}
+function openDashboard(){
+  document.getElementById('stat-modal').style.display='flex';
+  var jahr=recGv('stat-jahr');
+  var body=document.getElementById('stat-body');
+  body.innerHTML='<div style="padding:30px;text-align:center;color:var(--m,#64748b)">L\u00E4dt\u2026</div>';
+  Promise.all([
+    fetch(W+'/api/rechnungen/dashboard'+(jahr?'?jahr='+jahr:''),{headers:{Authorization:A}}).then(function(r){return r.json();}),
+    fetch(W+'/api/bank/ausgaben'+(jahr?'?jahr='+jahr:''),{headers:{Authorization:A}}).then(function(r){return r.json();}).catch(function(){return null;})
+  ]).then(function(res){renderDashboard(res[0],res[1]);}).catch(function(e){body.innerHTML='<div style="color:#dc2626;padding:20px">Fehler: '+e.message+'</div>';});
+}
+function renderDashboard(d,a){
+  var body=document.getElementById('stat-body'); if(!body)return;
+  var monate=d.monate||[], top=d.topKunden||[];
+  function c(l,v,col){return '<div style="background:var(--bg,#f8fafc);border:1px solid var(--b,#e2e8f0);border-radius:10px;padding:12px 14px"><div style="font-size:11px;color:var(--m,#64748b)">'+l+'</div><div style="font-size:18px;font-weight:700;color:'+col+'">'+v+'</div></div>';}
+  var ausg=a?(a.total||0):0, saldo=(d.jBezahlt||0)-ausg;
+  var cards='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;margin-bottom:20px">'+c('Umsatz',recEur(d.jBetrag),'#33afe2')+c('Bezahlt',recEur(d.jBezahlt),'#059669')+c('Offen',recEur(d.jOffen),'#dc2626')+(a?c('Ausgaben',recEur(ausg),'#ea580c')+c('Saldo',recEur(saldo),saldo>=0?'#059669':'#dc2626'):'')+c('\u00D8 Zahldauer',(d.avgZahldauer||0)+' Tage','#7c3aed')+'</div>';
+  var maxU=Math.max.apply(null,monate.map(function(m){return m.umsatz;}).concat([1]));
+  var monN=['','Jan','Feb','M\u00E4r','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  var bars=monate.map(function(m){
+    var hb=Math.round((m.bezahlt/maxU)*120), ho=Math.round((m.offen/maxU)*120); if(hb<0)hb=0; if(ho<0)ho=0;
+    var mm=parseInt(m.monat.slice(5,7))||0;
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:30px">'
+      +'<div style="font-size:9px;color:var(--m,#64748b)">'+Math.round(m.umsatz/1000)+'k</div>'
+      +'<div style="width:65%;display:flex;flex-direction:column;justify-content:flex-end;height:124px">'
+      +(ho>0?'<div style="background:#fca5a5;height:'+ho+'px;border-radius:3px 3px 0 0" title="Offen"></div>':'')
+      +'<div style="background:#33afe2;height:'+hb+'px;'+(ho>0?'':'border-radius:3px 3px 0 0')+'" title="Bezahlt"></div>'
+      +'</div><div style="font-size:10px;color:var(--m,#64748b)">'+(monN[mm]||m.monat.slice(5))+'</div></div>';
+  }).join('');
+  var chart='<div style="margin-bottom:8px;font-size:12px;font-weight:600;display:flex;justify-content:space-between"><span>Monatsumsatz</span><span style="font-weight:400;font-size:11px"><span style="color:#33afe2">\u25A0</span> Bezahlt &nbsp;<span style="color:#fca5a5">\u25A0</span> Offen</span></div><div style="display:flex;gap:4px;align-items:flex-end;padding:10px;background:var(--bg,#f8fafc);border-radius:10px;border:1px solid var(--b,#e2e8f0);margin-bottom:20px;min-height:150px">'+(bars||'<div style="color:var(--m,#64748b);padding:20px">Keine Daten</div>')+'</div>';
+  var maxK=Math.max.apply(null,top.map(function(k){return k.umsatz;}).concat([1]));
+  var rows=top.map(function(k,i){
+    var w=Math.round((k.umsatz/maxK)*100);
+    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="width:18px;font-size:11px;color:var(--m,#64748b);text-align:right">'+(i+1)+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+recEsc(k.kunde)+'</div><div style="background:var(--b,#e2e8f0);border-radius:4px;height:8px;overflow:hidden"><div style="background:#33afe2;height:100%;width:'+w+'%"></div></div></div><div style="font-size:12px;font-weight:700;width:78px;text-align:right">'+recEur(k.umsatz)+'</div></div>';
+  }).join('');
+  var ausgBox='';
+  if(a&&a.topEmpfaenger&&a.topEmpfaenger.length){
+    var maxE=Math.max.apply(null,a.topEmpfaenger.map(function(e){return e.betrag;}).concat([1]));
+    var erows=a.topEmpfaenger.map(function(e,i){
+      var ew=Math.round((e.betrag/maxE)*100);
+      return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="width:18px;font-size:11px;color:var(--m,#64748b);text-align:right">'+(i+1)+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+recEsc(e.name)+'</div><div style="background:var(--b,#e2e8f0);border-radius:4px;height:8px;overflow:hidden"><div style="background:#ea580c;height:100%;width:'+ew+'%"></div></div></div><div style="font-size:12px;font-weight:700;width:78px;text-align:right">'+recEur(e.betrag)+'</div></div>';
+    }).join('');
+    var artRows=(a.arten||[]).slice(0,6).map(function(ar){return '<span style="display:inline-block;background:rgba(234,88,12,.1);color:#c2410c;padding:3px 9px;border-radius:14px;font-size:11px;margin:2px 4px 2px 0">'+recEsc(ar.art)+': '+recEur(ar.betrag)+'</span>';}).join('');
+    ausgBox='<div style="margin:22px 0 8px;font-size:12px;font-weight:600;border-top:1px solid var(--b,#e2e8f0);padding-top:16px">\uD83D\uDCB8 Top Ausgaben / Empf\u00E4nger (Bank)</div>'+erows+(artRows?'<div style="margin-top:10px">'+artRows+'</div>':'');
+  }
+  body.innerHTML=cards+chart+'<div style="margin-bottom:8px;font-size:12px;font-weight:600">\uD83D\uDCC8 Top 10 Kunden (Umsatz)</div>'+(rows||'<div style="color:var(--m,#64748b)">Keine Daten</div>')+ausgBox;
+}
+function _csvNum(v){return (Number(v)||0).toFixed(2).replace('.',',');}
+function exportRechnungen(){
+  var rows=_recRows||[];
+  if(!rows.length){alert('Keine Daten zum Export');return;}
+  var head=['Rechnung-Nr','Datum','Kunde','Betrag','Bezahlt','Offen','Status','Mahnstufe','Bezahl-Datum'];
+  var lines=[head.join(';')];
+  rows.forEach(function(r){
+    var ms=['','Erinnerung','1. Mahnung','2. Mahnung'][parseInt(r.mahnstufe)||0]||'';
+    var f=[(r.rechnung_nr||''),recDat(r.rechnung_datum),String(r.kunde||'').replace(/[;\r\n]/g,' '),_csvNum(r.betrag),_csvNum(r.bezahlt),_csvNum(r.offen),(r.status||''),ms,(r.bezahl_datum?recDat(r.bezahl_datum):'')];
+    lines.push(f.join(';'));
+  });
+  var csv='\uFEFF'+lines.join('\r\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url;
+  a.download='Rechnungen_'+(recGv('rec-f-jahr')||'alle')+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+function recMarkPaid(){
+  var b=parseFloat(recGv('rec-m-betrag'))||0;
+  document.getElementById('rec-m-bezahlt').value=b;
+  document.getElementById('rec-m-status').value='Bezahlt';
+  if(!recGv('rec-m-bdatum')){document.getElementById('rec-m-bdatum').value=new Date().toISOString().slice(0,10);}
+  recCalcOffen();
+}
+function saveRec(){
+  var id=recGv('rec-m-id');
+  var body={rechnung_nr:recGv('rec-m-nr'),rechnung_datum:recGv('rec-m-datum'),kunde:recGv('rec-m-kunde'),betrag:parseFloat(recGv('rec-m-betrag'))||0,bezahlt:parseFloat(recGv('rec-m-bezahlt'))||0,status:recGv('rec-m-status'),bezahl_datum:recGv('rec-m-bdatum'),zahlungsart:recGv('rec-m-art'),zahlungsziel_tage:parseInt(recGv('rec-m-ziel'))||null,garantie:recGv('rec-m-garantie'),notiz:recGv('rec-m-notiz'),positionen:(window._recPos&&window._recPos.length)?JSON.stringify(window._recPos):null,netto:window._recNetto,mwst_betrag:window._recMwst,lieferdatum:recGv('rec-m-lieferdatum'),auftrag_id:window._recAuftragId||null};
+  if(!body.kunde&&!body.rechnung_nr){alert('Bitte mindestens Kunde oder Rechnung-Nr angeben.');return;}
+  var url=W+'/api/rechnungen'+(id?'/'+id:''), method=id?'PATCH':'POST';
+  fetch(url,{method:method,headers:{Authorization:A,'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(res){
+    if(res.ok||res.id){closeRecModal();loadRechnungen();}else alert('Fehler: '+(res.error||'unbekannt'));
+  }).catch(function(e){alert('Fehler: '+e.message);});
+}
+function delRec(){
+  var id=recGv('rec-m-id'); if(!id)return;
+  var btn=document.getElementById('rec-m-del');
+  if(!_recDelArm){_recDelArm=true;btn.textContent='Wirklich l\u00F6schen?';btn.style.background='#dc2626';btn.style.color='#fff';setTimeout(function(){_recDelArm=false;btn.textContent='\uD83D\uDDD1 L\u00F6schen';btn.style.background='#fff';btn.style.color='#dc2626';},3000);return;}
+  fetch(W+'/api/rechnungen/'+id,{method:'DELETE',headers:{Authorization:A}}).then(function(r){return r.json();}).then(function(){_recDelArm=false;closeRecModal();loadRechnungen();}).catch(function(e){alert('Fehler: '+e.message);});
+}
 
 function showPg(id){
   document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
@@ -1111,10 +2038,47 @@ document.querySelectorAll('.tab[data-pg]').forEach(function(b){
     if(pid==='pg-kunden') renderKunden('');
     if(pid==='pg-berichte') loadBerichte();
     if(pid==='pg-geraete') loadGeraete();
+    if(pid==='pg-rechnungen') loadRechnungen();
   });
 });
 
 // DASHBOARD
+function initFinJahr(){
+  var sel=document.getElementById('fin-jahr'); if(!sel||sel.options.length)return;
+  var y=new Date().getFullYear(),h='';
+  for(var i=0;i<4;i++){h+='<option value="'+(y-i)+'">'+(y-i)+'</option>';}
+  sel.innerHTML=h;
+}
+async function loadFinanzen(){
+  var sel=document.getElementById('fin-jahr'); var jahr=(sel&&sel.value)||new Date().getFullYear();
+  try{
+    var res=await Promise.all([
+      fetch(W+'/api/rechnungen/dashboard?jahr='+jahr,{headers:{Authorization:A}}).then(function(r){return r.json();}),
+      fetch(W+'/api/bank/ausgaben?jahr='+jahr,{headers:{Authorization:A}}).then(function(r){return r.json();}),
+      fetch(W+'/api/rechnungen/stats',{headers:{Authorization:A}}).then(function(r){return r.json();})
+    ]);
+    var da=res[0]||{},au=res[1]||{},st=res[2]||{};
+    var umsatz=da.jBezahlt||0,offen=da.jOffen||0,ausgaben=au.total||0,ueber=st.sumUeberfaellig||0,anzUeber=st.anzUeberfaellig||0;
+    var saldo=Math.round((umsatz-ausgaben)*100)/100;
+    var card=function(ic,lbl,val,col,extra,oc){
+      return '<div'+(oc?' onclick="'+oc+'"':'')+' style="'+(oc?'cursor:pointer;':'')+'background:var(--card,#fff);border:1px solid var(--b,#e2e8f0);border-left:4px solid '+col+';border-radius:14px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,0,0,.04)"><div style="font-size:21px;margin-bottom:6px">'+ic+'</div><div style="font-size:21px;font-weight:800;color:'+col+';line-height:1.2">'+val+'</div><div style="font-size:12px;color:var(--m,#64748b);margin-top:3px">'+lbl+(extra?' <b style="opacity:.75">'+extra+'</b>':'')+'</div></div>';
+    };
+    var k=document.getElementById('fin-kpi'); if(k)k.innerHTML=
+       card('&#x1F4B6;','Umsatz '+jahr,recEur(umsatz),'#0d9f6e')
+      +card('&#x1F4CB;','Offene Forderungen',recEur(offen),'#d97706','',"showPg('pg-rechnungen');loadRechnungen()")
+      +card('&#x1F534;','&Uuml;berf&auml;llig',recEur(ueber),'#dc2626',anzUeber?'('+anzUeber+')':'',"showPg('pg-rechnungen');loadRechnungen()")
+      +card('&#x1F4C9;','Ausgaben '+jahr,recEur(ausgaben),'#7c3aed')
+      +card(saldo>=0?'&#x2705;':'&#x26A0;&#xFE0F;','Saldo '+jahr,recEur(saldo),saldo>=0?'#0d9f6e':'#dc2626');
+    if(window.chFin){window.chFin.destroy();}
+    var monN2=['','Jan','Feb','M\u00e4r','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    var monate=da.monate||[];
+    var labels=monate.map(function(m){return monN2[parseInt(String(m.monat).slice(5,7))]||String(m.monat).slice(5);});
+    var bez=monate.map(function(m){return Math.round(m.bezahlt||0);});
+    var off2=monate.map(function(m){return Math.round(m.offen||0);});
+    var cv=document.getElementById('ch-fin');
+    if(cv&&window.Chart){window.chFin=new Chart(cv.getContext('2d'),{type:'bar',data:{labels:labels,datasets:[{label:'Bezahlt',data:bez,backgroundColor:'#33afe2',borderRadius:4},{label:'Offen',data:off2,backgroundColor:'#fca5a5',borderRadius:4}]},options:{plugins:{legend:{display:true,position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'}}}}});}
+  }catch(e){}
+}
 async function loadDash(){
   document.getElementById('dash-loading').style.display='block';
   document.getElementById('dash-content').style.display='none';
@@ -1156,10 +2120,12 @@ async function loadDash(){
     renderRueckgabe();
     renderOffeneAuftraege();
     checkOutlookStatus();
+    if(typeof initTerminTime==='function')initTerminTime();
     // Offene Rechnungen
     renderOffeneRechnungen();
     // Garantie
     renderGarantie();
+    initFinJahr(); loadFinanzen();
     document.getElementById('dash-loading').style.display='none';
     document.getElementById('dash-content').style.display='block';
   }catch(e){
@@ -1180,7 +2146,7 @@ function renderOffeneAuftraege(){
   if(!offene.length){wrap.style.display='none';return;}
   wrap.style.display='block';
   countEl.textContent=offene.length;
-  var SC={'Neu':'#33afe2','In Bearbeitung':'#0d9f6e','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#0d9f6e','Verkauft':'#15803d','Bestellt':'#a16207','Eingetroffen':'#0891b2','In Einrichtung':'#6366f1','Bereit':'#16a34a','Rückgabe (nicht möglich)':'#dc2626','Erledigt':'#0d9f6e','Abgerechnet':'#6b7585'};var SLBL={'Rückgabe (nicht möglich)':'Rückgabe'};
+  var SC={'Neu':'#33afe2','In Bearbeitung':'#2563eb','Vor-Ort-Termin':'#7c3aed','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#16a34a','Abholbereit':'#15803d','Verkauft':'#0d9488','Bestellt':'#a16207','Eingetroffen':'#0891b2','In Einrichtung':'#6366f1','Bereit':'#65a30d','Rückgabe (nicht möglich)':'#dc2626','Erledigt':'#059669','Abgerechnet':'#6b7585','Abgelehnt':'#ef4444','Storniert':'#ef4444'};var SLBL={'Rückgabe (nicht möglich)':'Rückgabe'};
   listEl.innerHTML=offene.map(function(r){
     var col=SC[r.status]||'#33afe2';
     return '<div class="row" style="grid-template-columns:160px 1fr 180px 110px;cursor:pointer" onclick="openDet('+r.id+',\'pg-dash\')">'
@@ -1251,21 +2217,7 @@ async function rueckgabeBestaetigen(id,nr,name){
 }
 
 async function renderAbholbereit(){
-  // Fertig olan ve AB'si olan auftragler
-  var fertig=reps.filter(function(r){return r.status==='Fertig';});
-  if(!fertig.length){
-    document.getElementById('abholbereit-wrap').style.display='none';
-    return;
-  }
-  // AB kontrolü — her fertig auftrag için AB var mı
-  mitAB=[];
-  await Promise.all(fertig.map(async function(r){
-    try{
-      var res=await fetch(W+'/api/arbeitsbericht?reparatur_id='+r.id,{headers:{Authorization:A}});
-      var abs=await res.json();
-      if(Array.isArray(abs)&&abs.length>0) mitAB.push({rep:r,ab:abs[0]});
-    }catch(e){}
-  }));
+  var mitAB=reps.filter(function(r){return r.status==='Abholbereit';});
   if(!mitAB.length){
     document.getElementById('abholbereit-wrap').style.display='none';
     return;
@@ -1283,20 +2235,15 @@ async function renderAbholbereit(){
       openDet(parseInt(rid),'pg-dash');
     }
   };
-  listEl.innerHTML=mitAB.map(function(item){
-    var r=item.rep;
-    var ab=item.ab;
-    return '<div class="row" style="grid-template-columns:160px 1fr 180px 140px" id="abrow-'+r.id+'">'
+  listEl.innerHTML=mitAB.map(function(r){
+    return '<div class="row" style="grid-template-columns:160px 1fr 120px" id="abrow-'+r.id+'">'
       +'<div class="nr">'+(r.nr||'')+'</div>'
       +'<div class="nm">'+(r.k_name||'')
         +'<span class="sub">'+(r.geraet_typ||'')+(r.modell?' &middot; '+r.modell:'')
         +(r.k_telefon?' &middot; &#x1F4DE; '+r.k_telefon:'')+'</span></div>'
-      +'<div style="text-align:right;font-size:13px;color:var(--green);font-weight:700">'
-        +'<div>'+(ab.ab_nr||'')+'</div>'
-        +'<div style="font-size:11px;color:var(--m)">'+(ab.total_netto?Number(ab.total_netto).toFixed(2).replace('.',',')+' € netto':'')+'</div>'
-      +'</div>'
       +'<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">'
         +'<button class="btn p" style="font-size:12px;padding:7px 14px;background:#0d9f6e;border-color:#0d9f6e" '
+          +'data-abhol-id="'+r.id+'" data-abhol-nr="'+recEsc(r.nr||'')+'" data-abhol-name="'+recEsc(r.k_name||'')+'">'
           +'&#x2713; Abgeholt</button>'
         +'<button class="btn" style="font-size:11px;padding:5px 10px" onclick="openDet('+r.id+',\'pg-dash\')">'
           +'Details</button>'
@@ -1339,6 +2286,82 @@ async function abholungBestaetigen(id, nr, name){
   }catch(e){
     if(btn){btn.disabled=false;btn.textContent='&#x2713; Abgeholt';}
     showNotif('&#x26A0; '+e.message,'amber');
+  }
+}
+function toggleKundeEdit(){
+  var form=document.getElementById('kunde-edit-form');
+  var view1=document.getElementById('fa-kunde');
+  var view2=document.getElementById('fa-geraet');
+  var btn=document.getElementById('kunde-edit-btn');
+  var open=form.style.display==='none';
+  if(open){
+    // Mevcut değerleri doldur
+    var c=cur;
+    document.getElementById('ke-name').value=c.k_name||'';
+    document.getElementById('ke-tel').value=c.k_telefon||'';
+    document.getElementById('ke-email').value=c.k_email||'';
+    document.getElementById('ke-adr').value=c.k_adresse||'';
+    document.getElementById('ke-plz').value=c.k_plz_ort||'';
+    document.getElementById('ke-geraet').value=c.geraet_typ||'';
+    document.getElementById('ke-modell').value=c.modell||'';
+    form.style.display='block';
+    view1.style.display='none';
+    view2.style.display='none';
+    btn.textContent='✕ Abbrechen';
+    btn.style.borderColor='#dc2626';btn.style.color='#dc2626';
+  } else {
+    form.style.display='none';
+    view1.style.display='';
+    view2.style.display='';
+    btn.textContent='✏ Bearbeiten';
+    btn.style.borderColor='var(--hasi)';btn.style.color='var(--hasi)';
+  }
+}
+async function saveKundeEdit(){
+  var newName=document.getElementById('ke-name').value.trim();
+  if(!newName){showNotif('⚠ Name darf nicht leer sein','amber');return;}
+  var body={
+    k_name:newName,
+    k_telefon:document.getElementById('ke-tel').value.trim(),
+    k_email:document.getElementById('ke-email').value.trim(),
+    k_adresse:document.getElementById('ke-adr').value.trim(),
+    k_plz_ort:document.getElementById('ke-plz').value.trim(),
+    geraet_typ:document.getElementById('ke-geraet').value.trim(),
+    modell:document.getElementById('ke-modell').value.trim()
+  };
+  try{
+    var r=await fetch(W+'/api/reparatur/'+cur.id,{
+      method:'PATCH',
+      headers:{Authorization:A,'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    var j=await r.json();
+    if(j.ok){
+      // cur güncelle
+      Object.assign(cur,body);
+      // reps array güncelle
+      var rep=reps.find(function(x){return x.id===cur.id;});
+      if(rep) Object.assign(rep,body);
+      // Görünümü yenile
+      document.getElementById('fa-name').textContent=cur.k_name||'';
+      var k='';
+      if(cur.k_telefon) k+='<div style="display:flex;align-items:center;gap:6px"><span style="color:var(--m)">📞</span><b>'+cur.k_telefon+'</b></div>';
+      if(cur.k_email) k+='<div style="display:flex;align-items:center;gap:6px"><span style="color:var(--m)">✉</span>'+cur.k_email+'</div>';
+      if(cur.k_adresse) k+='<div style="display:flex;align-items:center;gap:6px"><span style="color:var(--m)">📍</span>'+cur.k_adresse+(cur.k_plz_ort?' · '+cur.k_plz_ort:'')+'</div>';
+      document.getElementById('fa-kunde').innerHTML=k||'<span style="color:var(--m);font-size:12px">Keine Kontaktdaten</span>';
+      var g='<div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">🖥</span><div>';
+      g+='<div style="font-weight:700;font-size:14px">'+(cur.geraet_typ||'')+(cur.modell?' <span style="color:var(--m);font-weight:400">— '+cur.modell+'</span>':'')+'</div>';
+      if(cur.fehler) g+='<div style="font-size:12px;color:var(--m)">'+(cur.fehler||'')+'</div>';
+      g+='</div></div>';
+      document.getElementById('fa-geraet').innerHTML=g;
+      toggleKundeEdit();
+      showNotif('✅ Kundendaten gespeichert','green',3000);
+      renderList();
+    } else {
+      showNotif('⚠ Fehler: '+(j.error||'Unbekannt'),'amber');
+    }
+  }catch(e){
+    showNotif('⚠ '+e.message,'amber');
   }
 }
 function renderDashTbl(data,q){
@@ -1561,7 +2584,7 @@ document.getElementById('f-send').onclick=async function(){
   try{
     var geraetTyp = (typ === 'fernwartung') ? 'Fernwartung' : (document.getElementById('f-typ').value||'Sonstiges');
     var body={auftragstyp:typ,k_name:name,k_telefon:document.getElementById('f-tel').value,k_email:document.getElementById('f-mail').value,k_adresse:document.getElementById('f-adr').value,k_plz_ort:document.getElementById('f-plz').value,datum:document.getElementById('f-dat').value,geraet_typ:geraetTyp,modell:document.getElementById('f-mod').value,win_passwort:document.getElementById('f-pw').value,fehler:fa.join(', '),beschreibung:(document.getElementById('f-fehler')?document.getElementById('f-fehler').value:'')+(extraNotes?' | '+extraNotes:''),kostenlimit:document.getElementById('f-limit').value,zustand:window._starVal||0,schaeden:document.getElementById('f-schaeden').value,zubehoer:za.join(', ')};
-    var r=await fetch(W+'/api/reparatur',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var r=await fetch(W+'/api/reparatur',{method:'POST',headers:{'Authorization':A,'Content-Type':'application/json'},body:JSON.stringify(body)});
     var j=await r.json();
     if(j.ok||j.id){
       var nr=j.nr||window._vlNr||'';
@@ -1577,8 +2600,20 @@ document.getElementById('f-send').onclick=async function(){
       btn.style.borderColor='#6b7585';
       // id'yi direkt closure'a al — lastSaved'e güvenme
       var savedId=j.id;
+      // Vor-Ort-Termin kaydet (doluysa) → sonra Teams-Kalender
+      var _tDatum=((document.getElementById('fn-termin-datum')||{}).value||'').trim();
+      if(_tDatum&&savedId){
+        var _tStd=(document.getElementById('fn-termin-std')||{}).value||'';
+        var _tMin=(document.getElementById('fn-termin-min')||{}).value||'';
+        var _tZeit=(_tStd&&_tMin)?_tStd+':'+_tMin:'';
+        var _tAdr=((document.getElementById('fn-termin-adr')||{}).value||'').trim();
+        fetch(W+'/api/reparatur/'+savedId,{method:'PATCH',headers:{'Authorization':A,'Content-Type':'application/json'},body:JSON.stringify({termin_datum:_tDatum,termin_zeit:_tZeit,termin_adresse:_tAdr})})
+          .then(function(r){return r.json();})
+          .then(function(){if(typeof _outlookConnected!=='undefined'&&_outlookConnected){fetch(W+'/api/outlook/sync',{method:'POST',headers:{'Authorization':A,'Content-Type':'application/json'},body:JSON.stringify({rep_id:savedId})});}})
+          .catch(function(){});
+      }
       setTimeout(function(){
-        if(savedId) window.open('https://tools.hasi-elektronic.de/print.html?id='+savedId,'_blank');
+        if(savedId) window.open('https://tools.hasi-elektronic.de/print.html?id='+savedId+'&t='+encodeURIComponent(localStorage.getItem('hasi_tok')||''),'_blank');
       },400);
     } else {
       msg('f-msg','Fehler!',true);
@@ -1615,7 +2650,7 @@ document.getElementById('f-print').onclick=function(){
     msg('f-msg','Erst speichern!',true);
     return;
   }
-  window.open('https://tools.hasi-elektronic.de/print.html?id='+id, '_blank');
+  window.open('https://tools.hasi-elektronic.de/print.html?id='+id+'&t='+encodeURIComponent(localStorage.getItem('hasi_tok')||''), '_blank');
 };
 
 
@@ -1673,6 +2708,91 @@ function buildVorlagePdf(r){
 
 
 
+function terminToKalender(silent){
+  if(!cur)return;
+  if(typeof _outlookConnected==='undefined'||!_outlookConnected){
+    if(silent)return;
+    fetch(W+'/api/outlook/auth-url',{headers:{Authorization:A}})
+      .then(function(r){return r.json();})
+      .then(function(d){if(d.url){window.open(d.url,'_blank');terminMsg('Outlook-Anmeldung im neuen Tab \u2014 danach erneut klicken',true);}else terminMsg('Fehler',false);})
+      .catch(function(){terminMsg('Verbindungsfehler',false);});
+    return;
+  }
+  if(!cur.termin_datum){if(!silent)terminMsg('Erst Termin speichern',false);return;}
+  if(!silent)terminMsg('Synchronisiere...',true);
+  fetch(W+'/api/outlook/sync',{method:'POST',headers:{'Authorization':A,'Content-Type':'application/json'},body:JSON.stringify({rep_id:cur.id})})
+    .then(function(r){return r.json();})
+    .then(function(d){if(d.ok)terminMsg('\u2713 Zum Teams-Kalender hinzugef\u00fcgt',true);else terminMsg(d.error||'Fehler',false);})
+    .catch(function(){terminMsg('Verbindungsfehler',false);});
+}
+function updateNeuTerminMap(){
+  var adr=((document.getElementById('fn-termin-adr')||{}).value||'').trim();
+  var map=document.getElementById('fn-termin-map'),ifr=document.getElementById('fn-termin-iframe');
+  if(!map||!ifr)return;
+  if(adr.length>4){ifr.src='https://maps.google.com/maps?q='+encodeURIComponent(adr)+'&z=15&output=embed';map.style.display='block';}
+  else{map.style.display='none';}
+}
+function openNeuAppleMaps(){var adr=((document.getElementById('fn-termin-adr')||{}).value||'').trim();if(adr)window.open('https://maps.apple.com/?daddr='+encodeURIComponent(adr)+'&dirflg=d','_blank');}
+function openNeuGoogleMaps(){var adr=((document.getElementById('fn-termin-adr')||{}).value||'').trim();if(adr)window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(adr),'_blank');}
+function neuTeamsKalender(){
+  var m=document.getElementById('fn-termin-msg');
+  if(typeof _outlookConnected==='undefined'||!_outlookConnected){
+    fetch(W+'/api/outlook/auth-url',{headers:{Authorization:A}})
+      .then(function(r){return r.json();})
+      .then(function(d){if(d.url){window.open(d.url,'_blank');if(m){m.style.color='#7c3aed';m.textContent='Outlook-Anmeldung im neuen Tab \u2014 danach Auftrag speichern, Termin geht automatisch in den Kalender';}}else if(m){m.style.color='#dc2626';m.textContent='Fehler beim Verbinden';}})
+      .catch(function(){if(m){m.style.color='#dc2626';m.textContent='Verbindungsfehler';}});
+    return;
+  }
+  if(m){m.style.color='#0d9f6e';m.textContent='\u2713 Outlook verbunden \u2014 Termin wird beim Speichern automatisch in den Teams-Kalender eingetragen';}
+}
+function fillTimeSel(s,m){
+  if(s&&!s.options.length){var o='<option value="">--</option>';for(var i=0;i<24;i++){var h=(i<10?'0':'')+i;o+='<option value="'+h+'">'+h+'</option>';}s.innerHTML=o;}
+  if(m&&!m.options.length){var o2='<option value="">--</option>';for(var j=0;j<60;j+=5){var mm=(j<10?'0':'')+j;o2+='<option value="'+mm+'">'+mm+'</option>';}m.innerHTML=o2;}
+}
+function initTerminTime(){
+  fillTimeSel(document.getElementById('fa-termin-std'),document.getElementById('fa-termin-min'));
+  fillTimeSel(document.getElementById('fn-termin-std'),document.getElementById('fn-termin-min'));
+}
+function getTerminZeit(){
+  var s=document.getElementById('fa-termin-std');
+  var m=document.getElementById('fa-termin-min');
+  if(!s||!m||!s.value||!m.value)return '';
+  return s.value+':'+m.value;
+}
+function terminGetAdr(){var el=document.getElementById('fa-termin-adr');return el?el.value.trim():'';}
+function terminMsg(t,ok){var el=document.getElementById('fa-termin-msg');if(el){el.textContent=t;el.style.color=ok?'#16a34a':'#dc2626';}}
+function updateTerminMap(){
+  var adr=terminGetAdr();
+  var wrap=document.getElementById('fa-termin-map');
+  var ifr=document.getElementById('fa-termin-iframe');
+  if(!adr){if(wrap)wrap.style.display='none';return;}
+  if(wrap)wrap.style.display='block';
+  if(ifr){var src='https://maps.google.com/maps?q='+encodeURIComponent(adr)+'&z=15&output=embed';if(ifr.getAttribute('src')!==src)ifr.setAttribute('src',src);}
+}
+function openAppleMaps(){
+  var adr=terminGetAdr();
+  if(!adr){terminMsg('Bitte Adresse eingeben',false);return;}
+  window.open('https://maps.apple.com/?daddr='+encodeURIComponent(adr)+'&dirflg=d','_blank');
+}
+function openGoogleMaps(){
+  var adr=terminGetAdr();
+  if(!adr){terminMsg('Bitte Adresse eingeben',false);return;}
+  window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(adr),'_blank');
+}
+function saveTermin(){
+  if(!cur)return;
+  var datum=document.getElementById('fa-termin-datum').value;
+  var zeit=getTerminZeit();
+  var adr=terminGetAdr();
+  if(!datum){terminMsg('Bitte Datum wählen',false);return;}
+  fetch(W+'/api/reparatur/'+cur.id,{method:'PATCH',headers:{'Authorization':A,'Content-Type':'application/json'},body:JSON.stringify({termin_datum:datum,termin_zeit:zeit,termin_adresse:adr})})
+    .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+    .then(function(res){
+      if(res.ok){cur.termin_datum=datum;cur.termin_zeit=zeit;cur.termin_adresse=adr;terminMsg('✓ Termin gespeichert',true);loadFaAbList();if(typeof _outlookConnected!=='undefined'&&_outlookConnected){terminToKalender(true);}}
+      else terminMsg((res.d&&res.d.error)||'Fehler',false);
+    }).catch(function(){terminMsg('Verbindungsfehler',false);});
+}
+
 function renderTimeline(abs){
   var tl=document.getElementById('fa-timeline');
   if(!tl) return;
@@ -1711,13 +2831,24 @@ function renderTimeline(abs){
   });
   // Status (Fertig değilse göster)
   if(cur.status!=='Neu'){
-    var sc={'In Bearbeitung':'&#x1F527;','Teile bestellt':'&#x1F4E6;','Warten auf Kunde':'&#x1F4DE;','Fertig':'&#x2705;','Abgeholt':'&#x1F3E0;','Abgelehnt':'&#x274C;'};
+    var sc={'In Bearbeitung':'&#x1F527;','Vor-Ort-Termin':'&#x1F4C5;','Teile bestellt':'&#x1F4E6;','Warten auf Kunde':'&#x1F4DE;','Fertig':'&#x2705;','Abgeholt':'&#x1F3E0;','Abgelehnt':'&#x274C;'};
     items.push({
       date:cur.updated_at||cur.datum,
       icon:sc[cur.status]||'&#x2139;',
       color:cur.status==='Fertig'?'#0d9f6e':cur.status==='Abgeholt'?'#6b7585':'var(--amber)',
       title:'Status: '+cur.status,
       body:cur.notizen?'<span style="font-size:12px;color:var(--m)">'+cur.notizen+'</span>':''
+    });
+  }
+  if(cur.termin_datum){
+    var _tz=cur.termin_zeit?(' &middot; '+cur.termin_zeit+' Uhr'):'';
+    var _ta=cur.termin_adresse||'';
+    items.push({
+      date:cur.termin_datum,
+      icon:'&#x1F4C5;',
+      color:'#7c3aed',
+      title:'Vor-Ort-Termin'+_tz,
+      body:_ta?'<div style="font-size:12px;color:var(--m);margin-top:2px"><span style="color:#7c3aed">&#x1F4CD;</span> '+_ta+' <a href="https://maps.apple.com/?daddr='+encodeURIComponent(_ta)+'&dirflg=d" target="_blank" style="color:#33afe2;text-decoration:none;margin-left:6px;font-weight:600">&#x1F34E; Route</a></div>':''
     });
   }
   tl.innerHTML=items.map(function(item,idx){
@@ -1746,7 +2877,7 @@ function renderTimeline(abs){
     var bz=e.target.closest('[data-bez-id]');
     if(bz){e.stopPropagation();toggleBezahlt(parseInt(bz.dataset.bezId),bz.dataset.bezStatus,bz);return;}
     var pb=e.target.closest('[data-pab]');
-    if(pb){e.stopPropagation();window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+pb.dataset.pab+(pb.dataset.prep?'&rep='+pb.dataset.prep:'')+'&type=arbeitsbericht','_blank');return;}
+    if(pb){e.stopPropagation();window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+pb.dataset.pab+(pb.dataset.prep?'&rep='+pb.dataset.prep:'')+'&type=arbeitsbericht'+'&t='+encodeURIComponent(localStorage.getItem('hasi_tok')||''),'_blank');return;}
     var row=e.target.closest('[data-ab-id]');
     if(row){
       var abId=parseInt(row.dataset.abId);
@@ -1783,6 +2914,15 @@ function renderFallAkte(){
   document.getElementById('fa-nr').textContent=cur.nr||'';
   document.getElementById('fa-name').textContent=cur.k_name||'';
   document.getElementById('fa-status-badge').innerHTML=sbadge(cur.status);
+  // Edit formunu kapat
+  var _kef=document.getElementById('kunde-edit-form');
+  var _kv1=document.getElementById('fa-kunde');
+  var _kv2=document.getElementById('fa-geraet');
+  var _kbtn=document.getElementById('kunde-edit-btn');
+  if(_kef){_kef.style.display='none';}
+  if(_kv1){_kv1.style.display='';}
+  if(_kv2){_kv2.style.display='';}
+  if(_kbtn){_kbtn.textContent='✏ Bearbeiten';_kbtn.style.borderColor='var(--hasi)';_kbtn.style.color='var(--hasi)';}
   // Müşteri
   var k='';
   if(cur.k_telefon) k+='<div style="display:flex;align-items:center;gap:6px"><span style="color:var(--m)">&#x1F4DE;</span><b>'+cur.k_telefon+'</b></div>';
@@ -1805,9 +2945,19 @@ function renderFallAkte(){
   document.getElementById('fa-limit').textContent=cur.kostenlimit?cur.kostenlimit+' €':'—';
   document.getElementById('fa-msg').textContent='';
   var waWrap=document.getElementById('wa-wrap');
-  waWrap.style.display=(cur.status==='Fertig'||cur.status==='Abgeholt')?'':'none';
+  waWrap.style.display=(cur.status==='Fertig'||cur.status==='Abholbereit'||cur.status==='Abgeholt')?'':'none';
   var erlPanel=document.getElementById('fa-erledigen');
   if(erlPanel) erlPanel.style.display=(cur.status==='Fertig')?'block':'none';
+  // Vor-Ort-Termin doldur
+  var ftd=document.getElementById('fa-termin-datum');if(ftd)ftd.value=cur.termin_datum||'';
+  if(typeof initTerminTime==='function')initTerminTime();
+  var _tzp=(cur.termin_zeit||'').split(':');
+  var fts=document.getElementById('fa-termin-std');if(fts)fts.value=_tzp[0]||'';
+  var ftmn=document.getElementById('fa-termin-min');if(ftmn)ftmn.value=_tzp[1]||'';
+  var fta=document.getElementById('fa-termin-adr');
+  if(fta)fta.value=cur.termin_adresse||((cur.k_adresse||'')+(cur.k_plz_ort?', '+cur.k_plz_ort:''));
+  var ftm=document.getElementById('fa-termin-msg');if(ftm)ftm.textContent='';
+  if(typeof updateTerminMap==='function')updateTerminMap();
   // Timeline
   renderTimeline([]);
   loadFaAbList();
@@ -1975,7 +3125,7 @@ document.getElementById('fa-save-status').onclick=async function(){
       cur.notizen=document.getElementById('fa-notiz').value;
       document.getElementById('fa-status-badge').innerHTML=sbadge(cur.status);
       var waWrap=document.getElementById('wa-wrap');
-      waWrap.style.display=(cur.status==='Fertig'||cur.status==='Abgeholt')?'':'none';
+      waWrap.style.display=(cur.status==='Fertig'||cur.status==='Abholbereit'||cur.status==='Abgeholt')?'':'none';
       var rep=reps.find(function(x){return x.id===cur.id;});
       if(rep){rep.status=cur.status;rep.notizen=cur.notizen;}
       renderStats();renderList();
@@ -2038,20 +3188,20 @@ document.getElementById('fa-ab-save').onclick=async function(){
 
 document.getElementById('fa-ab-pdf').onclick=function(){
   if(!faCurAb||!faCurAb.id){msg('fa-ab-msg','Bitte zuerst speichern!',true);return;}
-  window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+faCurAb.id+'&rep='+cur.id+'&type=arbeitsbericht','_blank');
+  window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+faCurAb.id+'&rep='+cur.id+'&type=arbeitsbericht'+'&t='+encodeURIComponent(localStorage.getItem('hasi_tok')||''),'_blank');
 };
 document.getElementById('fa-ab-rec').onclick=function(){
   if(!faCurAb||!faCurAb.id){msg('fa-ab-msg','Bitte zuerst speichern!',true);return;}
-  window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+faCurAb.id+'&rep='+cur.id+'&type=rechnung','_blank');
+  window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+faCurAb.id+'&rep='+cur.id+'&type=rechnung'+'&t='+encodeURIComponent(localStorage.getItem('hasi_tok')||''),'_blank');
 };
 
 document.getElementById('fa-print-auftrag').onclick=function(){
   if(!cur) return;
-  window.open('https://tools.hasi-elektronic.de/print.html?id='+cur.id,'_blank');
+  window.open('https://tools.hasi-elektronic.de/print.html?id='+cur.id+'&t='+encodeURIComponent(localStorage.getItem('hasi_tok')||''),'_blank');
 };
 document.getElementById('fa-print-vorlage').onclick=function(){
   if(!cur) return;
-  window.open('https://tools.hasi-elektronic.de/print.html?id='+cur.id,'_blank');
+  window.open('https://tools.hasi-elektronic.de/print.html?id='+cur.id+'&t='+encodeURIComponent(localStorage.getItem('hasi_tok')||''),'_blank');
 };
 document.getElementById('fa-abschliessen').onclick=async function(){
   if(!cur) return;
@@ -2331,7 +3481,7 @@ function openKundenDetail(k){
   var initial=(k.name||'?')[0].toUpperCase();
 
   var auftraegeRows=k.auftraege.map(function(r){
-    var sc={'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'};
+    var sc={'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Vor-Ort-Termin':'#7c3aed','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'};
     var col=sc[r.status||'Neu']||'#33afe2';
     return '<tr onclick="openDet('+r.id+');kundenModalClose()" style="cursor:pointer">'
       +'<td style="padding:8px 12px;font-family:DM Mono,monospace;font-size:11px;color:var(--hasi)">'+(r.nr||'')+'</td>'
@@ -2394,6 +3544,9 @@ function gsOpen(){
   document.getElementById('gs-inp').value='';
   document.getElementById('gs-inp').focus();
   gsRender('');
+  if(window._recIsAdmin && !window._recCacheAll){
+    fetch(W+'/api/rechnungen',{headers:{Authorization:A}}).then(function(r){return r.json();}).then(function(rows){window._recCacheAll=Array.isArray(rows)?rows:[];var inp=document.getElementById('gs-inp');if(inp&&inp.value)gsRender(inp.value);}).catch(function(){window._recCacheAll=[];});
+  }
 }
 function gsClose(){
   document.getElementById('gs-overlay').classList.remove('on');
@@ -2409,7 +3562,7 @@ function gsRender(q){
   var box=document.getElementById('gs-results');
   var count=document.getElementById('gs-count');
   q=(q||'').trim().toLowerCase();
-  
+
   if(!q){
     box.innerHTML='<div class="gs-empty"><div class="big">&#x1F50D;</div>Tippen um zu suchen...</div>';
     count.textContent='';
@@ -2419,7 +3572,6 @@ function gsRender(q){
   var results=[];
   var sc={'Neu':'#33afe2','In Bearbeitung':'#60a5fa','Teile bestellt':'#fb923c','Warten auf Kunde':'#a78bfa','Fertig':'#34d399','Abgeholt':'#6b7585','Abgelehnt':'#f87171'};
 
-  // Auftrage ara
   reps.forEach(function(r){
     var hay=[r.nr,r.k_name,r.k_telefon,r.k_email,r.k_adresse,r.k_plz_ort,r.geraet_typ,r.modell,r.fehler,r.win_passwort,r.notizen,r.schaeden,r.zubehoer].join(' ').toLowerCase();
     if(hay.indexOf(q)>=0){
@@ -2427,7 +3579,6 @@ function gsRender(q){
     }
   });
 
-  // Tarihe göre ara (z.B. "30.04" veya "2026")
   if(/\d/.test(q)){
     reps.forEach(function(r){
       var d=fmtD(r.datum).toLowerCase();
@@ -2437,49 +3588,90 @@ function gsRender(q){
     });
   }
 
-  // Score'a göre sırala
   results.sort(function(a,b){return b.score-a.score;});
 
-  if(!results.length){
-    box.innerHTML='<div class="gs-empty"><div class="big">&#x1F615;</div>Keine Ergebnisse für "<b>'+q+'</b>"</div>';
+  // ===== RECHNUNGEN ara (admin) =====
+  var recRes=[];
+  if(window._recIsAdmin && window._recCacheAll){
+    window._recCacheAll.forEach(function(rc){
+      var hay=[rc.rechnung_nr,rc.kunde,rc.zahlungsart,rc.garantie,rc.notiz].join(' ').toLowerCase();
+      if(hay.indexOf(q)>=0) recRes.push(rc);
+    });
+    recRes.sort(function(a,b){return (parseInt(b.rechnung_nr)||0)-(parseInt(a.rechnung_nr)||0);});
+    recRes=recRes.slice(0,40);
+  }
+
+  if(!results.length && !recRes.length){
+    box.innerHTML='<div class="gs-empty"><div class="big">&#x1F615;</div>Keine Ergebnisse f&uuml;r "<b>'+q+'</b>"</div>';
     count.textContent='0 Ergebnisse';
     gsSelIdx=0;
     return;
   }
 
-  count.textContent=results.length+' Ergebnis'+(results.length!==1?'se':'');
+  var totalN=results.length+recRes.length;
+  count.textContent=totalN+' Ergebnis'+(totalN!==1?'se':'');
   gsSelIdx=0;
 
-  var html2='<div class="gs-section">Aufträge ('+results.length+')</div>';
-  html2+=results.map(function(item,idx){
-    var r=item.r;
-    var col=sc[r.status||'Neu']||'#33afe2';
-    var icon=r.geraet_typ&&r.geraet_typ.indexOf('Laptop')>=0?'&#x1F4BB;':r.geraet_typ&&r.geraet_typ.indexOf('Smartphone')>=0?'&#x1F4F1;':r.geraet_typ&&r.geraet_typ.indexOf('Drucker')>=0?'&#x1F5A8;':'&#x1F5A5;';
-    return '<div class="gs-item'+(idx===0?' sel':'')+'" data-idx="'+idx+'" data-id="'+r.id+'">'
-      +'<div class="gs-icon" style="background:'+col+'22;color:'+col+'">'+icon+'</div>'
-      +'<div class="gs-main">'
-        +'<div class="gs-title">'+gsHl(r.k_name||'—',q)+'<span style="margin-left:8px;font-size:10px;font-family:DM Mono,monospace;color:'+col+'">'+gsHl(r.nr||'',q)+'</span></div>'
-        +'<div class="gs-sub">'+gsHl(r.geraet_typ||'',q)+(r.modell?' · '+gsHl(r.modell,q):'')+(r.fehler?' · '+gsHl(r.fehler.slice(0,60),q):'')+'</div>'
-      +'</div>'
-      +'<div class="gs-meta">'
-        +'<div>'+fmtD(r.datum)+'</div>'
-        +'<div style="color:'+col+';font-weight:600;font-size:10px">'+r.status+'</div>'
-      +'</div>'
-      +'</div>';
-  }).join('');
+  var html2='';
+  if(results.length){
+    html2+='<div class="gs-section">Auftr&auml;ge ('+results.length+')</div>';
+    html2+=results.map(function(item,idx){
+      var r=item.r;
+      var col=sc[r.status||'Neu']||'#33afe2';
+      var icon=r.geraet_typ&&r.geraet_typ.indexOf('Laptop')>=0?'&#x1F4BB;':r.geraet_typ&&r.geraet_typ.indexOf('Smartphone')>=0?'&#x1F4F1;':r.geraet_typ&&r.geraet_typ.indexOf('Drucker')>=0?'&#x1F5A8;':'&#x1F5A5;';
+      return '<div class="gs-item'+(idx===0?' sel':'')+'" data-idx="'+idx+'" data-id="'+r.id+'">'
+        +'<div class="gs-icon" style="background:'+col+'22;color:'+col+'">'+icon+'</div>'
+        +'<div class="gs-main">'
+          +'<div class="gs-title">'+gsHl(r.k_name||'\u2014',q)+'<span style="margin-left:8px;font-size:10px;font-family:DM Mono,monospace;color:'+col+'">'+gsHl(r.nr||'',q)+'</span></div>'
+          +'<div class="gs-sub">'+gsHl(r.geraet_typ||'',q)+(r.modell?' \u00B7 '+gsHl(r.modell,q):'')+(r.fehler?' \u00B7 '+gsHl(r.fehler.slice(0,60),q):'')+'</div>'
+        +'</div>'
+        +'<div class="gs-meta">'
+          +'<div>'+fmtD(r.datum)+'</div>'
+          +'<div style="color:'+col+';font-weight:600;font-size:10px">'+r.status+'</div>'
+        +'</div>'
+        +'</div>';
+    }).join('');
+  }
+  if(recRes.length){
+    html2+='<div class="gs-section">Rechnungen ('+recRes.length+')</div>';
+    html2+=recRes.map(function(rc){
+      var off=(String(rc.status).toLowerCase()==='offen');
+      var col=off?'#dc2626':'#059669';
+      return '<div class="gs-item gs-rec-item" data-rec-id="'+rc.id+'">'
+        +'<div class="gs-icon" style="background:'+col+'22;color:'+col+'">&#x1F4B6;</div>'
+        +'<div class="gs-main">'
+          +'<div class="gs-title">'+gsHl(rc.kunde||'\u2014',q)+'<span style="margin-left:8px;font-size:10px;font-family:DM Mono,monospace;color:'+col+'">'+gsHl(rc.rechnung_nr||'',q)+'</span></div>'
+          +'<div class="gs-sub">'+recDat(rc.rechnung_datum)+' \u00B7 '+recEur(rc.betrag)+(off?' \u00B7 offen '+recEur(rc.offen):'')+'</div>'
+        +'</div>'
+        +'<div class="gs-meta">'
+          +'<div style="color:'+col+';font-weight:600;font-size:10px">'+rc.status+'</div>'
+        +'</div>'
+        +'</div>';
+    }).join('');
+  }
 
   box.innerHTML=html2;
   box.querySelectorAll('.gs-item').forEach(function(el){
-    el.onclick=function(){
-      var id=parseInt(el.dataset.id);
-      gsClose();
-      openDet(id);
-    };
-    el.onmouseenter=function(){
-      gsSelIdx=parseInt(el.dataset.idx);
-      gsUpdateSel();
-    };
+    if(el.dataset.recId){
+      el.onclick=function(){ gsClose(); gsOpenRechnung(parseInt(el.dataset.recId)); };
+    } else {
+      el.onclick=function(){
+        var id=parseInt(el.dataset.id);
+        gsClose();
+        openDet(id);
+      };
+      el.onmouseenter=function(){
+        gsSelIdx=parseInt(el.dataset.idx);
+        gsUpdateSel();
+      };
+    }
   });
+}
+
+function gsOpenRechnung(id){
+  showPg('pg-rechnungen');
+  loadRechnungen();
+  openRecModal(id);
 }
 
 function gsUpdateSel(){
@@ -2767,7 +3959,7 @@ document.getElementById('fab-save').onclick=async function(){
       fabAbId=0;
       // AB print aç
       if(j.id){
-        var printUrl='https://tools.hasi-elektronic.de/ab-print.html?ab='+j.id+'&type=arbeitsbericht';
+        var printUrl='https://tools.hasi-elektronic.de/ab-print.html?ab='+j.id+'&type=arbeitsbericht'+'&t='+encodeURIComponent(localStorage.getItem('hasi_tok')||'');
         if(repId) printUrl+='&rep='+repId;
         window.open(printUrl,'_blank');
       }
@@ -2827,7 +4019,7 @@ function renderBerichte(){
     var bz=e.target.closest('[data-bez-id]');
     if(bz){e.stopPropagation();toggleBezahlt(parseInt(bz.dataset.bezId),bz.dataset.bezStatus,bz);return;}
     var pb=e.target.closest('[data-pab]');
-    if(pb){e.stopPropagation();window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+pb.dataset.pab+(pb.dataset.prep?'&rep='+pb.dataset.prep:'')+'&type=arbeitsbericht','_blank');return;}
+    if(pb){e.stopPropagation();window.open('https://tools.hasi-elektronic.de/ab-print.html?ab='+pb.dataset.pab+(pb.dataset.prep?'&rep='+pb.dataset.prep:'')+'&type=arbeitsbericht'+'&t='+encodeURIComponent(localStorage.getItem('hasi_tok')||''),'_blank');return;}
     var row=e.target.closest('.ber-row');
     if(row&&row.dataset.repId) openDet(parseInt(row.dataset.repId));
   };
