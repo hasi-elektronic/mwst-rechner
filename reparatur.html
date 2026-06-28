@@ -4410,6 +4410,7 @@ function renderGeraete(){
       +'<div style="align-self:center;display:flex;flex-direction:column;gap:5px;align-items:center">'
         +statusBadge
         +(isVerf?'<button class="qs-btn" style="background:#15803d22;color:#15803d;border-color:#15803d44" onclick="event.stopPropagation();openVerkaufModal('+g.id+')">📦 Verkaufen</button>':'<button class="qs-btn" style="background:#0090c422;color:#0090c4;border-color:#0090c444" onclick="event.stopPropagation();printBeleg('+g.id+')">🖨 Beleg</button>')
+        +'<button class="qs-btn" style="background:#33afe222;color:#33afe2;border-color:#33afe244" onclick="event.stopPropagation();printEtikett('+g.id+')">🏷 Etikett</button>'
       +'</div>'
       +'</div>';
   }).join('');
@@ -4657,7 +4658,13 @@ function deleteGer(){
 
 
 function printBeleg(id){
-  window.open('geraet-beleg.html?id='+id,'_blank');
+  var t=encodeURIComponent(localStorage.getItem('hasi_tok')||'');
+  window.open('geraet-beleg.html?id='+id+'&t='+t,'_blank');
+}
+
+function printEtikett(id){
+  var t=encodeURIComponent(localStorage.getItem('hasi_tok')||'');
+  window.open('etikett.html?id='+id+'&t='+t,'_blank');
 }
 
 // ==================== END GERÄTE ====================
